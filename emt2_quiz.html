@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2급 응급구조사 필기 출동카드</title>
+<style>
+  :root{
+    --bg:#0A1220;
+    --bg2:#0E1830;
+    --surface:#131E33;
+    --surface2:#1A2740;
+    --line:#26365A;
+    --text:#E9EEF7;
+    --muted:#8FA0C2;
+    --cyan:#39D8C8;
+    --cyan-dim:#1E5A56;
+    --red-siren:#FF4C5E;
+
+    --d1:#F4F7FB;   /* 개쉬움 - 하양 */
+    --d1-ink:#0A1220;
+    --d2:#3ED17E;   /* 쉬움 - 초록 */
+    --d3:#F4C94A;   /* 보통 - 노랑 */
+    --d4:#FF9142;   /* 어려움 - 주황 */
+    --d5:#FF4C5E;   /* 개어려움 - 빨강 */
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top, #0F1B33 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
+    min-height:100vh;
+    padding:18px 14px 100px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+
+  /* ---- Header ---- */
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .pulse{width:10px;height:10px;border-radius:50%;background:var(--red-siren);
+    box-shadow:0 0 0 0 rgba(255,76,94,.6); animation:pulse 1.6s infinite;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,76,94,.55);}
+    70%{box-shadow:0 0 0 9px rgba(255,76,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(255,76,94,0);}
+  }
+  h1{font-size:20px;margin:0;letter-spacing:-.2px;}
+  .sub{color:var(--muted);font-size:12.5px;margin:2px 0 14px 20px;}
+
+  .ekg{width:100%;height:26px;margin:6px 0 16px;opacity:.85;}
+  .ekg path{fill:none;stroke:var(--cyan);stroke-width:2;stroke-linecap:round;
+    stroke-dasharray:340; stroke-dashoffset:340; animation:draw 2.8s ease-in-out infinite;}
+  @keyframes draw{ to{stroke-dashoffset:0;} }
+
+  /* ---- Info box ---- */
+  .infobox{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; margin-bottom:16px; font-size:12.8px; color:var(--muted); line-height:1.65;
+  }
+  .infobox b{color:var(--text);}
+  .infobox .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:8px;}
+  .infobox .tag{
+    display:inline-block;background:var(--cyan-dim);color:var(--cyan);
+    font-size:10.5px;padding:2px 8px;border-radius:20px;margin-right:6px;font-weight:600;
+    letter-spacing:.2px;
+  }
+
+  /* ---- Filters ---- */
+  .filterrow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;
+    -ms-overflow-style:none;scrollbar-width:none;}
+  .filterrow::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;padding:7px 13px;border-radius:20px;border:1px solid var(--line);
+    background:var(--surface);color:var(--muted);font-size:12.5px;cursor:pointer;
+    white-space:nowrap;transition:.15s;font-weight:600;
+  }
+  .chip.active{background:var(--cyan);color:#06231F;border-color:var(--cyan);}
+
+  .diffAcc{margin-bottom:14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);}
+  .diffToggleBtn{
+    width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:12px 14px;background:transparent;border:none;color:var(--text);font-size:13.5px;
+    font-weight:700;cursor:pointer;
+  }
+  .diffToggleBtn .chev{color:var(--cyan);transition:transform .2s;font-size:11px;}
+  .diffToggleBtn.open .chev{transform:rotate(180deg);}
+  #diffSummary{color:var(--muted);font-weight:500;font-size:12px;margin-left:2px;}
+  .diffPanel{max-height:0;overflow:hidden;transition:max-height .28s ease;border-top:1px solid transparent;}
+  .diffPanel.open{max-height:400px;border-top:1px solid var(--line);}
+  .diffPanelInner{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;}
+  .dchip{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:700;
+    cursor:pointer;border:2px solid transparent;opacity:.5;transition:.15s;background:var(--bg2);
+  }
+  .dchip.active{opacity:1;box-shadow:0 0 0 1px rgba(255,255,255,.15) inset;}
+  .dchip .swatch{width:16px;height:16px;border-radius:5px;flex:0 0 auto;}
+  .dchip .cnt{margin-left:auto;color:var(--muted);font-weight:500;font-size:11.5px;}
+  .dchip[data-d="1"] .swatch{background:var(--d1);}
+  .dchip[data-d="2"] .swatch{background:var(--d2);}
+  .dchip[data-d="3"] .swatch{background:var(--d3);}
+  .dchip[data-d="4"] .swatch{background:var(--d4);}
+  .dchip[data-d="5"] .swatch{background:var(--d5);}
+  .dchip[data-d="1"].active{border-color:var(--d1);}
+  .dchip[data-d="2"].active{border-color:var(--d2);}
+  .dchip[data-d="3"].active{border-color:var(--d3);}
+  .dchip[data-d="4"].active{border-color:var(--d4);}
+  .dchip[data-d="5"].active{border-color:var(--d5);}
+
+  /* ---- Progress ---- */
+  .statrow{display:flex;justify-content:space-between;align-items:center;
+    font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .statrow b{color:var(--cyan);}
+  .barbg{height:6px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+  .barfg{height:100%;background:linear-gradient(90deg,var(--cyan),#7CF0DE);width:0%;transition:width .35s;}
+
+  /* ---- Card ---- */
+  .card{
+    background:linear-gradient(180deg,var(--surface),var(--surface2));
+    border:1px solid var(--line); border-radius:20px; padding:20px 18px 18px;
+    box-shadow:0 18px 40px -22px rgba(0,0,0,.7);
+    animation:cardin .28s ease;
+  }
+  @keyframes cardin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .cardtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .subjectbadge{font-size:11px;color:var(--cyan);font-weight:700;letter-spacing:.3px;}
+  .difbadge{font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;}
+  .difbadge[data-d="1"]{background:var(--d1);color:var(--d1-ink);}
+  .difbadge[data-d="2"]{background:var(--d2);color:#052915;}
+  .difbadge[data-d="3"]{background:var(--d3);color:#3A2A00;}
+  .difbadge[data-d="4"]{background:var(--d4);color:#331700;}
+  .difbadge[data-d="5"]{background:var(--d5);color:#330008;}
+
+  .qtext{font-size:15.5px;line-height:1.55;margin:6px 0 16px;font-weight:600;}
+  .qnum{color:var(--muted);font-size:11.5px;font-weight:500;margin-bottom:2px;}
+
+  .opt{
+    display:flex;gap:10px;align-items:flex-start;background:var(--bg2);
+    border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px;
+    cursor:pointer;font-size:13.8px;line-height:1.5;transition:.12s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt .num{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface2);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);}
+  .opt.correct{background:rgba(62,209,126,.14);border-color:var(--d2);}
+  .opt.correct .num{background:var(--d2);color:#052915;}
+  .opt.wrong{background:rgba(255,76,94,.14);border-color:var(--d5);}
+  .opt.wrong .num{background:var(--d5);color:#fff;}
+  .opt.disabled{cursor:default;}
+  .opt.dim{opacity:.45;}
+
+  .explain{
+    margin-top:12px;background:var(--bg2);border-left:3px solid var(--cyan);
+    border-radius:0 12px 12px 0;padding:13px 14px;font-size:13px;line-height:1.65;
+    color:var(--text);opacity:0;max-height:0;overflow:hidden;transition:.3s;
+  }
+  .explain.show{opacity:1;max-height:500px;margin-top:12px;padding:13px 14px;}
+  .explain .lbl{color:var(--cyan);font-weight:700;font-size:11.5px;display:block;margin-bottom:4px;}
+  .explain .ref{margin-top:8px;color:var(--muted);font-size:11.8px;border-top:1px dashed var(--line);padding-top:8px;}
+  .explain .ref b{color:#B9C6E2;}
+
+  .navrow{display:flex;gap:8px;margin-top:16px;}
+  .btn{
+    flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:700;
+    cursor:pointer;transition:.15s;
+  }
+  .btn.primary{background:var(--cyan);color:#062621;}
+  .btn.primary:disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);flex:0 0 auto;padding:12px 16px;}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--muted);}
+
+  /* ---- Wrong note FAB ---- */
+  .fab{
+    position:fixed;right:16px;bottom:16px;background:var(--red-siren);color:#fff;
+    border:none;border-radius:30px;padding:13px 18px;font-size:13.5px;font-weight:800;
+    box-shadow:0 10px 26px -8px rgba(255,76,94,.6);cursor:pointer;display:flex;
+    align-items:center;gap:7px;z-index:50;
+  }
+  .fab .n{background:rgba(255,255,255,.25);border-radius:20px;padding:1px 8px;font-size:12px;}
+
+  .modal{position:fixed;inset:0;background:rgba(4,8,16,.72);backdrop-filter:blur(3px);
+    display:none;z-index:100;padding:16px;}
+  .modal.open{display:flex;align-items:flex-end;justify-content:center;}
+  .sheet{
+    background:var(--bg2);border:1px solid var(--line);border-radius:20px 20px 0 0;
+    width:100%;max-width:720px;max-height:82vh;overflow-y:auto;padding:18px 16px 24px;
+    animation:sheetup .25s ease;
+  }
+  @keyframes sheetup{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .sheethead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .sheethead h2{font-size:16px;margin:0;}
+  .closebtn{background:var(--surface2);border:none;color:var(--text);width:30px;height:30px;
+    border-radius:50%;cursor:pointer;font-size:15px;}
+  .wnfilter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .wnitem{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;}
+  .wnhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;}
+  .wnq{font-size:13.5px;font-weight:600;line-height:1.5;}
+  .wnsub{font-size:10.5px;color:var(--cyan);font-weight:700;margin-bottom:3px;}
+  .wndiftag{font-size:10.5px;font-weight:700;white-space:nowrap;}
+  .wnans{font-size:12.5px;color:var(--d2);margin-top:6px;}
+  .wnexp{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
+  .wnclear{font-size:11.5px;color:var(--muted);text-decoration:underline;cursor:pointer;text-align:center;margin-top:6px;}
+
+  .share{
+    margin-top:14px;font-size:11.5px;color:var(--muted);background:var(--surface);
+    border:1px dashed var(--line);border-radius:12px;padding:11px 13px;line-height:1.6;
+  }
+  .share b{color:var(--cyan);}
+
+  /* ---- 우측 상단 메뉴(자격증 전환) ---- */
+  .menuBtn{position:fixed;top:14px;right:14px;z-index:80;width:38px;height:38px;border-radius:50%;
+    background:var(--surface);border:1px solid var(--line);color:var(--text);font-size:17px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;letter-spacing:2px;}
+  .drawerOverlay{position:fixed;inset:0;background:rgba(4,8,16,.62);backdrop-filter:blur(2px);
+    z-index:85;display:none;}
+  .drawerOverlay.open{display:block;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:80%;max-width:300px;background:var(--bg2);
+    border-left:1px solid var(--line);z-index:90;transform:translateX(100%);
+    transition:transform .25s ease;padding:64px 14px 20px;overflow-y:auto;}
+  .drawer.open{transform:translateX(0);}
+  .drawerTitle{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.4px;margin:0 4px 10px;}
+  .drawerAcc{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);margin-bottom:10px;}
+  .drawerAccBtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:13px 14px;background:transparent;border:none;color:var(--text);font-size:13.5px;
+    font-weight:700;cursor:pointer;text-align:left;}
+  .drawerAccBtn .chev{color:var(--cyan);transition:transform .2s;font-size:11px;}
+  .drawerAccBtn.open .chev{transform:rotate(180deg);}
+  .drawerAccPanel{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .drawerAccPanel.open{max-height:260px;border-top:1px solid var(--line);}
+  .examLink{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600;
+    color:var(--text);text-decoration:none;border-top:1px solid var(--line);}
+  .examLink:first-child{border-top:none;}
+  .examLink .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:0 0 auto;}
+  .examLink.current{color:var(--cyan);cursor:default;pointer-events:none;background:rgba(57,216,200,.08);}
+  .examLink.current .dot{background:var(--cyan);}
+</style>
+</head>
+<body>
+<script src="storage-shim.js"></script>
+<script src="exam-core.js"></script>
+<button class="menuBtn" id="menuBtn">⋮</button>
+<div class="drawerOverlay" id="drawerOverlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawerAcc">
+    <button class="drawerAccBtn" id="examToggleBtn"><span>📋 자격증 선택</span><span class="chev">▾</span></button>
+    <div class="drawerAccPanel" id="examPanel">
+      <span class="examLink current"><span class="dot"></span>🩹 응급구조사 2급 필기 (현재)</span>
+      <a class="examLink" href="./hsk4_quiz.html"><span class="dot"></span>汉 중국어 HSK 4급</a>
+      <a class="examLink" href="./comp2_quiz.html"><span class="dot"></span>💻 컴퓨터활용능력 2급 필기</a>
+    </div>
+  </div>
+  <div class="drawerTitle" id="drawerHubLink" style="margin-top:16px;">🏠 <a href="./hub.html" style="color:var(--muted);text-decoration:none;">허브 홈으로</a></div>
+</div>
+
+<div class="wrap">
+
+  <div class="brand"><div class="pulse"></div><h1>2급 응급구조사 필기 출동카드</h1></div>
+  <div class="sub">국시원 최신 시험과목 기준 · 난이도별 심화 문제은행</div>
+
+  <div id="ecGoalTarget"></div>
+
+  <svg class="ekg" viewBox="0 0 340 26"><path d="M0,13 L60,13 L75,13 L85,2 L95,24 L105,13 L120,13 L135,13 L145,4 L152,22 L160,13 L340,13"/></svg>
+
+  <div class="infobox">
+    <b>시험 구조</b> — 1차 실기시험 합격자만 2차 필기시험에 응시할 수 있어요.<br>
+    <b>합격 기준</b> — 실기 60점 만점 중 36점(60%) 이상, 필기는 매 과목 40% 이상 &amp; 전 과목 총점 60%(140점 만점 중 84점) 이상.
+    <div class="grid">
+      <div><span class="tag">총론</span>122문항</div>
+      <div><span class="tag">환자관리</span>120문항</div>
+      <div><span class="tag">법령</span>121문항</div>
+      <div><span class="tag">각론</span>140문항</div>
+      <div><span class="tag">장비</span>123문항</div>
+      <div><span class="tag">합계</span>626문항(문제은행 기준)</div>
+    </div>
+    <div style="margin-top:8px;">2028년 제34회 시험부터 1급처럼 CBT(컴퓨터시험) 방식 도입 예정이며, 매년 원서접수 8월 말~9월, 실기 10월, 필기 11월 말경 시행돼요.</div>
+  </div>
+
+  <div class="filterrow" id="subjectRow"></div>
+  <div class="diffAcc">
+    <button class="diffToggleBtn" id="diffToggleBtn">
+      <span>🎚️ 난이도 선택 <span id="diffSummary">(전체)</span></span>
+      <span class="chev">▾</span>
+    </button>
+    <div class="diffPanel" id="diffPanel"><div class="diffPanelInner" id="diffPanelInner"></div></div>
+  </div>
+
+  <div class="statrow">
+    <span>진행 <b id="progText">0/0</b></span>
+    <span>정답률 <b id="scoreText">0%</b></span>
+  </div>
+  <div class="barbg"><div class="barfg" id="barfg"></div></div>
+
+  <div id="cardZone"></div>
+
+  <div id="ecExamTarget"></div>
+</div>
+
+<button class="fab" id="fabBtn">🩹 오답노트 <span class="n" id="wnCount">0</span></button>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <div class="sheethead">
+      <h2>오답노트</h2>
+      <button class="closebtn" id="closeModal">✕</button>
+    </div>
+    <div class="wnfilter" id="wnFilterRow"></div>
+    <div id="wnList"></div>
+    <div class="wnclear" id="clearWN">오답노트 전체 비우기</div>
+  </div>
+</div>
+
+<script>
+// ---- 우측 상단 메뉴(자격증 전환) ----
+(function(){
+  const menuBtn = document.getElementById('menuBtn');
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('drawerOverlay');
+  const examToggleBtn = document.getElementById('examToggleBtn');
+  const examPanel = document.getElementById('examPanel');
+  menuBtn.onclick = ()=>{ drawer.classList.add('open'); overlay.classList.add('open'); };
+  overlay.onclick = ()=>{ drawer.classList.remove('open'); overlay.classList.remove('open'); };
+  examToggleBtn.onclick = ()=>{
+    const willOpen = !examPanel.classList.contains('open');
+    examPanel.classList.toggle('open', willOpen);
+    examToggleBtn.classList.toggle('open', willOpen);
+  };
+})();
+
+// ================= 데이터 =================
+// 난이도: 1=개쉬움 2=쉬움 3=보통 4=어려움 5=개어려움
+const DIFF_LABEL = {1:"개쉬움",2:"쉬움",3:"보통",4:"어려움",5:"개어려움"};
+
+const Q = [
+{s:"총론",d:1,q:"응급처치의 1차적 목적으로 가장 적절한 것은?",o:["환자의 생명을 구하고 상태 악화를 방지한다","질병을 완치시킨다","입원 여부를 결정한다","의료비를 절감한다"],a:0,
+ e:"응급처치는 진단·치료가 아니라 생명 유지와 상태 악화 방지, 병원 이송까지의 시간을 버는 것이 핵심 목적이에요.",r:"기본응급처치학총론 – 응급처치의 정의 및 목적"},
+{s:"총론",d:1,q:"현장 도착 시 가장 먼저 확인해야 하는 것은?",o:["현장 안전 여부","환자의 병력","보호자 동의","이송 병원 선정"],a:0,
+ e:"구조자 자신의 안전이 확보되지 않으면 2차 사고가 발생할 수 있어 현장안전 확인이 모든 처치보다 선행돼요(현장 확인 3요소: 안전-상황-인원).",r:"현장 평가(Scene Size-up) 원칙"},
+{s:"총론",d:2,q:"1차 평가(primary survey)에서 가장 먼저 확인하는 항목은?",o:["의식 수준과 기도(Airway)","동공 반사","피부색","기왕력"],a:0,
+ e:"1차 평가는 ABCDE(기도-호흡-순환-장애-노출) 순서로 생명을 위협하는 문제부터 신속히 찾아내는 과정이에요.",r:"1차 평가 순서 – ABCDE 접근법"},
+{s:"총론",d:2,q:"환자 평가 중 'SAMPLE' 병력청취에서 'M'이 의미하는 것은?",o:["복용 약물(Medication)","기전(Mechanism)","의식(Mental)","측정치(Measurement)"],a:0,
+ e:"SAMPLE은 증상(S)-알레르기(A)-복용약물(M)-과거력(P)-최근 경구섭취(L)-발생상황(E)의 약자예요.",r:"SAMPLE 병력청취 기법"},
+{s:"총론",d:3,q:"2차 평가에서 시행하는 전신 신체검진(head-to-toe)을 실시하는 대상으로 가장 옳은 것은?",o:["의식이 없거나 손상기전이 불명확한 외상환자","의식이 명료한 경증 내과환자","이송을 거부하는 환자","협조적인 소아 환자"],a:0,
+ e:"의식저하·다발성 손상 등 손상기전 파악이 어려운 경우 두부부터 발끝까지 전신 신체검진을 시행해 숨은 손상을 놓치지 않아야 해요.",r:"2차 평가 – 신체검진 범위 선정 기준"},
+{s:"총론",d:3,q:"START 중증도 분류법(START Triage)에서 '즉각 치료(적색, immediate)'로 분류되는 기준은?",o:["호흡수가 분당 30회를 초과하거나 무호흡 후 기도확보로 회복","보행이 가능한 환자","호흡이 없고 기도확보 후에도 무호흡","경미한 열상 환자"],a:0,
+ e:"START는 보행가능(녹색)→호흡평가(무호흡·기도확보 후에도 무호흡=흑색, 30회 초과=적색)→순환(모세혈관재충혈·요골맥박)→의식(지시이행 불가=적색) 순으로 분류해요.",r:"다수 사상자 중증도 분류 – START Triage 알고리즘"},
+{s:"총론",d:4,q:"START 중증도 분류에서 자발 호흡이 없으나 기도를 개방(head-tilt)한 후 호흡이 돌아온 경우의 분류는?",o:["적색(즉각치료)","흑색(사망/처치불가)","황색(응급치료 지연가능)","녹색(경증)"],a:0,
+ e:"기도확보 시행 후 호흡이 회복되면 적색(1순위)으로 분류하고, 기도확보 후에도 무호흡이 지속되면 흑색으로 분류하는 것이 START의 핵심 분기점이에요. 많은 수험생이 '무호흡=바로 흑색'으로 오인해 틀리는 대표 문항이에요.",r:"START Triage – 호흡 평가 단계의 기도확보 시행 여부"},
+{s:"총론",d:4,q:"응급의료체계(EMS system)의 구성요소 중 '병원 전 단계'와 '병원 단계'를 유기적으로 연결하는 핵심 기능은?",o:["직접의료지도(on-line medical control)를 포함한 의료지도 체계","구급차 소독 규정","구급대원 복장 규정","환자 이송 요금 체계"],a:0,
+ e:"의료지도(직접·간접)는 현장의 응급구조사가 의사의 지도를 받아 표준화된 처치를 수행하게 함으로써 병원 전 단계 처치의 질을 병원 단계 수준으로 연결하는 핵심 축이에요.",r:"응급의료체계 구성요소 – 의료지도 체계"},
+{s:"총론",d:5,q:"재난현장 대응 시 SIEVE 방식과 START 방식을 비교할 때, 두 분류법이 공통적으로 첫 단계에서 사용하는 기준은?",o:["보행 가능 여부(walking wounded)로 우선 선별","혈압 측정값","맥박 산소포화도","체온"],a:0,
+ e:"SIEVE(영국식)와 START(미국식) 모두 1단계에서 '걸을 수 있는가'로 경증군을 우선 걸러낸 뒤, 호흡·순환·의식 순으로 세부 분류를 진행한다는 공통점이 있어요. 두 체계의 세부 명칭 차이(SIEVE는 P1~P4, START는 색상)를 헷갈리지 않는 것이 핵심이에요.",r:"다수사상자 분류체계 비교 – SIEVE vs START"},
+{s:"환자관리",d:1,q:"성인의 정상 안정 시 호흡수 범위로 옳은 것은?",o:["분당 12~20회","분당 30~40회","분당 5~10회","분당 40~60회"],a:0,
+ e:"성인 정상 호흡수는 분당 12~20회이며, 이를 벗어나면 호흡곤란 징후로 평가해야 해요.",r:"활력징후 – 정상 호흡수 기준"},
+{s:"환자관리",d:1,q:"성인의 정상 맥박수 범위는?",o:["분당 60~100회","분당 40~50회","분당 100~140회","분당 20~40회"],a:0,
+ e:"성인 안정 시 정상 맥박수는 분당 60~100회이며, 100회 초과는 빈맥, 60회 미만은 서맥으로 평가해요.",r:"활력징후 – 정상 맥박수 기준"},
+{s:"환자관리",d:2,q:"모세혈관 재충혈(capillary refill) 검사에서 정상 회복 시간 기준은?",o:["2초 이내","5초 이상","10초 이상","즉시 반응 없음이 정상"],a:0,
+ e:"손톱을 눌렀다 떼었을 때 2초 이내에 원래 색으로 돌아오면 정상 관류로 평가해요. 2초를 초과하면 관류 저하(쇼크 의심)를 시사해요.",r:"순환 평가 – 모세혈관 재충혈 시간"},
+{s:"환자관리",d:2,q:"의식수준 평가 AVPU 척도에서 'V'가 의미하는 반응은?",o:["언어(목소리) 자극에 반응","통증 자극에 반응","무반응","완전한 지남력이 있는 각성 상태"],a:0,
+ e:"AVPU는 Alert(자발 각성)-Verbal(언어자극 반응)-Pain(통증자극 반응)-Unresponsive(무반응) 순으로 신속하게 의식수준을 평가하는 척도예요.",r:"의식수준 평가 – AVPU 척도"},
+{s:"환자관리",d:3,q:"저혈량성 쇼크 초기(대상성 단계)에서 가장 먼저 나타나는 생체징후 변화로 옳은 것은?",o:["빈맥과 말초혈관 수축(피부 창백·냉감)","혈압 급격히 상승","서맥과 홍조","체온 급상승"],a:0,
+ e:"쇼크 초기에는 혈압이 정상으로 유지되는 대상성 단계로, 교감신경 항진에 의한 빈맥과 말초혈관 수축이 가장 먼저 나타나요. 혈압 저하는 대상기전이 소실된 후기 징후예요.",r:"쇼크의 병태생리 – 대상성 단계 징후"},
+{s:"환자관리",d:3,q:"글래스고 혼수척도(GCS)에서 최저 점수와 그 의미로 옳은 것은?",o:["3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)","0점, 사망","1점, 경도 의식저하","15점, 완전 무반응"],a:0,
+ e:"GCS는 개안반응(1~4)+언어반응(1~5)+운동반응(1~6)의 합으로 최저 3점, 최고 15점이며, 8점 이하는 중증 의식장애로 기도삽관을 고려하는 기준이 돼요.",r:"글래스고 혼수척도(GCS) 점수 체계"},
+{s:"환자관리",d:4,q:"쇼크 환자에서 맥압(pulse pressure, 수축기-이완기 혈압 차)이 좁아지는 이유로 가장 옳은 것은?",o:["말초혈관 수축으로 이완기압은 상승하고 심박출량 저하로 수축기압은 하강하기 때문","수축기압과 이완기압이 동시에 같은 비율로 상승하기 때문","서맥으로 심박출량이 증가하기 때문","혈관이 확장되어 이완기압이 급격히 낮아지기 때문"],a:0,
+ e:"쇼크 대상기전에서는 카테콜아민 분비로 말초혈관이 수축해 이완기압이 오히려 상승하고, 심박출량 감소로 수축기압은 떨어져 맥압이 좁아지는 특징적 소견을 보여요. 단순 저혈압보다 먼저 나타나는 민감한 지표예요.",r:"쇼크 병태생리 – 맥압의 임상적 의의"},
+{s:"환자관리",d:5,q:"소아 환자에서 쇼크의 대상기전이 성인보다 오래 유지되다가 급격히 붕괴하는 생리적 이유로 가장 적절한 것은?",o:["소아는 강력한 혈관수축 능력으로 혈압을 오래 유지하지만 심박출량 예비능이 낮아 대상기전이 소실되면 급격히 저혈압으로 진행한다","소아는 혈액량이 성인보다 절대적으로 많아 쇼크에 잘 빠지지 않는다","소아는 통증 역치가 높아 쇼크 징후가 늦게 나타난다","소아의 심장은 성인보다 방실전도가 느려 서맥이 우선 나타난다"],a:0,
+ e:"소아는 말초혈관 수축 능력이 뛰어나 저혈압이 매우 늦게(대상기전이 거의 다 소진된 후) 나타나는 것이 특징이에요. 따라서 '혈압이 정상이니 안심'이 아니라 빈맥·모세혈관재충혈지연·의식변화 등 초기 징후로 쇼크를 조기에 의심해야 하며, 저혈압이 확인되면 이미 실패 직전 단계라는 점이 시험에서 자주 함정으로 출제돼요.",r:"소아 쇼크의 병태생리 – 대상기전과 저혈압 발현 시점"},
+{s:"환자관리",d:4,q:"COPD(만성폐쇄성폐질환) 환자에게 고농도 산소를 무분별하게 투여할 때 우려되는 상황으로 가장 옳은 것은?",o:["저산소성 호흡추진력 저하로 인한 호흡억제 가능성","즉각적인 심정지","산소 중독으로 인한 실명","저혈당 유발"],a:0,
+ e:"일부 만성 COPD 환자는 만성적인 고탄산혈증에 적응되어 저산소증이 호흡을 자극하는 주요 기전(저산소성 호흡추진력)으로 작용할 수 있어, 고농도 산소를 급격히 투여하면 호흡 추진력이 약화될 수 있어요. 다만 응급 저산소증이 명백하면 산소투여를 주저해서는 안 되고 호흡을 면밀히 관찰하며 투여하는 것이 원칙이에요.",r:"호흡기 응급 – COPD 환자의 산소요법 시 주의점"},
+{s:"법령",d:1,q:"「응급의료에 관한 법률」상 응급구조사 자격시험은 어디에서 실시하는가?",o:["한국보건의료인국가시험원","대한응급구조사협회","보건복지부","소방청"],a:0,
+ e:"응급구조사 시험은 보건복지부장관의 위탁을 받아 한국보건의료인국가시험원(국시원)이 시행해요.",r:"응급의료에 관한 법률 시행령 제25조 (자격시험 위탁)"},
+{s:"법령",d:1,q:"응급구조사는 몇 개 등급으로 구분되는가?",o:["1급과 2급","1급, 2급, 3급","등급 구분 없음","1급뿐"],a:0,
+ e:"응급구조사는 업무범위와 자격기준에 따라 1급과 2급으로 구분돼요.",r:"응급의료에 관한 법률 제36조"},
+{s:"법령",d:2,q:"「응급의료에 관한 법률」 제41조에 따른 응급구조사의 업무로 옳은 것은?",o:["현장에서 응급환자에 대한 상담·구조 및 이송업무 수행","환자에 대한 진단서 발급","수술 시행","처방전 발급"],a:0,
+ e:"응급구조사는 응급환자가 발생한 현장에서 상담·구조·이송업무를 수행하며, 의료법상 무면허 의료행위 금지에도 불구하고 보건복지부령이 정하는 범위에서 응급처치를 할 수 있어요.",r:"응급의료에 관한 법률 제41조 (응급구조사의 업무)"},
+{s:"법령",d:2,q:"응급의료 통신을 위한 응급환자 신고 및 이송병원 안내 등에 이용되는 응급의료 전용 전화번호는?",o:["119","112","1339(현재는 119로 일원화 운영)","1330"],a:0,
+ e:"과거 1339 응급의료정보센터가 있었으나 현재는 119로 응급의료 상담·안내 기능이 일원화되어 운영되고 있어요. 법령/제도 변화가 있었던 부분으로 시험에 자주 출제돼요.",r:"응급의료에 관한 법률 제27조 (응급의료정보센터) 및 제도 연혁"},
+{s:"법령",d:3,q:"「응급의료에 관한 법률」상 선의의 응급의료에 대한 면책(제5조의2)이 적용되기 위한 요건으로 옳지 않은 것은?",o:["의료 전문가만 면책 대상이 되며 일반인은 적용되지 않는다","생명이 위급한 응급환자에게 응급의료를 제공한 경우","고의 또는 중대한 과실이 없는 경우","선의로 제공한 응급의료로 발생한 재산상 손해 및 사상에 대해 형을 감면"],a:0,
+ e:"선의의 응급의료 면책 규정은 응급의료종사자뿐 아니라 일반인이 시행한 응급처치에도 적용돼요('일반인'도 대상). 고의·중과실이 없는 응급처치에 대해 민형사상 책임을 감면·면제하는 제도예요.",r:"응급의료에 관한 법률 제5조의2 (선의의 응급의료에 대한 면책)"},
+{s:"법령",d:3,q:"구급차등을 운용하는 자가 응급환자 이송 시 반드시 갖추어야 할 의무로 옳은 것은?",o:["응급처치에 필요한 장비 및 인력(응급구조사 등)을 갖추어 운용해야 한다","환자의 동의 없이도 진료기록을 임의로 작성·변경할 수 있다","이송 요금은 무료로만 운영해야 한다","의사만 탑승이 가능하다"],a:0,
+ e:"구급차등의 운용자는 시행규칙이 정하는 인력·장비 기준을 갖추어야 하며, 특히 이송 중 응급처치 기록(구급활동일지)을 작성·보관할 의무가 있어요.",r:"응급의료에 관한 법률 제44조 및 제47조 (구급차등의 운용자 의무)"},
+{s:"법령",d:4,q:"2급 응급구조사의 업무범위(시행규칙 별표)에 해당하지 않는 것은?",o:["정맥로의 확보","자동제세동기를 이용한 규칙적 심박동 유도","구강 내 이물질 제거 및 기도기를 이용한 기도유지","쇼크방지용 하의 등을 이용한 하지·골반 고정"],a:0,
+ e:"정맥로 확보는 1급 응급구조사의 업무범위이며 2급은 시행할 수 없어요. 2급은 기도기 삽관, 기본 심폐소생술·AED, 산소투여, 부목/척추고정, 지혈, 활력징후 측정, 쇼크방지용 하의 고정, 흉통 시 니트로글리세린 설하투여 보조 등으로 업무가 제한돼요.",r:"응급의료에 관한 법률 시행규칙 별표14 (2급 응급구조사의 업무범위)"},
+{s:"법령",d:4,q:"1급 응급구조사에게는 허용되지만 2급 응급구조사에게는 허용되지 않는 업무로 옳은 것은?",o:["기본 심폐소생술을 위한 기도유지기의 삽관, 정맥로 확보를 통한 수액투여, 저혈당 시 포도당 투여","산소 투여","AED를 이용한 심박동 유도","부목을 이용한 골절 고정"],a:0,
+ e:"1급은 후두마스크 등 전문기도유지술, 정맥로 확보 및 수액투여, 저혈당 시 포도당 투여, 아나필락시스 시 에피네프린 투여, 심전도 측정 등 전문 처치가 추가로 허용돼요. 2급은 기본기도기·산소투여·AED·부목/지혈 등 기본 처치로 제한돼요.",r:"응급의료에 관한 법률 시행규칙 별표14 (1급·2급 업무범위 비교)"},
+{s:"법령",d:5,q:"2급 응급구조사가 흉통을 호소하는 환자에게 니트로글리세린을 설하투여하도록 '보조'할 수 있는 요건으로 가장 옳은 것은?",o:["환자가 이미 의사로부터 해당 약물을 처방받아 소지하고 있는 경우에 한해 투여를 보조할 수 있다","의료지도 없이도 2급 구조사 자신의 판단만으로 임의 처방·투여할 수 있다","1회에 한해 자체 구비한 니트로글리세린을 새로 투여할 수 있다","연령과 무관하게 모든 흉통 환자에게 투여할 수 있다"],a:0,
+ e:"2급 응급구조사는 환자가 이미 처방받아 소지 중인 니트로글리세린(설하)이나 자가 기관지확장제 흡입을 '보조'하는 수준까지만 가능해요. 임의로 약물을 새로 구비해 투여하거나 처방하는 것은 업무범위를 벗어나며, 이 조건(기처방 여부)을 놓치는 수험생이 많아 정답률이 낮은 문항이에요.",r:"응급의료에 관한 법률 시행규칙 별표14 – 2급 업무범위 제10호"},
+{s:"법령",d:4,q:"응급의료종사자가 업무 수행 중 응급환자를 구조하지 않거나 응급처치를 하지 않고 이송을 지연하는 등의 행위를 한 경우 관련 법령상 처벌 근거로 옳은 것은?",o:["「응급의료에 관한 법률」상 벌칙 규정에 따라 형사처벌 대상이 될 수 있다","단순 행정지도로 종결되며 형사처벌 대상이 아니다","민사상 손해배상 책임만 발생하고 형사책임은 없다","자격정지 등 행정처분은 불가능하다"],a:0,
+ e:"정당한 사유 없이 응급환자를 구조하지 않거나 응급의료를 거부·기피한 응급의료종사자는 벌칙(형사처벌) 및 자격정지 등 행정처분의 대상이 될 수 있어요.",r:"응급의료에 관한 법률 제6조·제60조 등 (응급의료 거부금지 및 벌칙)"},
+{s:"각론",d:1,q:"성인 심폐소생술에서 가슴압박 대 인공호흡의 비율(1인 구조자, 일반 성인 기준)은?",o:["30:2","15:2","30:1","5:1"],a:0,
+ e:"성인 심폐소생술은 가슴압박 30회 후 인공호흡 2회를 반복하는 30:2 비율이 표준이에요(구조자 수와 무관하게 일반인/전문구조자 성인 기준 동일 적용).",r:"KACPR(대한심폐소생협회) 심폐소생술 가이드라인 – 성인 CPR"},
+{s:"각론",d:1,q:"성인 가슴압박 시 권장 압박 깊이는?",o:["약 5~6cm","약 1~2cm","약 8~10cm","가슴 두께의 절반 이상 무조건 깊게"],a:0,
+ e:"성인 가슴압박 깊이는 약 5cm 이상 6cm를 넘지 않는 범위로 압박하는 것이 권장돼요.",r:"KACPR 가이드라인 – 가슴압박 깊이 기준"},
+{s:"각론",d:2,q:"기도 폐쇄가 의심되는 의식 있는 성인에게 시행하는 응급처치로 옳은 것은?",o:["하임리히법(복부 밀어내기)","즉시 기관절개","등 두드리기만 반복","머리를 뒤로 젖히기만 시행"],a:0,
+ e:"의식이 있는 성인·소아의 완전 기도폐쇄에는 복부 밀어내기(하임리히법)를 시행하며, 영아는 등 두드리기와 가슴 압박을 번갈아 시행해요.",r:"이물질에 의한 기도폐쇄 처치 – 하임리히법"},
+{s:"각론",d:2,q:"당뇨병 환자가 의식저하와 함께 식은땀, 빈맥을 보일 때 가장 먼저 의심해야 하는 상태는?",o:["저혈당","고혈당성 케톤산증","뇌졸중","심근경색"],a:0,
+ e:"식은땀·떨림·빈맥·의식저하가 급격히 나타나면 저혈당을 우선 의심해요. 의식이 있다면 당 섭취(경구)를 시도하고, 의식이 없으면 신속히 병원 이송 및 의료지도를 받아야 해요.",r:"내과 응급 – 저혈당의 임상양상"},
+{s:"각론",d:2,q:"천식 발작 환자에게서 흔히 관찰되는 호흡음은?",o:["호기 시 천명음(wheezing)","흡기 시 협착음(stridor)","수포음(crackles) only","무호흡음"],a:0,
+ e:"천식은 하기도 협착으로 인해 특징적으로 호기 시 천명음(쌕쌕거림)이 들리며, 상기도 폐쇄에서는 흡기성 협착음(stridor)이 특징적이에요.",r:"호흡기 응급 – 천식의 청진 소견"},
+{s:"각론",d:3,q:"급성 심근경색이 의심되는 흉통 환자의 전형적 증상으로 옳은 것은?",o:["30분 이상 지속되는 압박성 흉통이 좌측 어깨나 팔로 방사됨","날카롭고 순간적인 통증이 특정 자세에서만 발생","기침 시에만 악화되는 흉통","피부를 눌렀을 때만 발생하는 국소 통증"],a:0,
+ e:"급성 심근경색은 30분 이상 지속되는 압박감·조이는 듯한 흉통이 특징이며 좌측 어깨, 팔, 턱으로 방사되는 경우가 많고 안정으로도 호전되지 않아요.",r:"순환기 응급 – 급성관상동맥증후군의 전형적 증상"},
+{s:"각론",d:3,q:"뇌졸중 의심 환자를 신속히 선별하는 데 사용하는 'FAST' 평가 항목이 아닌 것은?",o:["체온(Temperature)","안면 마비(Face)","팔 처짐(Arm)","언어 장애(Speech)"],a:0,
+ e:"FAST는 Face(안면 마비)-Arm(팔 처짐)-Speech(언어장애)-Time(증상 발생 시각 확인)의 약자로 뇌졸중 신속 선별에 사용되며 체온은 포함되지 않아요.",r:"신경계 응급 – 뇌졸중 FAST 평가"},
+{s:"각론",d:3,q:"경추손상이 의심되는 외상환자의 기도 확보 시 우선적으로 사용해야 하는 방법은?",o:["턱 밀어올리기법(jaw-thrust maneuver)","머리기울임-턱들기법(head-tilt chin-lift)","목을 과신전시켜 기도확보","기도확보 없이 바로 이송"],a:0,
+ e:"경추손상 의심 환자는 목을 움직이지 않는 하악견인법(jaw-thrust)으로 기도를 확보해야 하며, 머리를 젖히는 head-tilt chin-lift는 경추 추가손상 위험이 있어 금기예요.",r:"외상환자 기도관리 – 경추 손상 의심 시 기도확보법"},
+{s:"각론",d:4,q:"긴장성 기흉(tension pneumothorax)의 특징적 임상 소견으로 옳은 것은?",o:["환측 호흡음 감소, 경정맥 팽대, 기관 편위(건측으로 이동), 저혈압","양측 호흡음 동일하게 증가","서맥과 고혈압만 동반","환측으로 기관이 편위됨"],a:0,
+ e:"긴장성 기흉은 흉강 내 공기가 지속적으로 축적되어 종격동을 반대측(건측)으로 밀며 기관 편위, 경정맥 팽대, 환측 호흡음 소실, 폐쇄성 쇼크(저혈압)를 유발하는 즉각적 생명위협 상태예요. 환측 편위로 오인하는 것이 대표적 오답 패턴이에요.",r:"흉부 외상 응급 – 긴장성 기흉의 병태생리 및 소견"},
+{s:"각론",d:4,q:"아나필락시스(전신 알레르기 반응) 환자의 가장 특징적이고 치명적인 위험 징후는?",o:["급격한 기도부종(후두부종)과 전신 혈관확장에 의한 분포성 쇼크","서맥과 고혈압","국소 피부 발진만 나타남","체온 저하만 관찰됨"],a:0,
+ e:"아나필락시스는 히스타민 등 매개체 대량 분비로 후두부종에 의한 기도폐쇄와 전신 혈관 확장(분포성 쇼크)이 동시에 진행되어 수 분 내 사망에 이를 수 있는 응급상황이에요. 2급 구조사는 환자가 이미 처방받은 자가주사기가 있는 경우 사용을 보조할 수 있어요.",r:"알레르기 응급 – 아나필락시스의 병태생리"},
+{s:"각론",d:4,q:"경증 저체온증과 중증 저체온증을 구분하는 데 사용되는 지표로 가장 옳은 것은?",o:["의식 수준 저하 및 심부체온(중심체온) 측정치, 오한 반응 소실 여부","피부 색깔 변화만으로 구분","환자의 나이","증상 발생 장소가 실내인지 실외인지"],a:0,
+ e:"저체온증은 심부체온 기준(약 35℃ 미만 경증, 32℃ 미만 중등도~중증)으로 분류하며, 중증으로 갈수록 오한(shivering)이 사라지고 의식이 저하돼요. 오한이 없어졌다고 '좋아진 것'으로 오인하면 안 되는 대표적 함정이에요.",r:"환경응급 – 저체온증의 중증도 분류"},
+{s:"각론",d:5,q:"익수(물에 빠짐) 환자의 심폐소생술 시 일반 심정지와 다르게 강조되는 부분으로 가장 옳은 것은?",o:["질식성 심정지이므로 가슴압박 전에 인공호흡을 우선 고려하고 초기 5회 인공호흡을 먼저 시행할 수 있다","가슴압박은 절대 시행하지 않는다","반드시 물속에서부터 가슴압박을 시작해야 한다","산소 투여는 금기이다"],a:0,
+ e:"익수는 저산소증이 원인인 질식성 심정지(asphyxial arrest)이므로 일반 심정지와 달리 인공호흡의 조기 시행이 특히 강조되며, 구조 상황에 따라 초기 인공호흡을 먼저 고려할 수 있어요. 물 밖으로 나온 뒤 안전한 곳에서 심폐소생술을 시행해야 하며 물속에서의 가슴압박은 불가능해요.",r:"환경응급 – 익수 심정지의 특수성(질식성 심정지)"},
+{s:"각론",d:5,q:"급성 복부대동맥류 파열이 의심되는 노년 환자의 전형적 3대 징후(triad)로 옳은 것은?",o:["갑작스런 극심한 복통·요통, 박동성 복부 종괴, 저혈압(쇼크)","발열, 기침, 인후통","서서히 진행하는 만성 소화불량과 변비","피부 발진과 가려움증"],a:0,
+ e:"복부대동맥류 파열은 갑작스런 극심한 복부·등 통증, 촉진 시 박동성 종괴, 그리고 대량 출혈로 인한 저혈압성 쇼크의 3대 징후가 나타나는 치명적 응급질환으로, 노년 남성에서 급성 복통 시 반드시 감별해야 해요. 정답률이 낮은 고난도 각론 문항이에요.",r:"복부 응급 – 복부대동맥류 파열의 3대 징후"},
+{s:"각론",d:2,q:"화상 환자의 중증도 분류 시 사용하는 '9의 법칙(rule of nines)'에서 성인의 머리(두부)가 차지하는 체표면적 비율은?",o:["9%","18%","36%","1%"],a:0,
+ e:"9의 법칙에서 성인 기준 머리 9%, 양팔 각 9%, 몸통 앞뒤 각 18%, 양다리 각 18%, 회음부 1%로 계산해요(소아는 머리 비율이 더 큼).",r:"화상 응급 – 9의 법칙 체표면적 산정"},
+{s:"각론",d:3,q:"척추손상이 의심되는 환자를 통나무 굴리기(log roll)로 이동시킬 때 가장 중요한 원칙은?",o:["척추의 일직선 정렬(long axis alignment)을 유지하며 여러 명이 동시에 몸통을 회전시킨다","혼자서 신속하게 굴린다","목만 먼저 돌리고 몸통은 나중에 돌린다","다리부터 회전시키고 상체는 고정한다"],a:0,
+ e:"통나무 굴리기는 머리부터 골반까지 척추의 일직선 정렬을 유지한 상태로 여러 구조자가 동시에 회전시켜야 이차적 척수손상을 예방할 수 있어요.",r:"외상환자 이동 – 통나무 굴리기(log roll) 원칙"},
+{s:"각론",d:3,q:"경련(발작) 환자에 대한 응급처치로 옳은 것은?",o:["주변의 위험 물건을 치우고 환자를 보호하며 경련이 끝난 후 기도를 확인한다","경련 중인 사지를 강제로 붙잡아 움직임을 완전히 막는다","입안에 손가락이나 물건을 넣어 혀 깨묾을 막는다","즉시 찬물을 끼얹어 의식을 깨운다"],a:0,
+ e:"경련 중에는 신체를 억지로 제압하거나 입안에 이물질을 넣지 않고, 주변 위험물을 제거해 2차 손상을 예방하며 경련 종료 후 기도·호흡 상태를 확인하는 것이 원칙이에요.",r:"신경계 응급 – 경련 환자 처치 원칙"},
+{s:"각론",d:4,q:"임신 3분기(후기) 임산부를 이송할 때 앙와위(똑바로 누운 자세) 대신 좌측위로 눕히는 이유로 가장 옳은 것은?",o:["커진 자궁이 하대정맥을 압박하는 것을 줄여 정맥 환류와 태반 혈류를 개선하기 위해","임산부의 요통을 줄이기 위한 단순 안락 목적","구토를 유발하기 위해","분만을 촉진하기 위해"],a:0,
+ e:"임신 후기에는 커진 자궁이 앙와위 시 하대정맥을 눌러 정맥 환류가 감소하고 저혈압(앙와위 저혈압 증후군)을 유발할 수 있어, 좌측위(또는 우측 골반 밑에 쿠션)로 눕혀 하대정맥 압박을 줄여야 해요.",r:"산부인과 응급 – 임신 후기 이송 자세(좌측위)의 근거"},
+{s:"각론",d:4,q:"영아 심폐소생술에서 2인 구조자인 경우 가슴압박 대 인공호흡 비율로 옳은 것은?",o:["15:2","30:2","5:1","3:1"],a:0,
+ e:"영아·소아의 2인 구조자 심폐소생술은 15:2 비율을 적용하며, 1인 구조자인 경우에는 성인과 동일하게 30:2를 적용해요. 구조자 수에 따라 비율이 달라지는 점이 시험 함정이에요.",r:"KACPR 가이드라인 – 소아·영아 심폐소생술 압박:호흡 비율"},
+{s:"각론",d:5,q:"제대탈출(cord prolapse)이 발생한 임산부에 대한 응급처치로 가장 옳은 것은?",o:["장갑 낀 손으로 태아 선진부를 밀어올려 제대 압박을 줄이고, 무릎-가슴 자세로 이송하며 제대를 체내로 밀어넣지 않는다","즉시 탯줄을 잘라 지혈한다","제대를 강하게 잡아당겨 태아를 꺼낸다","앙와위로 눕히고 다리를 곧게 편 채 이송한다"],a:0,
+ e:"제대탈출은 태아 저산소증을 유발하는 산과적 응급상황으로, 무균장갑을 낀 손으로 선진부를 살짝 밀어올려 제대 압박을 완화하고 무릎-가슴 자세(또는 골반거상)로 신속히 이송하되, 제대를 체내로 다시 밀어넣거나 절단해서는 안 돼요. 드물지만 정답률이 매우 낮은 고난도 산과 응급 문항이에요.",r:"산부인과 응급 – 제대탈출 시 응급처치 원칙"},
+{s:"각론",d:5,q:"열사병(heat stroke)과 열탈진(heat exhaustion)을 구분하는 가장 결정적인 임상 소견은?",o:["열사병은 중추신경계 이상(의식변화·섬망 등)을 동반하며 체온이 40℃ 이상으로 심하게 상승하는 반면, 열탈진은 의식이 비교적 명료하다","열사병은 항상 땀을 많이 흘리고 열탈진은 땀이 전혀 없다","열탈진이 더 위험한 응급질환이다","두 질환 모두 처치법이 완전히 동일하다"],a:0,
+ e:"열사병은 체온조절 기능이 붕괴되어 심부체온이 40℃ 이상으로 급상승하며 의식변화·경련 등 중추신경계 증상을 동반하는 즉각적 생명위협 상태로, 신속한 냉각(적극적 체온하강)이 최우선이에요. 열탈진은 발한이 유지되고 의식이 비교적 명료한 경증 상태로 구분돼요. '땀 유무'만으로 단순 판단하면 오답이 되기 쉬운 문항이에요.",r:"환경응급 – 열사병과 열탈진의 감별점"},
+{s:"각론",d:1,q:"골절이 의심되는 사지 손상 환자에게 부목을 적용하는 기본 원칙은?",o:["손상 부위 상하 관절을 포함하여 고정한다","골절 부위만 국소적으로 감싼다","관절만 고정하고 뼈는 고정하지 않는다","부목 적용 전 반드시 정복(교정)을 먼저 시행한다"],a:0,
+ e:"부목은 손상 부위의 상하 관절을 포함해 고정해야 움직임에 의한 추가 손상을 막을 수 있어요. 응급구조사는 명백한 기형이 아니라면 정복을 시도하지 않고 발견된 자세 그대로 고정하는 것이 원칙이에요.",r:"근골격계 손상 – 부목 적용의 기본 원칙"},
+{s:"각론",d:2,q:"개방성 기흉(흡인성 흉부손상) 발생 시 상처 부위에 적용하는 드레싱 방법으로 옳은 것은?",o:["삼면 밀봉드레싱(3-side occlusive dressing)을 적용해 공기가 빠져나가되 다시 들어가지 못하게 한다","완전 밀봉드레싱으로 사면을 모두 막는다","드레싱 없이 그대로 이송한다","젖은 거즈로 개방창을 완전히 채운다"],a:0,
+ e:"개방성 기흉은 한쪽 면을 열어둔 삼면 밀봉드레싱을 적용해 호기 시 공기는 빠져나가고 흡기 시 공기가 재유입되지 않도록 하여 긴장성 기흉으로의 진행을 예방해요.",r:"흉부 외상 – 개방성 기흉 드레싱 원칙"},
+{s:"각론",d:3,q:"두부 외상 환자에서 나타나는 쿠싱 반사(Cushing's reflex, 두개내압 상승의 징후)로 옳은 조합은?",o:["고혈압, 서맥, 불규칙한 호흡","저혈압, 빈맥, 규칙적 호흡","정상혈압, 정상맥박, 빠른 호흡","저혈압, 서맥, 무호흡"],a:0,
+ e:"쿠싱 반사는 두개내압 상승 시 뇌관류압을 유지하려는 대상반응으로 혈압 상승(고혈압), 반사성 서맥, 불규칙한 호흡패턴의 3대 징후가 나타나며 뇌탈출의 위험 신호예요.",r:"두부 외상 – 쿠싱 반사(Cushing's triad)"},
+{s:"각론",d:2,q:"저혈당 환자가 의식이 있고 스스로 삼킬 수 있을 때 시행하는 응급처치로 옳은 것은?",o:["설탕물이나 사탕 등 흡수가 빠른 당분을 경구로 섭취시킨다","즉시 정맥 주사로 포도당을 투여한다","금식시키고 신속히 이송만 한다","고농도 산소만 투여한다"],a:0,
+ e:"의식이 명료해 삼킴이 가능한 저혈당 환자는 흡수가 빠른 당분(설탕물, 주스 등)을 경구 투여하는 것이 우선이며, 정맥로 확보 및 포도당 정주는 1급 구조사의 업무예요.",r:"내과 응급 – 저혈당 환자의 경구 당분 섭취 처치"},
+{s:"각론",d:3,q:"익상형(피판형) 열상으로 심한 출혈이 있는 사지 상처에 대한 1차 지혈법으로 옳은 것은?",o:["직접 압박법","지혈대를 우선적으로 즉시 적용","상처를 심장보다 낮게 위치","알코올로 세척 후 방치"],a:0,
+ e:"대부분의 외부출혈은 직접 압박법으로 지혈이 가능하며, 직접 압박으로 조절되지 않는 심한 사지 출혈에 한해 지혈대를 2차적으로 고려해요.",r:"외상 응급 – 지혈법의 단계적 적용 원칙"},
+{s:"각론",d:4,q:"다발성 늑골골절로 흉벽의 일부가 반대로 움직이는 동요가슴(flail chest)에서 나타나는 특징적 호흡 양상은?",o:["역설적 호흡(paradoxical breathing) - 흡기 시 손상 부위가 함몰되고 호기 시 팽창","흡기·호기 모두 정상과 동일하게 흉벽이 움직임","호흡음이 완전히 소실됨","흉벽이 전혀 움직이지 않고 고정됨"],a:0,
+ e:"동요가슴은 인접한 늑골이 2개 이상의 부위에서 골절되어 분리된 흉벽 분절이 정상 흉벽과 반대로 움직이는 역설적 호흡을 보이며, 저산소증 예방을 위한 산소투여와 손상 부위 지지가 필요해요.",r:"흉부 외상 – 동요가슴(flail chest)의 역설적 호흡"},
+{s:"각론",d:4,q:"급성 뇌졸중 중 허혈성 뇌졸중과 출혈성 뇌졸중을 병원 전 단계에서 임상적으로 완전히 구별하기 어려운 이유와 관련해 응급구조사가 취해야 할 원칙은?",o:["증상만으로 완전한 감별이 불가능하므로 아스피린 등 임의 약물 투여 없이 신속히 뇌졸중센터로 이송하고 발병시각을 정확히 확인·기록한다","현장에서 즉시 혈전용해제를 투여한다","출혈성으로 보이면 두부를 낮춰 이송한다","증상만으로 확실히 감별 가능하므로 이송병원을 임의로 좁혀도 된다"],a:0,
+ e:"허혈성·출혈성 뇌졸중은 영상검사(CT 등) 없이는 병원 전 단계에서 확진할 수 없어요. 따라서 임의로 아스피린 등을 투여해서는 안 되며, 정확한 증상발생시각 확인이 치료방침(혈전용해술 가능 여부)을 결정하는 핵심 정보이므로 반드시 확인·기록해 이송해야 해요.",r:"신경계 응급 – 뇌졸중 병원 전 처치 원칙 및 발병시각의 중요성"},
+{s:"장비",d:1,q:"자동제세동기(AED) 사용 시 패드를 부착하기 전에 반드시 확인해야 할 사항은?",o:["환자의 가슴이 젖어있는지, 금속 물질이나 패치가 있는지 확인 후 제거","환자의 혈액형","환자의 최근 식사 여부","환자의 병력 전체"],a:0,
+ e:"AED 패드는 젖은 가슴, 금속 장신구, 경피용 약물패치 위에 부착하면 화상이나 통전 방해가 발생할 수 있어 사전에 제거·건조 후 부착해야 해요.",r:"응급의료장비 – AED 사용 전 확인사항"},
+{s:"장비",d:1,q:"산소통(산소 실린더)에 표기된 압력 단위로 흔히 사용되는 것은?",o:["psi(제곱인치당 파운드)","mmHg","kg","cc"],a:0,
+ e:"의료용 산소통의 압력은 psi(pounds per square inch) 단위로 표시되며, 국내에서는 kg/㎠도 병용돼요.",r:"응급의료장비 – 산소공급장치 압력 표시 단위"},
+{s:"장비",d:2,q:"백-밸브-마스크(BVM, bag-valve-mask)를 이용한 인공호흡 시 올바른 마스크 밀착 방법(1인 시행)은?",o:["E-C 술기(E-C clamp technique)로 마스크를 얼굴에 밀착시키며 하악을 들어올린다","마스크를 코 위쪽에만 걸쳐 놓는다","엄지와 검지만으로 백을 짜고 나머지 손가락은 사용하지 않는다","마스크를 느슨하게 놓고 백만 강하게 짠다"],a:0,
+ e:"1인 시행 시 한 손으로 'E-C' 모양(엄지·검지는 C자로 마스크 고정, 나머지 세 손가락은 E자로 하악을 들어올림)을 만들어 밀착과 기도유지를 동시에 확보해요.",r:"응급의료장비 – BVM 사용법(E-C clamp technique)"},
+{s:"장비",d:2,q:"비강 캐뉼라(nasal cannula)로 투여 가능한 산소 유량과 대략적인 산소농도 범위는?",o:["분당 1~6L, 약 24~44%","분당 15L, 약 90% 이상","분당 0.5L 미만, 약 100%","유량과 무관하게 항상 21%"],a:0,
+ e:"비강 캐뉼라는 분당 1~6L 유량에서 대략 24~44% 정도의 흡입산소농도를 제공하며, 저농도~중등도 산소요법에 사용돼요.",r:"응급의료장비 – 비강 캐뉼라 유량별 산소농도"},
+{s:"장비",d:2,q:"비재호흡마스크(non-rebreather mask)의 저장백(reservoir bag)을 사용 전 부풀려야 하는 이유는?",o:["환자가 흡기할 때 고농도 산소가 충분히 공급되도록 하기 위해","마스크의 냄새를 제거하기 위해","저장백 파손 여부를 확인만 하기 위해","환자에게 겁을 주지 않기 위해"],a:0,
+ e:"저장백을 미리 산소로 채워두어야 환자가 흡기하는 순간 고농도(약 90% 이상)의 산소를 공급할 수 있어요. 백이 찌그러진 채로 사용하면 목표 산소농도를 달성할 수 없어요.",r:"응급의료장비 – 비재호흡마스크 사용 전 준비"},
+{s:"장비",d:3,q:"구강 인두기도기(oropharyngeal airway, OPA) 삽입이 금기인 경우로 옳은 것은?",o:["구역반사(gag reflex)가 남아있는 의식 있는 환자","완전 무의식 상태의 환자","심정지 환자","깊은 혼수 상태의 환자"],a:0,
+ e:"구강 인두기도기는 구역반사를 자극해 구토·흡인을 유발할 수 있어 구역반사가 살아있는 환자에게는 금기이며, 이 경우 비강 인두기도기(NPA)를 우선 고려해요.",r:"기도유지 장비 – OPA 삽입 금기"},
+{s:"장비",d:3,q:"경추고정장구(cervical collar) 적용 시 크기 선택의 원칙으로 옳은 것은?",o:["환자의 목 길이와 어깨-턱 간격을 실측하여 맞는 크기를 선택하고 중립위를 유지한 채 적용한다","무조건 가장 큰 사이즈를 사용한다","목을 신전시킨 상태에서 측정한다","성인은 소아용 사이즈를 사용해도 무방하다"],a:0,
+ e:"경추고정장구는 목의 중립위를 유지한 상태에서 손가락 폭 등으로 목 길이를 실측해 맞는 크기를 선택해야 하며, 크기가 맞지 않으면 오히려 기도폐쇄나 고정 실패를 유발할 수 있어요.",r:"척추고정 장비 – 경추고정장구 크기 선정 원칙"},
+{s:"장비",d:4,q:"맥박산소포화도 측정기(pulse oximeter)의 측정값이 실제보다 부정확하게(과대평가) 표시될 수 있는 상황으로 옳은 것은?",o:["일산화탄소 중독 환자 (일산화탄소혈색소를 산소혈색소로 오인)","단순 저체온 환자에서 항상 정확도가 상승","고농도 산소를 투여받는 정상인","실내 조명이 어두운 환경"],a:0,
+ e:"펄스옥시미터는 산소포화 혈색소와 일산화탄소 결합 혈색소(COHb)를 구별하지 못해, 일산화탄소 중독 환자에서는 실제 조직 산소화가 매우 나쁨에도 SpO2가 정상~고값으로 표시되는 치명적 오류가 발생할 수 있어요. 말초 관류저하·매니큐어·심한 떨림 등도 오차 요인이에요.",r:"모니터링 장비 – 맥박산소포화도 측정의 한계와 일산화탄소 중독"},
+{s:"장비",d:4,q:"후두튜브(laryngeal tube) 등 성문상 기도기(supraglottic airway)를 2급 응급구조사가 사용할 수 있는 근거와 관련해 옳은 것은?",o:["2급의 실기시험 항목에 후두튜브 삽입이 포함되어 있으며, 기본 기도유지술의 연장선에서 활용된다","후두튜브는 1급만 사용 가능하며 2급은 전혀 다룰 수 없다","후두튜브는 정맥로 확보 장비의 일종이다","후두튜브는 산소통에 직접 연결하는 장비이다"],a:0,
+ e:"후두튜브(성문상 기도기)는 2급 응급구조사의 실기시험 항목(내과환자평가·외상환자평가와 함께 후두튜브 삽입, 자동제세동기 사용법 등)에 포함되어 있어, 기관내삽관보다 습득이 쉬운 대안적 기도유지 수기로 2급 실기범위에 반영돼 있어요.",r:"국시원 공고 – 2급 응급구조사 실기시험 항목(후두튜브 삽입)"},
+{s:"장비",d:5,q:"수동 흡인기(포터블 석션)를 이용해 기도 내 이물질을 흡인할 때, 한 번에 흡인을 지속하는 시간을 제한하는 가장 중요한 이유는?",o:["장시간 흡인 시 저산소증을 악화시키고 미주신경 자극으로 서맥·부정맥을 유발할 수 있기 때문","흡인기의 배터리를 절약하기 위해","환자가 불편함을 느끼기 때문만","카테터가 쉽게 마모되기 때문"],a:0,
+ e:"흡인은 기도 내 산소도 함께 제거하므로 장시간(성인 기준 대략 10~15초 이내 권장) 지속하면 저산소증이 악화되고, 인두 자극으로 미주신경이 항진되어 서맥·부정맥이 유발될 수 있어 흡인 전후 산소화와 시간 제한이 중요해요.",r:"기도관리 장비 – 흡인(suction) 시행 시간 제한의 생리적 근거"},
+{s:"장비",d:3,q:"부목(splint)의 종류 중 견인부목(traction splint)이 주로 적용되는 손상은?",o:["대퇴골 간부 골절","상완골 골절","쇄골 골절","손목 골절"],a:0,
+ e:"견인부목은 대퇴골 간부(중간부) 골절 시 근육 경련으로 인한 뼈끝의 겹침(단축)을 견인력으로 정렬하고 통증·출혈을 줄이는 데 사용돼요. 고관절이나 무릎 관절부 골절이 동반된 경우는 적용이 제한될 수 있어요.",r:"응급의료장비 – 견인부목의 적응증"},
+{s:"장비",d:2,q:"체온 측정 장비 중 고막 체온계 사용 시 정확한 측정을 위한 주의사항으로 옳은 것은?",o:["외이도의 귀지나 이물질을 확인하고 탐침을 정확히 고막 방향으로 삽입한다","반대편 귀로 측정해도 결과는 항상 동일하다","측정 직전 찬물로 귀를 세척한다","탐침을 외이도 입구에만 살짝 대고 측정한다"],a:0,
+ e:"고막 체온계는 귀지 등 이물질이 있으면 적외선 측정이 방해되어 오차가 발생하므로 사전 확인이 필요하고, 탐침을 정확한 각도로 고막을 향해 삽입해야 신뢰할 수 있는 측정값을 얻을 수 있어요.",r:"응급의료장비 – 고막 체온계 측정 원칙"},
+{s:"총론",d:1,q:"응급의료체계(EMS)는 크게 몇 단계로 구분되는가?",o:["병원 전 단계와 병원 단계","현장 단계뿐","이송 단계뿐","신고 단계와 종료 단계"],a:0,
+ e:"응급의료체계는 신고·출동·현장처치·이송을 포함하는 '병원 전 단계'와 응급실 이후의 '병원 단계'로 크게 나뉘며, 두 단계가 유기적으로 연결되어야 환자 예후가 개선돼요.",r:"기본응급처치학총론 – 응급의료체계의 단계 구분"},
+{s:"총론",d:2,q:"무선통신으로 현장 상황을 보고할 때 지켜야 할 원칙으로 옳은 것은?",o:["명확하고 간결한 표준 용어를 사용하고 불필요한 사적 대화를 피한다","최대한 길고 자세하게 모든 정황을 서술한다","은어나 속어를 자유롭게 사용한다","환자의 이름과 주민등록번호를 반드시 무선으로 전달한다"],a:0,
+ e:"무선통신은 채널이 공유되므로 표준화된 용어로 간결하게 전달해야 하며, 개인정보가 노출될 수 있는 사항은 무선보다 유선이나 도착 후 직접 전달이 원칙이에요.",r:"기본응급처치학총론 – 응급의료 무선통신 원칙"},
+{s:"총론",d:1,q:"감염 전파를 예방하기 위해 모든 환자에게 공통으로 적용하는 감염관리 원칙은?",o:["표준주의(standard precaution)","특이 질환에서만 적용하는 격리주의","환자가 요청할 때만 적용","의료진 본인 판단으로 선택 적용"],a:0,
+ e:"표준주의는 감염 여부를 알 수 없는 모든 환자를 잠재적 감염원으로 간주해 손위생, 장갑, 마스크 등 기본 보호조치를 일관되게 적용하는 감염관리의 기본 원칙이에요.",r:"기본응급처치학총론 – 표준주의(Standard Precaution)"},
+{s:"총론",d:3,q:"다수사상자 사고(MCI) 현장에서 지휘체계(ICS)를 운영하는 가장 중요한 목적은?",o:["자원(인력·장비)을 효율적으로 배분하고 혼란 없이 통일된 지휘 하에 대응하기 위해","구급차 대수를 줄이기 위해","기자 취재를 통제하기 위해","보험 처리를 간소화하기 위해"],a:0,
+ e:"현장지휘체계(Incident Command System)는 다수의 기관·인력이 동시에 투입되는 재난 상황에서 지휘 계통을 단일화하여 자원 배분과 임무 분담의 혼선을 막는 것이 핵심 목적이에요.",r:"다수사상자 대응 – 현장지휘체계(ICS)의 목적"},
+{s:"총론",d:2,q:"의사결정 능력이 있는 성인 환자가 이송 및 처치를 명확히 거부할 때 응급구조사가 취해야 할 원칙은?",o:["환자의 자기결정권을 존중하되 위험성을 충분히 설명하고 거부 사실을 기록한다","환자의 의사와 무관하게 강제로 이송한다","보호자 동의만 있으면 환자 의사는 무시해도 된다","거부 의사를 무시하고 경찰에 신고해 강제 조치한다"],a:0,
+ e:"의사결정능력이 있는 성인은 치료거부권(자율성 존중)을 가지므로, 위험성을 충분히 설명(告知)한 후에도 거부하면 그 의사를 존중하고 설명 내용과 거부 사실을 구체적으로 기록해야 법적 분쟁을 예방할 수 있어요.",r:"응급의료윤리 – 환자의 자기결정권과 치료거부"},
+{s:"총론",d:3,q:"현장에서 여러 환자를 동시에 마주쳤을 때, 도착 즉시 60초 이내로 전체 환자군의 중증도를 개략적으로 나누는 절차를 무엇이라 하는가?",o:["1차 중증도 분류(triage)","2차 평가","재평가","이송 결정"],a:0,
+ e:"다수사상자 발생 시 1차 중증도 분류(triage)는 개별 환자의 정밀 처치보다 전체 환자군을 신속히 4단계(적/황/녹/흑)로 나누어 자원을 우선순위대로 투입하기 위한 절차예요.",r:"다수사상자 대응 – 1차 중증도 분류의 목적과 소요시간"},
+{s:"총론",d:4,q:"응급처치 현장에서 '전부 아니면 전무(all or none)' 식 처치보다 '단계적 우선순위(load-and-go vs stay-and-play)' 판단이 강조되는 이유로 가장 옳은 것은?",o:["손상기전과 생리적 지표에 따라 현장처치 시간을 최소화해야 하는 중증외상과, 현장에서 안정화가 더 유리한 내과환자의 전략이 다르기 때문","모든 환자는 무조건 현장에서 안정화한 후 이송해야 하기 때문","이송시간이 길수록 예후가 항상 좋아지기 때문","현장처치 여부는 병원 도착 후 결정해도 되기 때문"],a:0,
+ e:"중증 외상 등 즉각적 수술적 처치가 필요한 환자는 현장체류시간을 최소화하는 'load-and-go' 전략이, 기도확보나 심정지 소생 등 현장 안정화가 예후에 유리한 상황은 'stay-and-play' 전략이 적용돼요.",r:"현장처치 전략 – Load-and-go vs Stay-and-play 판단기준"},
+{s:"총론",d:2,q:"신체검진의 기본 순서로 일반적으로 권장되는 것은?",o:["시진 → 촉진 → 타진 → 청진(단, 복부는 청진을 촉진보다 먼저 시행)","촉진 → 시진 → 청진 → 타진","청진 → 타진 → 촉진 → 시진","순서는 무의미하며 무작위로 진행한다"],a:0,
+ e:"일반적으로 시진-촉진-타진-청진 순서가 원칙이지만, 복부는 촉진과 타진이 장음에 영향을 줄 수 있어 청진을 촉진보다 먼저 시행하는 예외가 있다는 점이 자주 출제돼요.",r:"신체검진 – 기본 순서와 복부 검진의 예외"},
+{s:"총론",d:2,q:"소아 환자를 처음 마주쳤을 때 신체 접촉 전 시각·청각만으로 신속히 평가하는 '소아사정삼각형(Pediatric Assessment Triangle)'의 3가지 요소는?",o:["외모(의식·근긴장), 호흡 노력, 피부순환 상태","체온, 맥박, 혈압","키, 몸무게, 나이","보호자 표정, 소음 정도, 옷차림"],a:0,
+ e:"소아사정삼각형은 손을 대지 않고 외모(activity/tone)-호흡 노력(work of breathing)-피부순환(circulation to skin)의 3요소를 관찰해 중증도를 신속히 가늠하는 소아 특화 평가법이에요.",r:"소아 응급 – 소아사정삼각형(PAT) 3요소"},
+{s:"총론",d:3,q:"근무 교대 시 다음 근무자에게 환자·상황 정보를 인계하는 데 사용되는 구조화된 의사소통 기법의 예로 옳은 것은?",o:["SBAR(상황-배경-평가-권고) 기법","SOAP 진료기록만 단독 사용","무작위 구두 전달","기록 없이 구두로만 전달하고 끝낸다"],a:0,
+ e:"SBAR(Situation-Background-Assessment-Recommendation)는 상황을 놓치지 않고 표준화된 순서로 인계하는 대표적 의사소통 기법으로, 인수인계 누락에 의한 의료사고를 줄이는 데 사용돼요.",r:"응급의료 의사소통 – SBAR 인계기법"},
+{s:"총론",d:4,q:"현장에서 사망이 명백한 경우(참수, 사후강직, 시반 등)를 제외하고, 심폐소생술을 시작하지 않거나 중단할 수 있는 판단은 원칙적으로 누구의 권한인가?",o:["의료지도 의사의 지시에 따른다","응급구조사 단독 판단으로 항상 가능하다","보호자의 요청만으로 충분하다","경찰관의 지시에 따른다"],a:0,
+ e:"명백한 사망 징후가 없는 한 심폐소생술의 유보나 중단은 원칙적으로 의료지도(off-line/on-line medical control)에 근거해야 하며, 응급구조사가 임의로 독단 판단하지 않는 것이 원칙이에요.",r:"응급처치 윤리 및 의료지도 – 심폐소생술 유보·중단 판단 권한"},
+{s:"총론",d:3,q:"응급구조사가 반복적인 외상성 사건 목격 후 겪을 수 있는 정신건강 문제와 이에 대한 대응으로 가장 옳은 것은?",o:["외상후스트레스장애(PTSD) 등의 위험이 있으므로 동료지원 및 전문 상담 체계를 활용해야 한다","감정을 억누르고 절대 타인에게 알리지 않는다","증상이 있어도 근무에 지장이 없으면 방치한다","해당 문제는 응급구조사에게는 발생하지 않는다"],a:0,
+ e:"반복적으로 참혹한 현장에 노출되는 응급구조사는 PTSD·소진(burnout) 위험이 높아, 동료지원 프로그램(peer support)이나 전문 상담을 통해 조기에 관리하는 것이 권장돼요.",r:"응급구조사 직무 스트레스 관리 – 외상후스트레스장애 예방"},
+{s:"총론",d:2,q:"현장에서 사용하는 개인보호장비(PPE) 중 혈액·체액 노출이 예상되는 처치 시 가장 기본적으로 착용해야 하는 것은?",o:["장갑","방독마스크","방탄복","고글만 착용하고 장갑은 생략"],a:0,
+ e:"혈액·체액 접촉 가능성이 있는 모든 처치에는 기본적으로 장갑을 착용해야 하며, 상황에 따라 마스크·보안경·가운을 추가해요.",r:"감염관리 – 개인보호장비(PPE) 기본 착용 원칙"},
+{s:"환자관리",d:1,q:"혈압 측정 시 청진기로 듣는 소리를 무엇이라 하는가?",o:["코로트코프음(Korotkoff sound)","호흡음","심잡음","장음"],a:0,
+ e:"혈압 측정 시 커프를 감압하면서 청진기로 듣는 특징적인 소리를 코로트코프음이라 하며, 첫 소리가 들리는 지점이 수축기압, 소리가 사라지는 지점이 이완기압이에요.",r:"활력징후 – 혈압 측정과 코로트코프음"},
+{s:"환자관리",d:2,q:"정상적인 동공 반응을 표현하는 'PERRLA'가 의미하는 것은?",o:["양측 동공이 원형이고 크기가 같으며 빛에 반응한다","양측 동공의 크기가 다르다","한쪽 동공만 반응한다","동공이 고정되어 있다"],a:0,
+ e:"PERRLA는 Pupils Equal, Round, Reactive to Light and Accommodation의 약자로, 정상 동공 상태를 표현하는 신경학적 평가 용어예요.",r:"신경계 평가 – 동공반응(PERRLA)"},
+{s:"환자관리",d:2,q:"통증을 체계적으로 평가하는 'OPQRST' 문진법에서 'P'가 의미하는 것은?",o:["악화·완화 요인(Provocation/Palliation)","통증의 질(Pain quality)","기왕력(Past history)","맥박(Pulse)"],a:0,
+ e:"OPQRST는 발생(Onset)-악화/완화요인(Provocation/Palliation)-양상(Quality)-방사(Radiation)-중증도(Severity)-시간경과(Time)의 약자로 통증 평가에 널리 쓰여요.",r:"통증 평가 – OPQRST 문진법"},
+{s:"환자관리",d:3,q:"성인과 비교했을 때 소아의 정상 활력징후에 대한 설명으로 옳은 것은?",o:["연령이 어릴수록 정상 맥박수와 호흡수는 성인보다 빠른 것이 일반적이다","소아는 항상 성인과 동일한 정상범위를 가진다","연령이 어릴수록 정상 맥박수는 성인보다 느리다","혈압은 연령과 무관하게 일정하다"],a:0,
+ e:"신생아·영아·소아는 대사율이 높아 성인보다 정상 맥박수와 호흡수가 빠르며, 연령이 증가할수록 점차 성인 범위에 가까워져요.",r:"활력징후 – 소아의 연령별 정상범위 특성"},
+{s:"환자관리",d:2,q:"청진기로 폐음을 들을 때 일반적으로 지켜야 할 원칙은?",o:["전·후·측면을 포함해 여러 부위를 대칭적으로 비교 청진한다","한 부위만 들으면 충분하다","등쪽은 청진하지 않는다","숨을 참은 상태에서만 청진한다"],a:0,
+ e:"호흡음은 좌우 대칭 여러 부위(상·중·하 폐야, 전면과 후면)를 비교 청진하여 편측성 이상(무기폐, 기흉 등)을 놓치지 않는 것이 원칙이에요.",r:"호흡 평가 – 폐음 청진 원칙"},
+{s:"환자관리",d:3,q:"의식장애의 원인을 감별할 때 사용하는 'AEIOU-TIPS'에서 'T'가 흔히 의미하는 것은?",o:["외상(Trauma) 또는 체온이상(Temperature)","갑상선(Thyroid)뿐","독성물질(Toxin)만","호흡곤란(Trouble breathing)"],a:0,
+ e:"AEIOU-TIPS는 Alcohol-Epilepsy/Electrolyte-Insulin(저혈당)-Uremia-Overdose-Underdose-Trauma/Temperature-Infection-Psychiatric-Stroke/Shock 등 의식장애의 다양한 원인을 빠짐없이 떠올리기 위한 기억법이에요.",r:"의식장애 감별 – AEIOU-TIPS"},
+{s:"환자관리",d:4,q:"쇼크를 병태생리에 따라 분류할 때 심장눌림증(심낭압전), 긴장성 기흉처럼 심장 자체의 펌프기능 외적 요인으로 심박출량이 감소하는 쇼크 유형은?",o:["폐쇄성 쇼크(obstructive shock)","저혈량성 쇼크","심인성 쇼크","분포성 쇼크"],a:0,
+ e:"폐쇄성 쇼크는 심장 근육 자체의 문제(심인성)나 체액 소실(저혈량성)이 아니라, 심낭압전·긴장성 기흉·폐색전증처럼 심장으로의 혈류 유입/박출을 물리적으로 막는 기전으로 발생해요.",r:"쇼크의 병태생리학적 분류 – 폐쇄성 쇼크"},
+{s:"환자관리",d:2,q:"활력징후 재측정 주기에 대한 일반적 원칙으로 옳은 것은?",o:["안정된 환자는 약 15분마다, 불안정한 환자는 약 5분마다 재측정한다","모든 환자는 30분에 한 번만 측정한다","한 번 측정하면 이송 종료까지 다시 측정하지 않는다","불안정한 환자일수록 측정 간격을 늘린다"],a:0,
+ e:"환자 상태 변화를 놓치지 않기 위해 안정 환자는 약 15분, 불안정 환자는 약 5분 간격으로 활력징후를 재평가하는 것이 일반적 원칙이에요.",r:"환자평가 – 활력징후 재평가(ongoing assessment) 주기"},
+{s:"환자관리",d:1,q:"피부의 색깔, 온도, 습도를 관찰하는 것은 어떤 계통의 평가에 주로 활용되는가?",o:["순환 및 관류 상태 평가","호흡기계 평가","근골격계 평가","생식기계 평가"],a:0,
+ e:"창백하고 차갑고 축축한 피부는 말초혈관 수축과 관류 저하(쇼크)를 시사하는 대표적 소견으로, 피부 관찰은 순환 평가의 핵심 요소예요.",r:"순환 평가 – 피부 소견의 임상적 의미"},
+{s:"환자관리",d:2,q:"맥박산소포화도(SpO2)의 정상범위로 일반적으로 인정되는 값은?",o:["95~100%","70~80%","50~60%","100% 이상"],a:0,
+ e:"정상 성인의 맥박산소포화도는 대략 95~100%이며, 94% 미만은 저산소증을 의심해 산소투여 등 조치를 고려해야 해요.",r:"활력징후 – 맥박산소포화도(SpO2) 정상범위"},
+{s:"환자관리",d:4,q:"환자평가에서 GCS 점수가 8점 이하로 확인되었을 때의 임상적 의미로 가장 옳은 것은?",o:["중증 의식장애로 기도유지 능력 상실 위험이 높아 적극적 기도관리가 필요한 상태로 간주한다","경미한 의식저하로 특별한 조치가 필요 없다","완전한 정상 의식 상태를 의미한다","반드시 뇌사 상태를 의미한다"],a:0,
+ e:"GCS 8점 이하는 흔히 기도삽관을 고려하는 기준으로 불릴 만큼 기도유지 능력이 저하된 중증 의식장애 상태로, 적극적인 기도·호흡 관리가 필요해요.",r:"신경계 평가 – GCS 8점 이하의 임상적 의미"},
+{s:"법령",d:2,q:"「응급의료에 관한 법률」상 '응급환자'의 정의로 가장 옳은 것은?",o:["즉시 필요한 응급처치를 받지 아니하면 생명을 보전할 수 없거나 심신에 중대한 위해가 발생할 가능성이 있는 사람","단순 감기 증상이 있는 모든 사람","병원에 내원한 모든 외래환자","의사가 입원을 권유한 모든 환자"],a:0,
+ e:"응급의료법상 응급환자는 즉각적인 처치가 없으면 생명이나 심신에 중대한 위해가 발생할 가능성이 있는 사람으로 정의되며, 이는 응급의료 제공의 법적 근거가 돼요.",r:"응급의료에 관한 법률 제2조 (정의 – 응급환자)"},
+{s:"법령",d:3,q:"응급의료기관은 기능에 따라 어떻게 구분되는가?",o:["권역응급의료센터, 지역응급의료센터, 지역응급의료기관 등으로 구분된다","모든 응급의료기관은 동일한 기능을 수행한다","1급과 2급으로만 구분된다","공공기관과 민간기관으로만 구분된다"],a:0,
+ e:"응급의료기관은 중증도와 기능에 따라 권역응급의료센터-지역응급의료센터-지역응급의료기관 등으로 지정·구분되어 있으며, 이송 시 환자 중증도에 맞는 기관 선정이 중요해요.",r:"응급의료에 관한 법률 – 응급의료기관의 종별 구분"},
+{s:"법령",d:2,q:"구급차등을 운용하는 차량에 반드시 표시해야 하는 것은?",o:["응급환자이송업 등 구급차 전용 표지","광고 문구","운전자 개인 정보","소속기관장의 사진"],a:0,
+ e:"구급차등은 응급환자 이송에 사용됨을 나타내는 전용 표지를 의무적으로 표시해야 해요.",r:"응급의료에 관한 법률 시행규칙 – 구급차등의 표시 의무"},
+{s:"법령",d:3,q:"응급의료비 미수금 대지급제도의 목적으로 가장 옳은 것은?",o:["응급의료 비용을 지불할 능력이 없는 응급환자도 진료를 거부당하지 않도록 국가가 우선 비용을 지원하는 것","응급실의 모든 진료를 무료화하는 것","응급의료기관의 수익을 보장하는 것","응급구조사의 급여를 지원하는 것"],a:0,
+ e:"응급의료비 미수금 대지급제도는 지불능력이 없는 응급환자가 비용 문제로 응급의료를 거부당하지 않도록 국가가 먼저 비용을 부담하고 이후 구상권을 행사하는 제도예요.",r:"응급의료에 관한 법률 – 응급의료비 미수금 대지급"},
+{s:"법령",d:4,q:"응급구조사가 고의 또는 중대한 과실로 환자에게 손해를 입혀 자격정지 처분을 받을 수 있는 근거 법령 체계로 가장 옳은 것은?",o:["응급의료에 관한 법률 및 그 시행규칙상 자격정지 사유에 해당하면 보건복지부장관이 처분한다","형법에만 근거하여 사법부가 직접 자격을 정지한다","소속 기관장이 임의로 자격을 영구 박탈할 수 있다","자격정지 제도는 존재하지 않는다"],a:0,
+ e:"응급구조사의 자격정지 등 행정처분은 응급의료에 관한 법률 및 시행규칙이 정한 사유와 절차에 따라 보건복지부장관이 처분하는 구조로 되어 있어요.",r:"응급의료에 관한 법률 – 응급구조사 자격정지 처분 체계"},
+{s:"법령",d:3,q:"「응급의료에 관한 법률」상 누구든지 응급의료종사자의 응급의료 업무를 폭행·협박 등으로 방해하는 행위를 한 경우에 대한 조치로 옳은 것은?",o:["응급의료 방해 행위로 처벌 대상이 된다","단순 민원으로 처리되며 처벌 규정이 없다","응급의료종사자 개인이 알아서 해결해야 한다","방해 행위는 응급실 내에서만 처벌 대상이다"],a:0,
+ e:"응급의료법은 응급의료 종사자의 업무를 폭행·협박·위계 등으로 방해하는 행위에 대해 별도의 처벌 규정(응급의료 방해죄)을 두고 있어요.",r:"응급의료에 관한 법률 – 응급의료 방해 금지 및 처벌"},
+{s:"법령",d:2,q:"응급구조사가 자격을 유지하기 위해 정기적으로 이수해야 하는 것은?",o:["보수교육","매년 국가시험 재응시","별도의 실기 재시험만","해당 사항 없음(1회 취득으로 평생 유효, 교육 불필요)"],a:0,
+ e:"응급구조사는 면허(자격) 유지를 위해 정해진 주기로 보수교육을 이수해야 하며, 이는 최신 의료지식과 처치 기준을 습득하기 위한 법적 의무예요.",r:"응급의료에 관한 법률 – 응급구조사 보수교육 의무"},
+{s:"법령",d:4,q:"응급의료법상 응급의료종사자가 응급환자에게 응급의료를 거부하거나 기피할 수 있는 정당한 사유에 해당하지 않는 것으로 가장 옳은 것은?",o:["단순히 환자의 지불능력이 없어 보인다는 이유","자신의 안전이 명백히 위협받는 불가항력적 상황","다른 위급한 응급환자를 이미 처치 중인 불가피한 상황","의료기관의 시설·인력 한계로 처치가 물리적으로 불가능한 경우"],a:0,
+ e:"응급의료 거부·기피는 원칙적으로 금지되며, 지불능력 부족은 정당한 거부 사유가 될 수 없어요. 반면 구조자 자신의 안전 위협, 다른 위급 환자 처치 중, 시설·인력의 물리적 한계 등은 예외적으로 인정될 수 있는 사유로 다뤄져요.",r:"응급의료에 관한 법률 제6조 – 응급의료 거부금지의 예외와 한계"},
+{s:"법령",d:3,q:"재난 등 다수사상자가 발생한 현장에 설치하여 중증도 분류와 초기 처치, 이송 우선순위를 결정하는 임시 기구는?",o:["현장응급의료소","권역응급의료센터","보건소 상황실","119종합상황실"],a:0,
+ e:"대형 재난이나 다수사상자 사고 발생 시 현장에 임시로 설치되는 현장응급의료소는 중증도 분류, 응급처치, 이송병원 배정을 총괄하는 현장 의료 지휘 거점 역할을 해요.",r:"재난의료 – 현장응급의료소의 기능과 근거"},
+{s:"법령",d:4,q:"무자격자가 응급구조사 명칭을 사용하거나 그 업무범위에 해당하는 행위를 한 경우에 대한 응급의료법상 태도로 가장 옳은 것은?",o:["무면허 응급구조사 업무 수행 및 명칭 사용을 금지하고 위반 시 처벌 대상으로 규정한다","자격이 없어도 실무 경험만 있으면 문제되지 않는다","응급처치는 누구나 자유롭게 명칭을 사용해 시행할 수 있다","응급구조사 명칭 사용에는 아무 제한이 없다"],a:0,
+ e:"응급의료법은 응급구조사 자격이 없는 사람이 명칭을 사용하거나 그 업무범위에 해당하는 행위를 하는 것을 금지하고, 위반 시 벌칙 규정의 적용을 받도록 하고 있어요.",r:"응급의료에 관한 법률 – 무자격자의 업무수행·명칭사용 금지"},
+{s:"법령",d:2,q:"응급의료기금의 재원으로 활용될 수 있는 것으로 가장 옳은 것은?",o:["과징금, 기부금 등 법령이 정하는 재원으로 조성되어 응급의료 지원에 사용된다","전액 응급구조사 개인 기부로만 조성된다","응급환자의 진료비로만 충당된다","해당 기금 제도는 존재하지 않는다"],a:0,
+ e:"응급의료기금은 과태료·과징금 수입, 정부 출연금, 기부금 등 법령이 정한 재원으로 조성되어 응급의료 인프라 확충과 취약지역 지원 등에 사용돼요.",r:"응급의료에 관한 법률 – 응급의료기금의 조성 및 용도"},
+{s:"각론",d:2,q:"12쌍의 뇌신경 중 안구 운동을 조절하며 동공반사와 밀접한 관련이 있는 신경은?",o:["동안신경(제3뇌신경)","시신경(제2뇌신경)","삼차신경(제5뇌신경)","안면신경(제7뇌신경)"],a:0,
+ e:"동안신경(제3뇌신경)은 안구 운동 대부분과 동공 수축(부교감신경 섬유 포함)을 담당하며, 두개내압 상승 시 이 신경이 눌리면 동공이 확대되는 소견이 나타나요.",r:"신경학 – 동안신경(제3뇌신경)의 기능과 동공반사"},
+{s:"각론",d:3,q:"경추 손상으로 척수가 완전 손상되었을 때 나타날 수 있는 신경성 쇼크(neurogenic shock)의 특징적 소견은?",o:["교감신경 기능 소실로 인한 저혈압과 서맥(따뜻하고 건조한 피부 동반)","교감신경 항진으로 인한 고혈압과 빈맥","말초혈관 수축으로 인한 창백하고 차가운 피부","항상 의식소실을 동반한다"],a:0,
+ e:"신경성 쇼크는 척수 손상으로 교감신경 신호 전달이 끊겨 말초혈관이 확장된 채로 유지되면서 저혈압이 발생하고, 반사성 서맥과 따뜻하고 건조한 피부라는 다른 쇼크와 구별되는 특징을 보여요.",r:"척추 손상 – 신경성 쇼크(neurogenic shock)의 병태생리"},
+{s:"각론",d:2,q:"당뇨병성 케톤산증(DKA) 환자에서 나타나는 특징적인 호흡 양상은?",o:["깊고 빠른 호흡(쿠스마울 호흡)과 함께 과일향(아세톤향) 호흡이 동반된다","얕고 느린 호흡만 나타난다","호흡은 완전히 정상이다","호흡정지가 먼저 나타난다"],a:0,
+ e:"당뇨병성 케톤산증은 대사성 산증을 보상하려는 쿠스마울(Kussmaul) 호흡(깊고 빠른 호흡)과, 케톤체 배출로 인한 과일향 호흡이 특징적으로 동반돼요.",r:"내분비 응급 – 당뇨병성 케톤산증의 호흡 양상"},
+{s:"각론",d:4,q:"갑상선기능항진증 환자가 감염이나 스트레스를 계기로 급격히 악화되어 고열, 빈맥, 의식변화를 보이는 생명을 위협하는 상태는?",o:["갑상선 위기(thyroid storm)","점액수종 혼수","애디슨 위기","저혈당 혼수"],a:0,
+ e:"갑상선 위기(thyroid storm)는 조절되지 않은 갑상선기능항진증이 급성 스트레스를 계기로 악화되어 고열·빈맥·심한 흥분·의식변화를 일으키는 내분비계 응급상황으로 즉각적인 이송이 필요해요.",r:"내분비 응급 – 갑상선 위기(thyroid storm)"},
+{s:"각론",d:2,q:"음식 알레르기나 벌 쏘임 등으로 발생하는 아나필락시스 환자가 처방받은 자가주사기(에피네프린)를 소지한 경우, 2급 응급구조사가 취할 수 있는 조치는?",o:["환자가 이미 처방받은 자가주사기를 스스로 사용하도록 보조할 수 있다","임의로 다른 약물을 대신 주사한다","자가주사기 사용을 금지시킨다","정맥로를 확보해 별도의 약물을 투여한다"],a:0,
+ e:"2급 응급구조사는 환자가 이미 처방받아 소지한 자가주사기(에피네프린 등) 사용을 '보조'하는 범위에서 도울 수 있으며, 새로운 약물을 임의로 투여하거나 정맥로를 확보하는 것은 업무범위를 벗어나요.",r:"알레르기 응급 – 2급 구조사의 자가주사기 사용 보조 범위"},
+{s:"각론",d:3,q:"복부 촉진 시 손을 뗄 때 오히려 통증이 심해지는 '반발통(rebound tenderness)'이 시사하는 상태는?",o:["복막염 등 복막 자극 소견","단순 근육통","변비","단순 소화불량"],a:0,
+ e:"반발통은 복막이 염증으로 자극된 상태(복막염)를 시사하는 대표적 신체검진 소견으로, 급성 복증에서 수술적 처치가 필요한지 감별하는 중요한 단서예요.",r:"위장관 응급 – 반발통(rebound tenderness)의 임상적 의의"},
+{s:"각론",d:2,q:"급성 복통 환자를 평가할 때 응급구조사가 지켜야 할 원칙으로 가장 옳은 것은?",o:["환자의 자세와 통증 양상을 관찰하며, 임의로 진통제를 투여하거나 확정 진단을 내리지 않는다","현장에서 원인을 확정 진단한다","즉시 진통제를 투여해 통증을 없앤다","통증 부위부터 강하게 촉진해 원인을 찾는다"],a:0,
+ e:"응급구조사는 급성 복통의 원인을 확진할 수 없으므로, 통증을 유발하는 촉진은 최소화하고 자세·증상 관찰 위주로 평가하며 임의 약물 투여 없이 신속히 이송하는 것이 원칙이에요.",r:"위장관 응급 – 급성 복통 환자 평가 원칙"},
+{s:"각론",d:3,q:"신장이 후복막 장기라는 해부학적 특성과 관련해, 신장 손상 시 나타날 수 있는 소견으로 옳은 것은?",o:["옆구리(측복부) 통증과 혈뇨가 나타날 수 있다","반드시 앞쪽 복벽에만 압통이 나타난다","혈뇨는 신장 손상과 무관하다","신장 손상은 증상이 전혀 없다"],a:0,
+ e:"신장은 후복막에 위치한 장기로 손상 시 옆구리(측복부) 통증이 특징적이며, 혈뇨는 신장이나 요로 손상을 시사하는 중요한 소견이에요.",r:"비뇨기 응급 – 신장 손상의 임상 소견(측복부 통증·혈뇨)"},
+{s:"각론",d:4,q:"급성신부전을 원인 위치에 따라 분류할 때, 저혈량증·심한 탈수로 인한 신장 관류 저하가 원인인 유형은?",o:["신전성(prerenal) 급성신부전","신성(renal) 급성신부전","신후성(postrenal) 급성신부전","해당사항 없음"],a:0,
+ e:"신전성 급성신부전은 신장 자체의 손상이 아니라 저혈량증·심부전 등으로 신장으로 가는 혈류가 부족해 발생하며, 신성은 신장 실질 손상, 신후성은 요로 폐쇄가 원인이에요.",r:"비뇨기 응급 – 급성신부전의 원인별 분류(신전성/신성/신후성)"},
+{s:"각론",d:2,q:"유기인계(organophosphate) 살충제 중독 시 나타나는 콜린성 증상(SLUDGE)에 포함되지 않는 것은?",o:["동공 확대(산동)","침 흘림(타액분비 증가)","눈물 흘림","설사"],a:0,
+ e:"유기인계 중독은 부교감신경 항진으로 침흘림·눈물·소변실금·설사·위장관 경련·구토(SLUDGE)와 함께 동공 축소(축동)가 특징적이며, 동공 확대(산동)는 해당하지 않아요.",r:"독성학 – 유기인계 중독의 콜린성 증상(SLUDGE)"},
+{s:"각론",d:3,q:"아세트아미노펜(타이레놀) 과량 복용 시 가장 우려되는 지연성 합병증은?",o:["간독성(급성 간부전)","급성 신부전이 가장 우선적으로 나타난다","즉각적인 심정지","실명"],a:0,
+ e:"아세트아미노펜 과량 복용은 초기에는 증상이 미미할 수 있으나, 대사산물이 간세포를 손상시켜 수일 내 급성 간부전으로 진행할 수 있어 증상이 없어도 반드시 병원 평가가 필요해요.",r:"독성학 – 아세트아미노펜 중독의 간독성"},
+{s:"각론",d:2,q:"일산화탄소 중독이 의심되는 환자에 대한 병원 전 응급처치로 가장 옳은 것은?",o:["고농도 산소를 투여하며 신속히 이송한다","산소 투여 없이 안정만 취하게 한다","종이봉투를 이용한 재호흡을 시행한다","환자를 밀폐된 공간에서 안정시킨다"],a:0,
+ e:"일산화탄소 중독은 고농도 산소 투여로 헤모글로빈에서 일산화탄소를 치환·배출시키는 것이 핵심 처치이며, 재호흡(종이봉투)은 오히려 저산소증을 악화시켜 금기예요.",r:"독성학 – 일산화탄소 중독의 산소요법"},
+{s:"각론",d:3,q:"두개골 골절 중 임상적으로 가장 흔하게 발생하는 유형은?",o:["선상 두개골 골절(linear skull fracture)","함몰 두개골 골절","두개기저부 골절","복합 두개골 골절"],a:0,
+ e:"두개골 골절 중 단순히 금이 가는 형태인 선상 골절이 임상적으로 가장 흔하며, 함몰·기저부·복합 골절은 상대적으로 드물지만 중증도는 더 높을 수 있어요.",r:"두경부 손상 – 두개골 골절의 유형별 빈도"},
+{s:"각론",d:4,q:"두개기저부 골절이 의심될 때 관찰될 수 있는 특징적 신체 소견으로 옳은 것은?",o:["너구리눈 징후(안와주위 반상출혈)와 배틀 징후(유양돌기부 반상출혈), 뇌척수액 이루/비루","전신 두드러기","양측 동공의 대칭적 축동만","사지의 대칭적 근력 저하만"],a:0,
+ e:"두개기저부 골절은 눈 주위의 반상출혈(너구리눈 징후)과 귀 뒤 유양돌기부의 반상출혈(배틀 징후), 귀나 코로 맑은 뇌척수액이 흐르는 이루/비루가 특징적 소견이에요.",r:"두경부 손상 – 두개기저부 골절의 특징적 징후"},
+{s:"각론",d:3,q:"척수손상 이후 일시적으로 반사와 감각·운동 기능이 모두 소실되는 '척수 쇼크(spinal shock)' 상태에 대한 설명으로 옳은 것은?",o:["시간이 지나면서 회복될 수도 있어 초기 완전마비 소견만으로 영구적 손상 여부를 단정할 수 없다","척수 쇼크는 항상 영구적 완전마비를 의미한다","척수 쇼크는 순환기계와 무관한 개념이다","척수 쇼크는 반드시 즉각적인 사망을 의미한다"],a:0,
+ e:"척수 쇼크는 손상 직후 반사 활동이 일시적으로 억제되는 상태로, 시간이 지나 반사가 일부 회복될 수 있어 급성기 완전마비 소견만으로 예후를 단정하기 어렵다는 점이 중요해요.",r:"척추 손상 – 척수 쇼크(spinal shock)의 개념"},
+{s:"각론",d:2,q:"골절 시 골편이 피부를 뚫고 나와 외부와 교통하는 경우를 무엇이라 하는가?",o:["개방성 골절(open fracture)","폐쇄성 골절","피로 골절","불완전 골절"],a:0,
+ e:"개방성 골절은 골절 부위가 피부 밖으로 노출되어 외부 오염에 취약하며, 감염 위험이 높아 무균적 드레싱과 신속한 이송이 중요해요.",r:"근골격계 손상 – 개방성 골절과 폐쇄성 골절의 구분"},
+{s:"각론",d:3,q:"관절 탈구가 의심되는 환자에 대한 응급구조사의 처치 원칙으로 옳은 것은?",o:["발견된 자세대로 부목으로 고정하고 무리하게 정복을 시도하지 않는다","반드시 현장에서 도수 정복을 시행한다","탈구된 관절을 강제로 원위치로 밀어 넣는다","고정 없이 그대로 이송한다"],a:0,
+ e:"응급구조사는 명백한 순환장애 등 특수한 상황이 아니라면 관절을 무리하게 정복하지 않고, 발견된 자세 그대로 부목으로 고정해 신경혈관 손상을 예방하며 이송하는 것이 원칙이에요.",r:"근골격계 손상 – 관절 탈구 처치 원칙"},
+{s:"각론",d:3,q:"우측 하부 늑골(9~11번) 골절 시 가장 손상되기 쉬운 복강 내 장기는?",o:["간(liver)","비장(spleen)","췌장(pancreas)","방광(bladder)"],a:0,
+ e:"우측 하부 늑골은 간과 인접해 있어 골절 시 간 손상 위험이 높고, 반대로 좌측 하부 늑골 골절은 비장 손상과 흔히 연관돼요. 좌우를 바꿔 기억하면 오답이 되기 쉬운 대표 문항이에요.",r:"흉부 손상 – 하부 늑골 골절과 인접 장기 손상(간·비장)"},
+{s:"각론",d:4,q:"심장눌림증(심낭압전, cardiac tamponade)의 전형적인 3대 징후(Beck's triad)로 옳은 것은?",o:["경정맥 팽대, 심음 감소(둔탁), 저혈압(맥압 감소)","고혈압, 서맥, 규칙적 호흡","경정맥 편평, 심음 항진, 고혈압","발열, 기침, 흉통"],a:0,
+ e:"Beck's triad는 경정맥 팽대(JVD), 심음의 둔탁한 감소, 저혈압(좁아진 맥압)의 3가지 소견으로, 심낭 내 출혈·삼출로 심장이 눌려 충분히 확장하지 못해 심박출량이 급격히 감소하는 폐쇄성 쇼크의 대표 예예요.",r:"흉부 손상 – 심낭압전(Beck's triad)"},
+{s:"각론",d:4,q:"외상성 질식(traumatic asphyxia)의 특징적 소견으로 옳은 것은?",o:["안면·목·상흉부의 자청색 변색, 결막출혈, 경정맥 팽대가 흉부 압박 손상 후 나타난다","전신이 창백해지고 경정맥이 편평해진다","증상이 전혀 나타나지 않는다","하지에서만 변색이 나타난다"],a:0,
+ e:"외상성 질식은 흉곽에 갑작스런 강한 압박이 가해져 정맥압이 급상승하면서 상반신·안면부의 자청색 변색, 결막출혈, 경정맥 팽대가 나타나는 특징적 손상 양상이에요.",r:"흉부 손상 – 외상성 질식(traumatic asphyxia)의 소견"},
+{s:"각론",d:3,q:"복부 관통상 환자의 상처에 내장(장기)이 돌출된 경우 응급처치 원칙으로 옳은 것은?",o:["돌출된 장기를 억지로 복강 내로 밀어넣지 않고 촉촉한 멸균 드레싱으로 덮어 보호한다","돌출된 장기를 즉시 복강 안으로 밀어넣는다","건조한 거즈로 강하게 압박한다","돌출 부위를 완전히 절제한다"],a:0,
+ e:"복부 장기 탈출(evisceration) 시에는 장기를 다시 밀어넣지 않고, 촉촉한 멸균 거즈로 덮은 뒤 그 위를 마른 드레싱으로 감싸 건조와 추가 오염을 막는 것이 원칙이에요.",r:"복부 손상 – 장기 탈출(evisceration) 처치 원칙"},
+{s:"각론",d:2,q:"결핵의 주된 전파 경로로 옳은 것은?",o:["비말(공기 중 미세입자) 전파","오염된 혈액을 통한 전파만","곤충 매개 전파","단순 접촉만으로는 전파되지 않는다"],a:0,
+ e:"결핵은 기침 등을 통해 배출되는 비말핵(공기 중 미세입자)을 흡입해 전파되므로, 밀폐된 이송 공간에서는 마스크 착용 등 호흡기 감염관리가 특히 중요해요.",r:"감염질환 – 결핵의 전파 경로(비말 전파)"},
+{s:"각론",d:3,q:"응급구조사가 감염 예방을 위해 정기적으로 받는 것이 권장되는 예방접종에 해당하지 않는 것은?",o:["황열 예방접종(국내 근무 인력에는 일반적으로 해당 없음)","B형간염 예방접종","인플루엔자(독감) 예방접종(매년)","파상풍-디프테리아 예방접종"],a:0,
+ e:"응급구조사는 혈액·체액 노출 위험이 있어 B형간염, 매년 인플루엔자, 파상풍-디프테리아 등의 접종이 권장되지만, 황열은 국내 근무 환경에서는 일반적으로 해당되지 않는 접종이에요.",r:"감염관리 – 응급구조사 권장 예방접종"},
+{s:"각론",d:4,q:"쇼크의 단계를 대상성(compensated)에서 비대상성(decompensated)으로 진행할 때 나타나는 변화로 가장 옳은 것은?",o:["대상기전이 소실되며 혈압이 급격히 떨어지고 의식저하가 뚜렷해진다","오히려 맥박이 느려지고 혈압이 정상화된다","피부가 따뜻하고 붉어진다","증상이 모두 사라진다"],a:0,
+ e:"비대상성 쇼크로 진행하면 교감신경의 대상 반응(말초혈관수축, 빈맥)만으로는 관류를 유지할 수 없어 혈압이 급격히 떨어지고 의식저하 등 말기 징후가 뚜렷하게 나타나요.",r:"쇼크 병태생리 – 대상성에서 비대상성으로의 이행"},
+{s:"각론",d:2,q:"심정지 환자의 생존을 위한 '생존사슬(chain of survival)'에서 병원 전 단계 첫 고리로 강조되는 것은?",o:["신속한 신고 및 심정지 조기 인지","입원 후 재활치료","전문소생술 약물 투여","심장 카테터 시술"],a:0,
+ e:"생존사슬의 첫 고리는 심정지를 조기에 인지하고 신속히 신고하는 것으로, 이후 조기 심폐소생술-조기 제세동-전문소생술-통합 치료로 이어지는 각 고리가 모두 중요해요.",r:"심정지 소생술 – 생존사슬(chain of survival)의 첫 단계"},
+{s:"각론",d:2,q:"환청·환시, 피해망상 등을 특징으로 하며 사고 과정의 장애를 보이는 정신질환은?",o:["조현병(정신분열증)","단순 공황장애","경도의 적응장애","단순 불면증"],a:0,
+ e:"조현병은 환각(환청·환시)과 망상, 사고장애 등을 특징으로 하는 정신질환으로, 응급구조사는 안전을 우선하며 자극을 최소화한 접근이 필요해요.",r:"정신과적 응급 – 조현병의 임상 양상"},
+{s:"각론",d:4,q:"양극성 장애(조울증) 치료에 흔히 사용되는 약물로, 치료 범위가 좁아 혈중 농도 관리가 중요한 약물은?",o:["리튬(lithium)","인슐린","니트로글리세린","에피네프린"],a:0,
+ e:"리튬은 양극성 장애의 대표적 치료제이지만 치료 농도와 중독 농도의 범위가 좁아 혈중 농도 관리가 중요하며, 이 약을 복용 중인 환자의 이상 증상은 리튬 중독 가능성도 고려해야 해요.",r:"정신과적 응급 – 양극성 장애와 리튬 치료의 특성"},
+{s:"각론",d:3,q:"자살 위험이 있는 환자를 평가할 때 응급구조사가 취해야 할 태도로 가장 옳은 것은?",o:["직접적으로 자살 생각 여부를 침착하게 확인하고 안전을 확보하며 비난하지 않는 태도로 대한다","자살이라는 단어를 절대 언급하지 않는다","환자를 혼자 두고 처치 장비만 준비한다","환자의 말을 무시하고 신속히 이송만 한다"],a:0,
+ e:"자살 위험 평가 시 직접적으로 질문하는 것이 오히려 위험을 부추기지 않으며, 비난 없는 태도로 안전을 확보하고 신속히 전문적 도움으로 연결하는 것이 중요해요.",r:"정신과적 응급 – 자살 위험 환자에 대한 접근 원칙"},
+{s:"각론",d:2,q:"과호흡을 동반한 공황발작 환자에게 병원 전 단계에서 시행할 수 있는 처치로 가장 옳은 것은?",o:["안심시키며 천천히 호흡하도록 유도하고 필요시 저농도 산소를 공급하며 관찰한다","봉투에 재호흡시켜 이산화탄소를 급격히 올린다","강제로 신체를 억압한다","즉시 진정제를 임의로 주사한다"],a:0,
+ e:"공황발작의 과호흡은 종이봉투 재호흡법이 저산소증 등 위험을 유발할 수 있어 더 이상 권장되지 않으며, 안심시키고 천천히 호흡하도록 유도하는 것이 중요해요.",r:"정신과적 응급 – 공황발작 및 과호흡 처치의 최신 원칙"},
+{s:"각론",d:2,q:"정상 분만 과정에서 태아가 만출되는 단계는 분만 몇 기에 해당하는가?",o:["분만 2기","분만 1기","분만 3기","분만 4기"],a:0,
+ e:"분만 1기는 자궁경부 개대, 분만 2기는 태아 만출, 분만 3기는 태반 만출 단계로 구분되며, 응급구조사는 진행 단계를 파악해 병원 이송 여부와 현장 분만 대비를 판단해요.",r:"산과 응급 – 분만 단계 구분(1~3기)"},
+{s:"각론",d:4,q:"임신 초기 하복부 통증과 질 출혈을 보이는 여성에서 반드시 감별해야 하는 생명을 위협하는 산과적 응급질환은?",o:["자궁외임신(파열 시 대량 복강내출혈 위험)","단순 월경통","단순 방광염","단순 변비"],a:0,
+ e:"자궁외임신은 나팔관 등에 착상된 태아가 성장하며 파열되면 대량 복강내출혈로 급격한 쇼크에 빠질 수 있는 응급질환으로, 가임기 여성의 하복부 통증·질출혈에서 반드시 고려해야 해요.",r:"산과 응급 – 자궁외임신(파열)의 위험성"},
+{s:"각론",d:3,q:"화상의 깊이 분류에서 3도 화상(전층 화상)의 특징적 소견으로 옳은 것은?",o:["피부 전층이 손상되어 가죽처럼 창백하거나 그을린 양상을 보이며 신경종말 손상으로 오히려 통증이 적을 수 있다","가장 통증이 심하며 물집이 특징적이다","표피만 손상되어 붉어지고 매우 아프다","화상 중 가장 경미한 손상이다"],a:0,
+ e:"3도(전층) 화상은 진피 아래까지 손상되어 피부가 가죽처럼 창백/갈색으로 변하고, 신경종말까지 파괴되어 오히려 통증을 덜 느낄 수 있다는 점이 2도 화상과 구별되는 핵심 포인트예요.",r:"화상 응급 – 3도(전층) 화상의 특징"},
+{s:"각론",d:2,q:"연조직 손상 중 개방창(열상 등)에 대한 기본 처치 원칙으로 옳은 것은?",o:["멸균 드레싱으로 상처를 덮고 직접 압박으로 지혈한다","상처 부위를 알코올로 소독 후 방치한다","이물질이 박혀 있으면 즉시 제거한다","출혈이 있어도 드레싱 없이 이송한다"],a:0,
+ e:"개방창은 멸균 드레싱으로 덮어 오염을 막고 직접 압박으로 지혈하는 것이 기본 원칙이며, 깊이 박힌 이물질은 함부로 제거하지 않고 고정한 채 이송해야 해요.",r:"연조직 손상 – 개방창 처치의 기본 원칙"},
+{s:"각론",d:5,q:"관통상(자상·총상)의 손상 정도를 평가할 때, 단순히 진입구 크기만으로 내부 손상 정도를 판단하기 어려운 이유로 가장 옳은 것은?",o:["탄환이나 흉기가 체내에서 공동현상(cavitation)이나 경로 변화를 일으켜 진입구보다 훨씬 넓은 조직 손상을 유발할 수 있기 때문","진입구가 크면 항상 내부 손상도 정확히 비례해서 크기 때문","관통상은 항상 경미한 손상만 유발하기 때문","무기 종류와 관계없이 손상 정도는 동일하기 때문"],a:0,
+ e:"고속 탄환 등은 조직을 통과하며 순간적으로 큰 공동을 만드는 공동현상을 일으키고, 체내에서 예측 불가능한 경로 변화를 보일 수 있어 겉으로 보이는 진입구 크기만으로 내부 장기 손상의 범위를 판단할 수 없어요.",r:"손상기전 평가 – 관통상의 공동현상(cavitation)과 손상 범위 판단의 한계"},
+{s:"장비",d:1,q:"심전도 모니터의 기본 3유도 부착 시 일반적으로 사용되는 신체 부위는?",o:["양팔과 왼다리(또는 몸통 좌우 및 하부) 3곳","머리 중앙 1곳뿐","양쪽 발바닥","등 중앙 1곳뿐"],a:0,
+ e:"기본 3유도 심전도는 오른팔·왼팔·왼다리(또는 그에 상응하는 몸통 부위) 3곳에 전극을 부착해 기본적인 심장 리듬을 관찰하는 방식이에요.",r:"응급의료장비 – 심전도 모니터 기본 3유도 부착"},
+{s:"장비",d:2,q:"자동제세동기(AED)의 패드를 부착하는 표준 위치로 옳은 것은?",o:["우측 쇄골 아래(흉골 우측)와 좌측 측흉부(액와 중간선, 유두 아래)","양쪽 발바닥","머리 양측","복부 정중앙 1곳"],a:0,
+ e:"AED 표준 패드 위치는 우측 쇄골 아래(전흉부)와 좌측 측흉부(액와 중간선)로, 심장을 사이에 두고 전류가 흐르도록 배치돼요.",r:"응급의료장비 – AED 패드 표준 부착 위치"},
+{s:"장비",d:2,q:"척추손상이 의심되는 환자를 통째로 들어 올려 이동시키는 데 사용하는 장비는?",o:["긴 척추고정판(백보드, long spine board)","혈압계","청진기","산소포화도 측정기"],a:0,
+ e:"긴 척추고정판(백보드)은 전신을 일직선으로 고정한 채 들어 올리고 이동시킬 수 있도록 설계된 장비로, 척추손상 의심 환자의 표준 이동 장비예요.",r:"응급의료장비 – 긴 척추고정판(백보드)의 용도"},
+{s:"장비",d:2,q:"단순 안면마스크(simple face mask)로 투여 가능한 대략적인 산소 유량과 농도로 옳은 것은?",o:["분당 6~10L, 약 40~60%","분당 1~2L, 약 24%","분당 15L, 항상 정확히 100%","유량과 무관하게 항상 21%"],a:0,
+ e:"단순 안면마스크는 분당 6~10L 유량으로 대략 40~60% 정도의 중등도 산소농도를 제공하며, 그 이상의 고농도가 필요하면 비재호흡마스크를 사용해요.",r:"응급의료장비 – 단순 안면마스크의 유량별 산소농도"},
+{s:"장비",d:3,q:"벤츄리 마스크(venturi mask)의 특징으로 가장 옳은 것은?",o:["색상별 조절기로 비교적 정확하고 일정한 산소 농도를 제공할 수 있다","산소 농도를 전혀 조절할 수 없다","저농도든 고농도든 관계없이 항상 100%를 제공한다","소아에게는 사용할 수 없는 장비이다"],a:0,
+ e:"벤츄리 마스크는 색상이 다른 조절기를 교체해 비교적 정밀하게 목표 산소농도를 맞출 수 있어, COPD 환자처럼 정밀한 산소 조절이 필요한 경우에 유용해요.",r:"응급의료장비 – 벤츄리 마스크의 산소농도 조절 특성"},
+{s:"장비",d:1,q:"청진기에서 저음(심음, 장음 등)을 듣기에 적합한 부분은?",o:["벨(bell) 부분","다이아프램(diaphragm) 부분","튜브 연결부","이어피스"],a:0,
+ e:"청진기의 벨 부분은 저음역대 청취에, 다이아프램 부분은 고음역대(호흡음 등) 청취에 적합하게 설계돼 있어요.",r:"응급의료장비 – 청진기 벨과 다이아프램의 용도 차이"},
+{s:"장비",d:3,q:"공기부목(air splint) 사용 시 고도 변화(항공 이송 등)와 관련해 반드시 주의해야 할 점은?",o:["고도가 높아지면 부목 내부 공기가 팽창할 수 있어 압력을 주기적으로 확인·조절해야 한다","고도 변화는 공기부목에 전혀 영향을 주지 않는다","고도가 높아지면 공기가 저절로 빠져나가 무용지물이 된다","항공 이송 시에는 반드시 제거해야 한다"],a:0,
+ e:"항공 이송 등으로 고도가 상승하면 기압이 낮아져 공기부목 내부의 공기가 팽창해 지나친 압박을 유발할 수 있어, 이송 중 주기적으로 압력을 확인하고 필요시 공기를 빼주어야 해요.",r:"응급의료장비 – 공기부목과 고도 변화에 따른 압력 관리"},
+{s:"장비",d:2,q:"경성부목과 비교했을 때 진공부목(vacuum splint)의 특징으로 옳은 것은?",o:["공기를 빼면 내부 알갱이가 굳어 환자의 신체 윤곽에 맞춰 고정할 수 있다","반드시 관절이 아닌 뼈 중앙부에만 사용해야 한다","공기를 채워야 딱딱해진다","금속 재질로만 제작된다"],a:0,
+ e:"진공부목은 알갱이가 채워진 주머니에서 공기를 빼면 형태가 굳어 환자의 신체 윤곽에 맞게 밀착 고정할 수 있어요.",r:"응급의료장비 – 진공부목(vacuum splint)의 원리와 특징"},
+{s:"장비",d:2,q:"KED(케드, Kendrick Extrication Device)의 주된 사용 목적은?",o:["차량 등 좁은 공간에 갇힌 척추손상 의심 환자를 앉은 자세에서 척추 정렬을 유지하며 구출하기 위해","화상 부위를 덮기 위해","골절 부위의 부목으로만 사용한다","혈압을 측정하기 위해"],a:0,
+ e:"KED는 자동차 사고 등으로 좁은 공간에 앉은 자세로 갇힌 환자에게서 척추 정렬을 유지한 채 신속히 구출하기 위해 사용하는 반강성 고정 장비예요.",r:"응급의료장비 – KED(단기 척추고정장비)의 용도"},
+{s:"장비",d:2,q:"스쿠프들것(scoop stretcher)의 특징과 용도로 옳은 것은?",o:["환자를 좌우로 분리·결합해 몸통을 크게 움직이지 않고 들어 올릴 수 있다","반드시 환자를 통나무 굴리기로만 옮길 때 사용한다","공기를 주입해야 딱딱해진다","화상 처치 전용 장비이다"],a:0,
+ e:"스쿠프들것은 세로로 두 조각으로 분리되어 환자 양옆에서 밀어 넣은 뒤 결합함으로써, 환자를 굴리는 동작 없이도 들어 올릴 수 있어요.",r:"응급의료장비 – 스쿠프들것(scoop stretcher)의 특징"},
+{s:"장비",d:1,q:"산소통에서 마스크나 비강캐뉼라로 전달되는 산소의 유량을 조절하는 장치는?",o:["유량계(flow meter)","압력조절기 없이 직접 조절 불가능함","체온계","혈압계"],a:0,
+ e:"산소 유량계는 산소통에 부착되어 분당 리터(L/min) 단위로 환자에게 전달되는 산소 유량을 조절하는 장치예요.",r:"응급의료장비 – 산소 유량계의 기능"},
+{s:"장비",d:3,q:"비강 인두기도기(nasopharyngeal airway, NPA)의 사용이 상대적으로 금기시되는 경우는?",o:["심한 두개저·안면부 골절이 의심되는 환자","구역반사가 살아있는 의식 있는 환자","완전 무의식 환자","심정지 환자"],a:0,
+ e:"NPA는 구역반사가 있는 환자에게도 비교적 잘 견뎌 OPA 대안으로 쓰이지만, 두개저 골절이 의심되면 삽입 경로가 두개강 내로 잘못 들어갈 위험이 있어 신중해야 해요.",r:"기도유지 장비 – 비강 인두기도기(NPA)의 상대적 금기"},
+{s:"장비",d:2,q:"흡인용 카테터 중 단단하고 구부러지지 않아 구강 내 다량의 이물질(토사물 등)을 빠르게 제거하는 데 적합한 것은?",o:["단단한 흡인 팁(경성 카테터)","부드러운 유연 카테터","비강캐뉼라","산소마스크"],a:0,
+ e:"경성(단단한) 흡인 팁은 구강 내 대량의 이물질을 신속히 제거하는 데 적합하며, 부드러운 유연 카테터는 좁고 깊은 경로의 흡인에 주로 사용돼요.",r:"응급의료장비 – 흡인 카테터의 종류와 용도 구분"},
+{s:"장비",d:4,q:"제세동을 시행하기 전 '전 모두 물러나 주세요(clear)'를 외치고 확인해야 하는 가장 중요한 이유는?",o:["통전 순간 다른 사람이 환자와 접촉해 있으면 감전 사고가 발생할 수 있기 때문","목소리 크기를 훈련하기 위해","환자의 프라이버시를 보호하기 위해","제세동기 배터리를 절약하기 위해"],a:0,
+ e:"제세동 시행 순간 환자와 접촉하고 있는 사람이 있으면 전류가 함께 흘러 감전될 수 있어, 통전 전 반드시 주변 인원이 환자에게서 떨어졌는지 확인하는 안전 절차가 필수예요.",r:"응급의료장비 – 제세동 시행 시 안전 확인 절차"},
+{s:"총론",d:1,q:"응급구조사의 법적 업무 범위를 규정하는 근거 법률은?",o:["응급의료에 관한 법률","의료법","산업안전보건법","도로교통법"],a:0,
+ e:"응급구조사의 업무범위와 자격은 「응급의료에 관한 법률」 및 시행규칙에서 규정해요.",r:"총론 – 응급구조사 관련 법령 개요"},
+{s:"총론",d:1,q:"현장 도착 후 개인보호장비(PPE) 착용이 가장 우선되는 이유는?",o:["구조자 자신의 감염 및 손상을 예방하기 위해","환자에게 신뢰감을 주기 위해","규정상 의무이기 때문에","이송 시간을 단축하기 위해"],a:0,
+ e:"구조자의 안전이 확보되어야 지속적인 처치가 가능하므로 PPE 착용은 현장 진입 전 최우선 조치예요.",r:"총론 – 개인보호장비(BSI/PPE)"},
+{s:"총론",d:1,q:"응급의료체계(EMS)에서 '병원 전 단계'가 의미하는 것은?",o:["환자 발생부터 병원 도착 전까지의 모든 과정","응급실 내원 이후 진료 과정","수술 준비 단계","퇴원 후 재활 단계"],a:0,
+ e:"병원 전 단계는 신고 접수, 출동, 현장처치, 이송까지 병원 도착 이전의 전 과정을 말해요.",r:"총론 – 응급의료체계 단계 구분"},
+{s:"총론",d:1,q:"응급처치의 기본 3대 목적에 해당하지 않는 것은?",o:["질병의 완치","생명 유지","상태 악화 방지","고통 경감"],a:0,
+ e:"응급처치는 완치가 아니라 생명유지·악화방지·고통경감·병원이송까지의 시간 확보를 목적으로 해요.",r:"총론 – 응급처치의 목적"},
+{s:"총론",d:1,q:"구급대원이 현장에서 가장 먼저 시행하는 '현장 확인'의 3요소가 아닌 것은?",o:["환자의 과거병력","안전","상황","인원(환자 수)"],a:0,
+ e:"현장 확인 3요소는 안전-상황-인원이며, 과거병력은 이후 병력청취(SAMPLE) 단계에서 확인해요.",r:"총론 – 현장평가(Scene Size-up)"},
+{s:"총론",d:2,q:"BSI(Body Substance Isolation)의 핵심 개념으로 옳은 것은?",o:["모든 체액을 감염원으로 간주하고 방어한다","혈액에만 주의하면 된다","맨눈으로 오염이 보일 때만 장갑을 착용한다","호흡기 분비물은 감염 위험이 없다"],a:0,
+ e:"BSI는 혈액뿐 아니라 모든 체액·분비물을 잠재적 감염원으로 간주하여 표준화된 보호조치를 취하는 개념이에요.",r:"총론 – 감염관리 원칙(BSI)"},
+{s:"총론",d:2,q:"현장에서 다수의 환자가 발생했을 때 가장 먼저 시행해야 할 조치는?",o:["중증도 분류(Triage)","전원 동시 이송","심폐소생술부터 실시","보호자 면담"],a:0,
+ e:"다수사상자 상황에서는 제한된 자원으로 최대 생존자를 확보하기 위해 중증도 분류를 최우선으로 시행해요.",r:"총론 – 다수사상자 관리 원칙"},
+{s:"총론",d:2,q:"무선통신 시 표준 교신 용어 사용의 주된 목적은?",o:["오해 없이 신속·정확한 정보 전달","교신 시간을 늘리기 위해","비밀 유지를 위해","개인 특성을 드러내기 위해"],a:0,
+ e:"표준화된 교신 용어는 혼선을 줄이고 짧은 시간에 정확한 정보를 주고받기 위한 목적이에요.",r:"총론 – 무선통신 원칙"},
+{s:"총론",d:2,q:"직접의료지도(on-line medical control)에 대한 설명으로 옳은 것은?",o:["현장에서 의사와 실시간 통신으로 지시를 받는 방식","사전에 승인된 프로토콜만 따르는 방식","사후 기록 검토만 이루어지는 방식","의료지도 없이 자체 판단으로 처치하는 방식"],a:0,
+ e:"직접의료지도는 현장 상황을 실시간으로 의사에게 전달받아 지시에 따라 처치하는 방식이에요.",r:"총론 – 의료지도 체계(온라인/오프라인)"},
+{s:"총론",d:2,q:"간접의료지도(off-line medical control)에 해당하는 것은?",o:["사전에 정해진 표준 프로토콜에 따른 처치","실시간 의사 지시에 따른 처치","보호자 동의에 따른 처치","환자 요청에 따른 처치"],a:0,
+ e:"간접의료지도는 사전 승인된 프로토콜(지침)에 따라 자율적으로 처치하고 사후 검토를 받는 방식이에요.",r:"총론 – 의료지도 체계(온라인/오프라인)"},
+{s:"총론",d:3,q:"현장 안전 평가에서 '2차 사고'를 예방하기 위한 조치로 가장 적절한 것은?",o:["차량 통제 및 경고 표지 설치 후 접근","환자에게 즉시 접근","사이렌을 끄고 조용히 접근","경찰 도착까지 무조건 대기"],a:0,
+ e:"교통사고 등 현장에서는 후속 차량 충돌 등 2차 사고 예방을 위해 경고 표지·차량 통제가 선행되어야 해요.",r:"총론 – 현장안전과 2차 사고 예방"},
+{s:"총론",d:3,q:"재난의학에서 '최대 다수에게 최대의 이익'이라는 윤리 원칙이 적용되는 상황은?",o:["자원이 제한된 다수사상자 상황","단일 환자 응급처치","병원 내 중환자 치료","일상적인 이송 업무"],a:0,
+ e:"재난 상황에서는 개별 환자 최선이 아니라 제한된 자원으로 전체 생존율을 최대화하는 공리주의적 원칙이 적용돼요.",r:"총론 – 재난의학 윤리원칙"},
+{s:"총론",d:3,q:"START 중증도 분류에서 '황색(지연치료)'으로 분류되는 기준은?",o:["보행 불가하나 호흡·순환·의식이 모두 정상 범위인 환자","호흡이 없는 환자","30회 초과 호흡수를 보이는 환자","보행이 가능한 환자"],a:0,
+ e:"보행 불가하지만 호흡·맥박·의식 상태가 기준을 만족하면 황색(응급치료 지연 가능)으로 분류해요.",r:"총론 – START Triage 황색 기준"},
+{s:"총론",d:3,q:"현장에서 응급구조사가 환자 이송을 거부당했을 때 우선적으로 취해야 할 조치는?",o:["환자의 판단능력을 평가하고 거부 사유를 기록한다","무조건 강제로 이송한다","즉시 현장을 이탈한다","보호자 없이는 어떤 조치도 하지 않는다"],a:0,
+ e:"이송 거부 시 환자의 의사결정능력(지남력, 판단력)을 평가하고, 위험성 설명 및 거부 사실을 반드시 기록해야 법적 분쟁을 예방할 수 있어요.",r:"총론 – 이송 거부 대응 원칙"},
+{s:"총론",d:3,q:"응급의료체계에서 '반응시간(response time)'이 의미하는 것은?",o:["신고 접수부터 현장 도착까지 걸린 시간","현장 도착부터 이송 시작까지 시간","이송 시작부터 병원 도착까지 시간","병원 도착부터 진료 시작까지 시간"],a:0,
+ e:"반응시간은 신고 접수 후 구급차가 현장에 도착하기까지 걸리는 시간으로, EMS 질 평가의 핵심 지표예요.",r:"총론 – EMS 성과지표(반응시간)"},
+{s:"총론",d:4,q:"CBRNE(화생방·폭발) 사고 현장에서 응급구조사가 취해야 할 최우선 조치는?",o:["오염통제구역 설정 및 제독 전 접근 금지","즉시 환자 접촉 후 처치","현장 촬영 및 기록","경찰 지시 없이 자율 판단으로 진입"],a:0,
+ e:"CBRNE 사고에서는 2차 오염을 막기 위해 통제구역(hot/warm/cold zone)을 설정하고 제독 절차 전에는 무방비 접근을 금지해요.",r:"총론 – 특수재난(CBRNE) 대응 원칙"},
+{s:"총론",d:4,q:"다수사상자 현장에서 '지휘통제체계(ICS)'를 적용하는 주된 이유는?",o:["여러 기관 간 지휘 혼선을 방지하고 자원을 효율적으로 배분하기 위해","서류 작업을 줄이기 위해","언론 대응을 위해","환자 수를 줄이기 위해"],a:0,
+ e:"ICS(Incident Command System)는 다기관 협업 시 지휘체계를 단일화해 혼선을 막고 인력·자원 배분을 효율화해요.",r:"총론 – 재난대응 지휘체계(ICS)"},
+{s:"총론",d:4,q:"응급구조사의 '주의의무 위반(과실)'이 성립하기 위한 요건에 해당하지 않는 것은?",o:["환자의 사전 동의 여부","주의의무의 존재","의무 위반 행위","위반과 손해 사이의 인과관계"],a:0,
+ e:"과실 성립 요건은 주의의무 존재, 의무 위반, 손해 발생, 위반과 손해 간 인과관계이며 사전 동의 여부는 별개의 법적 쟁점(동의/거부)이에요.",r:"총론 – 응급처치 관련 법적 책임(과실)"},
+{s:"총론",d:4,q:"현장에서 응급구조사가 판단 곤란한 윤리적 딜레마(예: 소생 가능성이 낮은 다발성 손상 환자의 처치 순위) 상황에 가장 근접한 대응 원칙은?",o:["의료지도 및 프로토콜에 따른 트리아지 원칙 적용","개인적 신념에 따라 임의 판단","가장 먼저 접촉한 환자부터 처치","보호자의 요청을 최우선"],a:0,
+ e:"윤리적 딜레마 상황에서도 개인 판단이 아닌 표준 트리아지 프로토콜과 의료지도를 따르는 것이 원칙이에요.",r:"총론 – 현장 윤리적 의사결정"},
+{s:"총론",d:5,q:"대량 재난 상황에서 SIEVE(1차)와 SORT(2차) 분류를 연속 적용하는 영국식 체계의 특징으로 옳은 것은?",o:["현장에서 신속 선별 후 이송 전 재평가로 정확도를 높인다","한 번의 분류로 모든 절차를 종료한다","의사만 분류를 수행할 수 있다","소아에게는 적용하지 않는다"],a:0,
+ e:"SIEVE는 현장에서 신속 1차 선별, SORT는 이송 전/후 생리학적 점수로 재평가하는 2단계 체계로 정확도를 높여요.",r:"총론 – 재난 중증도분류 체계 비교(SIEVE/SORT)"},
+{s:"총론",d:5,q:"응급의료체계 질 관리에서 '과다이송(over-triage)'과 '과소이송(under-triage)'에 대한 설명으로 옳은 것은?",o:["과소이송은 중증 환자를 경증으로 분류해 치료가 지연되므로 더 치명적이다","과다이송이 항상 더 위험하다","두 개념은 소아에게만 적용된다","과소이송은 자원 낭비만 초래한다"],a:0,
+ e:"과소이송(under-triage)은 실제 중증 환자를 경증으로 잘못 분류해 처치가 지연되는 것으로 임상적으로 더 치명적인 오류로 간주돼요.",r:"총론 – 트리아지 오류(과다/과소이송)"},
+{s:"총론",d:5,q:"응급구조사의 업무범위 중 '2급 응급구조사'가 수행할 수 없고 '1급 응급구조사'만 가능한 것으로 대표적인 예는?",o:["정맥로 확보 및 수액투여","기본 심폐소생술","산소 투여","척추 고정"],a:0,
+ e:"정맥로 확보·수액투여, 전문기도유지술 등 침습적 처치는 1급 응급구조사의 업무범위에 해당해요(법령에 따라 세부 차이 있음).",r:"총론 – 응급구조사 등급별 업무범위 비교"},
+{s:"총론",d:1,q:"현장에서 환자 접촉 전 반드시 확인해야 할 개인보호장비 조합으로 가장 기본적인 것은?",o:["장갑과 보안경(필요시 마스크)","방독면만","안전화만","헬멧만"],a:0,
+ e:"체액 노출이 예상되는 대부분의 현장 처치에서는 장갑이 기본이며, 비말·분사 위험 시 보안경·마스크를 추가해요.",r:"총론 – 개인보호장비 기본 구성"},
+{s:"총론",d:1,q:"응급구조사가 현장에서 지켜야 할 윤리적 기본 원칙 중 '환자의 비밀을 유지해야 한다'는 원칙은?",o:["비밀유지 의무","선행의 원칙","자율성 존중","정의의 원칙"],a:0,
+ e:"환자 정보에 대한 비밀유지 의무는 응급구조사의 기본 윤리 원칙 중 하나로 개인정보 보호와 직결돼요.",r:"총론 – 응급구조사 윤리원칙"},
+{s:"총론",d:1,q:"현장에서 환자의 자기결정권을 존중하는 윤리 원칙은?",o:["자율성 존중의 원칙","해악금지의 원칙","선행의 원칙","정의의 원칙"],a:0,
+ e:"의식이 명료한 성인 환자는 처치를 거부할 권리가 있으며, 이를 존중하는 것이 자율성 존중 원칙이에요.",r:"총론 – 생명윤리 4원칙"},
+{s:"총론",d:2,q:"현장에서 감염성 질환이 의심되는 환자를 이송할 때 우선 조치로 옳은 것은?",o:["환자에게 마스크를 착용시키고 구조자도 적절한 보호구를 착용한다","이송을 거부한다","소독 없이 신속히 이송만 한다","보호자에게만 마스크를 착용시킨다"],a:0,
+ e:"비말 전파가 의심되면 환자·구조자 모두 마스크 등 보호구를 착용해 교차감염을 예방해야 해요.",r:"총론 – 감염관리(비말/공기전파 대응)"},
+{s:"총론",d:2,q:"응급의료체계의 4대 구성요소로 보기 어려운 것은?",o:["의약품 가격 결정 체계","인력","장비","통신"],a:0,
+ e:"EMS 구성요소는 인력, 장비, 통신, 이송수단, 의료지도, 병원 연계 등이며 의약품 가격결정은 해당하지 않아요.",r:"총론 – 응급의료체계 구성요소"},
+{s:"총론",d:2,q:"현장 지휘체계에서 '현장지휘자(Incident Commander)'의 주된 역할은?",o:["전체 현장 자원과 활동을 총괄 조정한다","환자를 직접 처치한다","언론 인터뷰만 담당한다","구급차를 운전한다"],a:0,
+ e:"현장지휘자는 직접 처치보다 인력·자원 배분, 안전관리, 기관 간 조정 등 전체 현장을 총괄하는 역할을 해요.",r:"총론 – ICS 현장지휘자 역할"},
+{s:"총론",d:3,q:"응급구조사가 현장에서 '선의의 응급의료 면책(Good Samaritan Law)'의 보호를 받기 위한 조건으로 옳은 것은?",o:["고의 또는 중대한 과실 없이 성실히 처치한 경우","반드시 자격증을 소지한 경우에만","보호자 동의를 받은 경우에만","의사의 사전 지시가 있는 경우에만"],a:0,
+ e:"선의의 응급의료 면책은 고의나 중대한 과실 없이 성실하게 응급처치를 한 경우 민형사상 책임을 감면해주는 제도예요.",r:"총론 – 선의의 응급의료 면책제도"},
+{s:"총론",d:3,q:"현장에서 다수의 사상자가 발생했을 때 '치료 불가능(흑색)'으로 분류하는 기준에 가장 부합하는 것은?",o:["기도확보 후에도 무호흡이 지속되는 경우","보행이 가능한 경우","경미한 열상만 있는 경우","의식이 명료한 경우"],a:0,
+ e:"기도확보 시행 후에도 자발호흡이 없으면 START 기준상 흑색(사망/처치불가)으로 분류해요.",r:"총론 – START Triage 흑색 기준"},
+{s:"총론",d:3,q:"현장 스트레스 관리에서 '중대사건 스트레스 해소(CISD)'가 필요한 대표적 상황은?",o:["소아 사망 등 정서적 충격이 큰 사건 대응 후","단순 타박상 환자 처치 후","정기 교육 훈련 후","경미한 이송 업무 후"],a:0,
+ e:"소아 사망, 동료 순직 등 심리적 충격이 큰 사건 이후에는 CISD 등 스트레스 해소 프로그램이 권장돼요.",r:"총론 – 구조자 스트레스 관리(CISD)"},
+{s:"총론",d:4,q:"응급의료체계에서 '메디컬 컨트롤(Medical Control)' 의사의 역할로 가장 적절한 것은?",o:["프로토콜 승인과 현장 처치의 의학적 감독","구급차 정비 관리","행정 서류 접수","환자 이송료 산정"],a:0,
+ e:"메디컬 컨트롤 의사는 프로토콜 제·개정 승인, 현장 처치에 대한 의학적 지도·감독, 질 관리를 담당해요.",r:"총론 – 메디컬 컨트롤 의사의 역할"},
+{s:"총론",d:4,q:"현장에서 응급구조사가 '묵시적 동의(implied consent)'를 적용할 수 있는 경우는?",o:["의식이 없는 응급환자로 즉각적 처치가 필요한 경우","의식이 명료하고 판단능력이 있는 성인이 거부하는 경우","단순 상담을 원하는 경우","미용 목적의 처치를 원하는 경우"],a:0,
+ e:"의식이 없거나 생명이 위급해 동의를 받을 수 없는 경우, 합리적인 사람이라면 동의했을 것이라는 전제하에 묵시적 동의가 적용돼요.",r:"총론 – 동의의 종류(명시적/묵시적)"},
+{s:"총론",d:4,q:"현장 안전관리에서 '온·경계·냉 구역(Hot/Warm/Cold Zone)' 개념이 가장 많이 활용되는 상황은?",o:["위험물질(HazMat) 유출 사고","단순 낙상 사고","심정지 환자 단독 발생","경미한 교통사고"],a:0,
+ e:"위험물질 유출·CBRNE 사고에서 오염구역(Hot)-제독구역(Warm)-안전구역(Cold)으로 구역을 나눠 통제해요.",r:"총론 – HazMat 현장 구역설정"},
+{s:"총론",d:5,q:"재난 대응에서 '자원 요청의 단계적 확대(mutual aid)' 개념이 필요한 이유로 가장 적절한 것은?",o:["단일 기관의 자원만으로 대응이 불가능한 대규모 사고에 대비하기 위해","비용을 절감하기 위해","훈련 횟수를 줄이기 위해","보고서 작성을 단순화하기 위해"],a:0,
+ e:"대규모 재난은 단일 기관 자원으로 대응이 어려워 인접 기관·지자체 간 상호응원(mutual aid) 체계가 필수예요.",r:"총론 – 재난대응 상호응원체계"},
+{s:"총론",d:5,q:"응급의료 질 관리 지표 중 '심정지 생존퇴원율'이 지역 EMS 시스템 평가에서 중요한 이유는?",o:["병원 전 단계부터 병원 단계까지 전체 소생사슬의 효과를 종합적으로 반영하기 때문","구급차 대수만을 반영하기 때문","행정 비용만을 반영하기 때문","반응시간만을 반영하기 때문"],a:0,
+ e:"생존퇴원율은 목격자 CPR, 신고, 제세동, 전문소생술, 병원치료 등 소생사슬 전체의 질을 종합 반영하는 대표 지표예요.",r:"총론 – EMS 질 지표(생존퇴원율)"},
+{s:"총론",d:1,q:"응급구조사가 갖추어야 할 기본 소양 중 '침착성'이 특히 중요한 이유는?",o:["혼란한 현장에서 정확한 판단과 처치를 위해 필요하기 때문","환자에게 친근감을 주기 위해서만","법적 책임을 피하기 위해서만","이송 속도를 높이기 위해서만"],a:0,
+ e:"긴박한 현장에서 침착함을 유지해야 정확한 평가와 우선순위 판단이 가능해요.",r:"총론 – 응급구조사 기본 소양"},
+{s:"총론",d:1,q:"현장 도착 전 무전으로 확인해야 할 정보로 가장 거리가 먼 것은?",o:["환자의 보험 가입 여부","사고 장소","환자 수","사고 유형"],a:0,
+ e:"출동 전 확인 정보는 위치, 사고유형, 환자 수 등 현장 대응 준비에 필요한 정보이며 보험 여부는 해당되지 않아요.",r:"총론 – 출동 전 정보 확인"},
+{s:"총론",d:2,q:"현장에서 '2차 평가'를 생략하고 즉시 이송해야 하는 경우로 가장 적절한 것은?",o:["1차 평가에서 즉각적인 생명 위협이 발견된 경우","환자가 이송을 원하는 경우","날씨가 좋지 않은 경우","보호자가 재촉하는 경우"],a:0,
+ e:"1차 평가에서 기도·호흡·순환에 즉각적 위협이 확인되면 2차 평가를 생략하고 신속 이송(load and go)을 고려해요.",r:"총론 – Load and Go 원칙"},
+{s:"총론",d:2,q:"응급구조사가 현장에서 기록해야 할 필수 항목에 해당하지 않는 것은?",o:["환자의 정치적 성향","활력징후 변화","처치 내용과 시각","환자 반응"],a:0,
+ e:"기록에는 활력징후, 처치내용, 시각, 환자 반응 등 의학적·법적으로 필요한 정보만 포함하며 정치적 성향 등은 무관해요.",r:"총론 – 현장 기록(문서화) 원칙"},
+{s:"총론",d:3,q:"현장에서 사망이 명백한 징후(예: 신체 부패, 두부 절단)를 확인했을 때 응급구조사의 적절한 조치는?",o:["소생술을 시행하지 않고 관련 기관에 신고한다","무조건 심폐소생술을 30분 이상 시행한다","현장을 즉시 정리하고 이탈한다","보호자 동의 없이 시신을 이동한다"],a:0,
+ e:"부패, 두부 절단 등 명백한 사망 징후가 있으면 소생술을 시행하지 않고 관련 절차(경찰 등)에 따라야 해요.",r:"총론 – 명백한 사망 징후와 대응"},
+{s:"총론",d:3,q:"현장에서 응급구조사가 보호자와 환자의 의견이 상충할 때(성인, 의식 명료) 우선해야 할 원칙은?",o:["환자 본인의 자기결정권을 우선한다","보호자의 의견을 우선한다","무조건 이송을 강행한다","다수결로 결정한다"],a:0,
+ e:"의식이 명료하고 판단능력이 있는 성인 환자는 본인의 자기결정권이 보호자 의견보다 우선해요.",r:"총론 – 환자 자기결정권과 보호자 의견 상충"},
+{s:"총론",d:4,q:"현장에서 응급구조사가 '기록 누락'으로 인해 발생할 수 있는 법적 문제로 가장 적절한 것은?",o:["처치의 적절성을 입증하기 어려워 분쟁 시 불리해질 수 있다","처치 시간이 단축된다","환자 만족도가 높아진다","보험 처리가 간소화된다"],a:0,
+ e:"기록이 부실하면 추후 의료분쟁 발생 시 적절한 처치가 이루어졌음을 입증하기 어려워져요.",r:"총론 – 기록의 법적 중요성"},
+{s:"총론",d:4,q:"현장 지휘체계에서 응급구조사가 '섹터(sector) 담당자'로 지정되었을 때의 역할은?",o:["배정된 구역 내 자원과 활동을 관리·보고한다","전체 현장을 단독 지휘한다","언론 브리핑을 담당한다","예산을 집행한다"],a:0,
+ e:"섹터 담당자는 전체 현장이 아닌 배정된 구역의 자원·인력을 관리하고 상위 지휘부에 보고하는 역할을 해요.",r:"총론 – ICS 섹터(구역) 관리"},
+{s:"총론",d:5,q:"응급의료체계 개선을 위한 '사후 검토(after-action review)'의 주된 목적은?",o:["대응 과정의 문제점을 분석해 향후 대응력을 개선하기 위해","책임자를 처벌하기 위해","예산을 절감하기 위해","언론 대응을 위해"],a:0,
+ e:"사후 검토는 처벌이 아니라 대응 과정의 강점·약점을 분석해 시스템과 프로토콜을 개선하는 데 목적이 있어요.",r:"총론 – 재난대응 사후검토(AAR)"},
+{s:"총론",d:5,q:"다수사상자 사고에서 '2차 트리아지(재분류)'가 필요한 이유로 가장 적절한 것은?",o:["환자 상태는 시간에 따라 변할 수 있어 지속적 재평가가 필요하기 때문","1차 분류는 항상 오류이기 때문","법적으로 반드시 두 번 시행해야 하기 때문","인력을 더 투입하기 위한 명분이기 때문"],a:0,
+ e:"환자 상태는 악화되거나 호전될 수 있으므로 이송 전후 재평가(2차 트리아지)를 통해 분류를 갱신해야 해요.",r:"총론 – 트리아지 재평가의 필요성"},
+{s:"총론",d:1,q:"응급구조사가 출동 중 반드시 착용해야 하는 기본 안전장비는?",o:["안전벨트","방독면","방탄복","잠수복"],a:0,
+ e:"이동 중 안전벨트 착용은 구조자 자신의 안전을 위한 가장 기본적인 조치예요.",r:"총론 – 이동 중 안전수칙"},
+{s:"총론",d:1,q:"응급구조사가 환자를 처음 만났을 때 가장 먼저 해야 할 행동으로 적절한 것은?",o:["자기소개와 환자 상태에 대한 간단한 설명","즉시 활력징후 측정","보호자와의 대화","서류 작성"],a:0,
+ e:"환자와의 신뢰 형성을 위해 자기소개 후 상황을 간단히 설명하고 동의를 구하는 것이 기본이에요.",r:"총론 – 환자 접촉 초기 대응"},
+{s:"총론",d:2,q:"현장에서 '환자 인계(hand-off)' 시 병원 의료진에게 전달해야 할 필수 정보로 가장 거리가 먼 것은?",o:["환자의 직업","활력징후 변화","처치 내용","손상 기전"],a:0,
+ e:"인계 시 손상기전, 활력징후, 처치내용, 반응 등이 핵심이며 직업은 필수 인계 정보가 아니에요.",r:"총론 – 환자 인계(SBAR 등)"},
+{s:"총론",d:2,q:"소아 다수사상자 분류에 사용되는 JumpSTART가 성인용 START와 다른 주요 차이점은?",o:["호흡이 없을 때 인공호흡 5회 시도 후에도 무호흡이면 흑색으로 분류한다","호흡수 기준이 성인과 동일하다","보행 여부는 고려하지 않는다","의식평가를 하지 않는다"],a:0,
+ e:"JumpSTART는 소아의 생리적 특성을 반영해 무호흡 시 인공호흡 5회를 먼저 시도하는 것이 성인용 START와의 핵심 차이예요.",r:"총론 – 소아 다수사상자 분류(JumpSTART)"},
+{s:"총론",d:3,q:"현장에서 응급구조사가 폭력적인 환자를 상대할 때 우선 조치로 가장 적절한 것은?",o:["자신과 동료의 안전을 확보하고 필요시 경찰 지원을 요청한다","즉시 물리적으로 제압한다","환자를 방치하고 철수한다","보호자에게 모든 책임을 넘긴다"],a:0,
+ e:"폭력적 환자 상황에서는 구조자 안전 확보가 최우선이며, 필요시 경찰 등 지원 요청이 원칙이에요.",r:"총론 – 폭력적 환자 대응 원칙"},
+{s:"총론",d:3,q:"현장 도착 전 '사고 유형(기전)'을 미리 파악하는 것이 중요한 이유는?",o:["필요한 장비와 인력을 사전에 준비할 수 있기 때문","보험 처리를 위해서만 필요","기록 작성 편의를 위해서만","언론 보도를 위해서만"],a:0,
+ e:"사고 유형을 사전에 파악하면 필요한 장비·인력을 미리 준비해 대응 시간을 단축할 수 있어요.",r:"총론 – 출동 전 정보의 활용"},
+{s:"총론",d:4,q:"응급구조사가 현장에서 '트리아지 태그(triage tag)'를 사용하는 목적으로 가장 적절한 것은?",o:["환자의 중증도를 시각적으로 표시해 이송 우선순위를 신속히 공유하기 위해","환자의 신원을 감추기 위해","보험 처리를 위한 서류이기 때문","병원 청구서 대용이기 때문"],a:0,
+ e:"트리아지 태그는 색상으로 중증도를 표시해 여러 대원이 이송 우선순위를 빠르게 공유할 수 있게 해줘요.",r:"총론 – 트리아지 태그의 역할"},
+{s:"총론",d:4,q:"응급의료체계에서 '지역 응급의료 이송지침(이송병원 선정기준)'이 필요한 이유는?",o:["환자 중증도에 맞는 적절한 병원으로 이송해 치료 지연을 줄이기 위해","가장 가까운 병원으로 무조건 이송하기 위해","병원 선택을 환자에게 전적으로 맡기기 위해","이송료를 낮추기 위해"],a:0,
+ e:"중증외상·심정지 등은 전문 치료가 가능한 병원으로 이송해야 예후가 개선되므로 이송지침이 필요해요.",r:"총론 – 병원 선정 및 이송지침"},
+{s:"총론",d:5,q:"현장 대응 시스템 평가에서 '표준화된 프로토콜 준수율'이 중요한 지표로 간주되는 이유는?",o:["처치의 일관성과 질을 담보하는 핵심 지표이기 때문","서류 작업량을 보여주는 지표이기 때문","예산 규모를 보여주는 지표이기 때문","인력 수를 보여주는 지표이기 때문"],a:0,
+ e:"프로토콜 준수율은 현장 처치가 표준화된 근거 기반으로 이루어지고 있는지를 보여주는 핵심 질 지표예요.",r:"총론 – EMS 질 관리 지표(프로토콜 준수율)"},
+{s:"총론",d:2,q:"현장에서 응급구조사가 환자의 '지남력(orientation)'을 평가할 때 확인하는 항목이 아닌 것은?",o:["체온","사람","장소","시간"],a:0,
+ e:"지남력은 사람·장소·시간(및 상황)에 대한 인지를 평가하는 것으로 체온은 별도의 활력징후 항목이에요.",r:"총론 – 의식평가(지남력)"},
+{s:"총론",d:3,q:"현장에서 응급구조사가 '이차 손상(예: 부적절한 이동으로 인한 척추손상 악화)'을 예방하기 위해 지켜야 할 원칙은?",o:["손상기전이 의심되면 척추 고정을 우선 고려한다","무조건 빠르게 이동시킨다","환자 스스로 움직이게 한다","고정 없이 부축만 한다"],a:0,
+ e:"낙상, 교통사고 등 척추손상 가능성이 있는 기전에서는 부적절한 이동으로 인한 이차 손상을 막기 위해 고정을 우선해요.",r:"총론 – 이차 손상 예방 원칙"},
+{s:"총론",d:1,q:"응급구조사가 현장에서 사용하는 표준 무전 용어 중 '카피(copy)'가 의미하는 것은?",o:["내용을 이해하고 수신했다","즉시 출동하겠다","교신을 종료한다","도움이 필요하다"],a:0,
+ e:"'카피(copy)'는 상대방의 교신 내용을 이해하고 수신했음을 확인하는 표준 응답 용어예요.",r:"총론 – 표준 무선교신 용어"},
+{s:"총론",d:2,q:"현장에서 응급구조사가 언론이나 구경꾼으로부터 환자 정보를 보호해야 하는 이유는?",o:["환자의 사생활과 비밀유지 의무를 지키기 위해","교통 통제를 위해서만","시간 절약을 위해서만","보험 처리를 위해서만"],a:0,
+ e:"환자의 신상 및 의료정보는 사생활 보호와 비밀유지 의무에 따라 제3자에게 노출되지 않도록 해야 해요.",r:"총론 – 환자 정보 보호와 비밀유지"},
+{s:"환자관리",d:1,q:"성인의 정상 체온 범위로 가장 적절한 것은?",o:["36.5~37.5℃","34~35℃","38~39℃","39~40℃"],a:0,
+ e:"성인의 정상 심부체온은 대략 36.5~37.5℃ 범위로 평가해요.",r:"환자관리 – 활력징후(체온)"},
+{s:"환자관리",d:1,q:"성인의 정상 수축기 혈압 범위로 가장 적절한 것은?",o:["90~140mmHg","40~60mmHg","160~200mmHg","200mmHg 이상"],a:0,
+ e:"성인의 정상 수축기 혈압은 대략 90~140mmHg 범위로 평가해요.",r:"환자관리 – 활력징후(혈압)"},
+{s:"환자관리",d:1,q:"맥박산소포화도(SpO2) 정상 범위로 가장 적절한 것은?",o:["95~100%","70~80%","85~90%","60% 이하"],a:0,
+ e:"정상 맥박산소포화도는 95% 이상이며, 90% 미만은 저산소증을 의심해요.",r:"환자관리 – 맥박산소포화도(SpO2)"},
+{s:"환자관리",d:1,q:"AVPU 척도에서 'A'가 의미하는 것은?",o:["자발적으로 각성된 상태(Alert)","통증에 반응(Pain)","무반응(Unresponsive)","언어자극에 반응(Verbal)"],a:0,
+ e:"AVPU의 A는 Alert로, 자발적으로 눈을 뜨고 주변을 인지하는 각성 상태를 의미해요.",r:"환자관리 – 의식수준 평가(AVPU)"},
+{s:"환자관리",d:1,q:"글래스고 혼수척도(GCS)에서 평가하는 3가지 항목은?",o:["눈뜨기, 언어반응, 운동반응","맥박, 호흡, 혈압","체온, 맥박, 호흡","동공, 피부색, 맥박"],a:0,
+ e:"GCS는 눈뜨기(E)·언어반응(V)·운동반응(M) 3개 항목을 점수화해 의식수준을 평가해요.",r:"환자관리 – GCS 평가항목"},
+{s:"환자관리",d:1,q:"쇼크 환자의 일반적인 자세로 가장 적절한 것은?",o:["하지를 30cm 정도 거상한 앙와위","완전한 좌위","복위(엎드린 자세)","머리를 낮추고 하지도 낮춘 자세"],a:0,
+ e:"쇼크 환자는 뇌·심장으로의 정맥환류를 돕기 위해 하지를 거상한 앙와위(변형 트렌델렌버그)를 취해요.",r:"환자관리 – 쇼크 체위"},
+{s:"환자관리",d:1,q:"의식이 없는 환자의 기도 유지에 가장 기본적으로 사용하는 수기법은?",o:["head-tilt chin-lift(머리기울임-턱들기)법","하임리히법","흉부압박법","측와위 고정법"],a:0,
+ e:"외상이 의심되지 않는 경우 head-tilt chin-lift법이 기본적인 기도 개방 수기예요.",r:"환자관리 – 기도개방 수기"},
+{s:"환자관리",d:1,q:"외상이 의심되는 환자의 기도 개방에 사용하는 수기법은?",o:["하악견인법(jaw-thrust)","head-tilt chin-lift법","복부압박법","측위 고정법"],a:0,
+ e:"경추손상이 의심되면 목을 움직이지 않는 하악견인법(jaw-thrust)을 사용해요.",r:"환자관리 – 외상환자 기도개방"},
+{s:"환자관리",d:1,q:"개방성 기흉 환자 처치 시 사용하는 대표적 드레싱은?",o:["3면 밀봉(불완전밀봉) 드레싱","완전 밀봉 드레싱","압박 드레싱만","드레싱 없이 방치"],a:0,
+ e:"개방성 기흉은 3면만 밀봉해 흡기 시 공기 유입은 막고 호기 시 공기 배출은 허용하는 드레싱을 적용해요.",r:"환자관리 – 개방성 기흉 처치"},
+{s:"환자관리",d:2,q:"SAMPLE 병력청취에서 'S'가 의미하는 것은?",o:["증상(Signs/Symptoms)","기전(Situation)","약물(Substance)","혈청(Serum)"],a:0,
+ e:"SAMPLE의 S는 현재 증상(Signs/Symptoms)을 의미해요.",r:"환자관리 – SAMPLE 병력청취"},
+{s:"환자관리",d:2,q:"OPQRST 통증 평가에서 'P'가 의미하는 것은?",o:["악화·완화 요인(Provocation/Palliation)","통증의 질(Provocation)","맥박(Pulse)","자세(Position)"],a:0,
+ e:"OPQRST의 P는 통증을 악화시키거나 완화시키는 요인을 의미해요.",r:"환자관리 – OPQRST 통증평가"},
+{s:"환자관리",d:2,q:"저혈량성 쇼크 초기(대상성 단계)의 임상 징후로 가장 적절한 것은?",o:["빈맥과 창백한 피부","서맥과 홍조된 피부","고혈압과 서맥","의식 저하만 단독으로 나타남"],a:0,
+ e:"쇼크 초기에는 보상기전으로 빈맥, 말초혈관수축에 의한 창백·냉습한 피부가 나타나요.",r:"환자관리 – 쇼크의 대상성 단계 징후"},
+{s:"환자관리",d:2,q:"비재호흡마스크(non-rebreather mask)를 통한 산소 투여 시 일반적인 유량은?",o:["분당 10~15L","분당 1~2L","분당 20~25L","분당 30L 이상"],a:0,
+ e:"비재호흡마스크는 저장백을 부풀린 상태로 분당 10~15L의 고농도 산소를 투여해요.",r:"환자관리 – 산소투여 기구별 유량"},
+{s:"환자관리",d:2,q:"비강캐뉼라를 통한 산소 투여 시 일반적인 유량 범위는?",o:["분당 1~6L","분당 10~15L","분당 20L 이상","분당 0.5L 미만"],a:0,
+ e:"비강캐뉼라는 분당 1~6L 범위로 저농도~중등도 산소를 투여할 때 사용해요.",r:"환자관리 – 비강캐뉼라 산소투여"},
+{s:"환자관리",d:2,q:"직접 압박으로 지혈되지 않는 사지 대량 출혈에 우선 고려하는 처치는?",o:["지혈대(tourniquet) 적용","냉찜질만 적용","환부 마사지","수분 섭취 권장"],a:0,
+ e:"직접압박으로 조절되지 않는 사지 대량출혈은 지혈대를 신속히 적용해 생명을 구할 수 있어요.",r:"환자관리 – 대량출혈과 지혈대"},
+{s:"환자관리",d:2,q:"척추손상이 의심되는 환자를 통나무 굴리기(log roll)로 이동시키는 주된 목적은?",o:["척추의 일직선(중립) 상태를 유지하기 위해","이동 속도를 높이기 위해","환자를 편안하게 하기 위해서만","출혈을 줄이기 위해서만"],a:0,
+ e:"log roll 기법은 여러 명이 협력해 척추를 뒤틀림 없이 일직선으로 유지하며 이동시키는 방법이에요.",r:"환자관리 – 척추손상 환자 이동(log roll)"},
+{s:"환자관리",d:2,q:"경추 고정 장비 중 '경성 경추보호대(rigid cervical collar)'만으로 완전한 고정이 되지 않는 이유는?",o:["측면·회전 움직임까지 완전히 막지 못해 추가 고정(백보드 등)이 필요하기 때문","불편하기 때문","가격이 비싸기 때문","착용이 어렵기 때문"],a:0,
+ e:"경성 경추보호대는 굴곡·신전은 제한하지만 완전한 고정을 위해서는 백보드 등 추가 고정장비가 함께 필요해요.",r:"환자관리 – 경추 고정의 한계와 보완"},
+{s:"환자관리",d:2,q:"환자 이송 중 '측위(회복자세)'를 적용하는 주된 목적은?",o:["구토물 등에 의한 기도 흡인을 방지하기 위해","체온을 낮추기 위해서만","혈압을 높이기 위해서만","통증을 줄이기 위해서만"],a:0,
+ e:"측위는 의식저하 환자에서 구토물이나 분비물이 기도로 흡인되는 것을 방지하는 자세예요.",r:"환자관리 – 회복자세(측위)의 목적"},
+{s:"환자관리",d:2,q:"급성 호흡곤란 환자(심질환 의심 없음)에게 편안함을 주는 이송 자세는?",o:["좌위(파울러 체위)","앙와위","트렌델렌버그 체위","복위"],a:0,
+ e:"호흡곤란 환자는 횡격막 운동을 돕는 좌위(반좌위)가 호흡을 편하게 해줘요.",r:"환자관리 – 호흡곤란 환자 체위"},
+{s:"환자관리",d:2,q:"임산부(임신 후반기) 환자를 앙와위로 눕혀야 할 때 주의할 점은?",o:["좌측으로 약간 기울여 대정맥 압박을 예방한다","반드시 똑바로 눕힌다","우측으로 기울인다","고개만 좌측으로 돌린다"],a:0,
+ e:"임신 후반기 앙와위는 자궁이 하대정맥을 압박해 저혈압을 유발할 수 있어 좌측위로 기울여야 해요.",r:"환자관리 – 임산부 앙와위 저혈압증후군"},
+{s:"환자관리",d:3,q:"쇼크 비대상성(진행) 단계에서 나타나는 대표적 징후는?",o:["저혈압과 의식수준 저하","정상 혈압과 명료한 의식","서맥과 고혈압","체온 상승과 발한 없음"],a:0,
+ e:"비대상성 단계는 보상기전이 실패해 저혈압, 의식저하, 소변량 감소 등이 나타나는 심각한 상태예요.",r:"환자관리 – 쇼크 비대상성 단계"},
+{s:"환자관리",d:3,q:"긴장성 기흉 환자에서 나타날 수 있는 특징적 징후는?",o:["기관 편위(trachea deviation)와 경정맥 확장","서맥과 저체온","동공 축소","말초부종만 단독으로 나타남"],a:0,
+ e:"긴장성 기흉은 흉강 내압 상승으로 기관이 건강한 쪽으로 편위되고 경정맥이 확장되는 특징을 보여요.",r:"환자관리 – 긴장성 기흉 징후"},
+{s:"환자관리",d:3,q:"두부손상 환자에서 GCS 점수가 8점 이하일 때 임상적 의미는?",o:["중증 뇌손상으로 기도 보호 능력이 저하될 수 있다","경증 뇌손상을 의미한다","정상 의식 수준이다","즉시 퇴원이 가능하다"],a:0,
+ e:"GCS 8점 이하는 중증 뇌손상 기준으로, 기도 반사가 저하되어 기도 확보에 각별히 주의해야 해요.",r:"환자관리 – GCS와 중증도 판단"},
+{s:"환자관리",d:3,q:"저혈당 의심 환자(의식저하, 발한, 빈맥)에서 응급구조사가 취할 수 있는 처치로 가장 적절한 것은?",o:["의식이 있으면 경구 당분을 섭취시키고, 프로토콜에 따라 혈당을 측정한다","무조건 인슐린을 투여한다","수분 섭취를 제한한다","고농도 산소만 투여하고 당분은 주지 않는다"],a:0,
+ e:"의식이 있는 저혈당 의심 환자는 경구 당분 섭취가 가능하며, 혈당 측정 후 프로토콜에 따라 대응해요.",r:"환자관리 – 저혈당 의심 환자 처치"},
+{s:"환자관리",d:3,q:"화상 환자의 체표면적(9의 법칙)에서 성인 한쪽 팔 전체가 차지하는 비율은?",o:["9%","18%","36%","1%"],a:0,
+ e:"9의 법칙에서 성인 한쪽 팔은 9%, 한쪽 다리는 18%, 몸통 앞뒤 각 18%, 머리 9%로 계산해요.",r:"환자관리 – 화상 체표면적 계산(9의 법칙)"},
+{s:"환자관리",d:3,q:"경추 손상이 의심되는 환자에서 '척추 고정 완화(선택적 척추 고정) 기준'에 해당하지 않는 것은?",o:["고에너지 손상 기전이 명확한 경우","의식이 명료하고 신경학적 이상이 없는 경우","중심선 압통이 없는 경우","주의를 분산시키는 다른 손상이 없는 경우"],a:0,
+ e:"선택적 척추고정 기준은 의식 명료, 압통 없음, 신경학적 정상, 주의 분산 손상 없음 등이며, 고에너지 기전 자체는 고정을 지지하는 요인이에요.",r:"환자관리 – 선택적 척추고정 기준(NEXUS 등)"},
+{s:"환자관리",d:3,q:"다발성 외상 환자에서 '삼중고정(경추보호대+헤드블록+백보드)'을 시행하는 목적은?",o:["이송 중 척추의 추가 움직임을 최소화하기 위해","환자를 눕히기 편하게 하기 위해서만","체온 유지를 위해서만","출혈을 줄이기 위해서만"],a:0,
+ e:"삼중고정은 경추·흉추·요추 전체를 안정화해 이송 중 이차 척수손상을 예방하기 위한 표준 처치예요.",r:"환자관리 – 척추 삼중고정"},
+{s:"환자관리",d:3,q:"흉통을 호소하는 환자의 병력청취에서 '방사통(radiation)' 확인이 중요한 이유는?",o:["심근경색 등 심장성 통증의 특징적 소견일 수 있기 때문","단순 근육통 여부만 확인하기 위해","호흡곤란 여부만 확인하기 위해","체온 변화만 확인하기 위해"],a:0,
+ e:"팔·턱·등으로 뻗치는 방사통은 급성 관상동맥증후군의 특징적 소견 중 하나예요.",r:"환자관리 – 흉통 평가와 방사통"},
+{s:"환자관리",d:3,q:"경련(발작) 환자의 응급처치에서 가장 우선해야 할 조치는?",o:["주변 위험물을 치우고 손상을 예방한다","입에 물체를 강제로 물린다","팔다리를 억지로 붙잡아 고정한다","즉시 찬물을 끼얹는다"],a:0,
+ e:"경련 중에는 억지로 억제하지 않고 주변 위험물을 치워 2차 손상을 예방하는 것이 우선이에요.",r:"환자관리 – 경련 환자 응급처치"},
+{s:"환자관리",d:4,q:"쇼크 환자에게 산소를 고농도로 투여하는 생리학적 근거는?",o:["조직 관류 저하 상태에서 산소운반능을 최대화하기 위해","체온을 낮추기 위해","심박수를 낮추기 위해","통증을 줄이기 위해"],a:0,
+ e:"쇼크는 조직 관류·산소공급이 저하된 상태이므로 고농도 산소로 동맥혈 산소함량을 최대화해 조직 저산소증을 완화해요.",r:"환자관리 – 쇼크와 산소요법의 생리학적 근거"},
+{s:"환자관리",d:4,q:"둔상에 의한 복부손상 환자에서 '반동압통(rebound tenderness)'이 시사하는 것은?",o:["복막 자극(복막염) 가능성","단순 근육 좌상","정상 소견","탈수 상태"],a:0,
+ e:"반동압통은 복막이 자극받고 있다는 신호로 내부 장기 손상이나 복막염을 의심하게 해요.",r:"환자관리 – 복부 손상 평가(반동압통)"},
+{s:"환자관리",d:4,q:"경추손상이 의심되는 환자에서 헬멧을 제거해야 하는 경우로 가장 적절한 것은?",o:["기도확보나 호흡평가가 헬멧 때문에 불가능한 경우","환자가 불편함을 호소하는 경우만","헬멧이 새것이 아닌 경우","이송 거리가 짧은 경우"],a:0,
+ e:"헬멧 착용이 기도확보·호흡평가·심정지 처치를 방해하면 2인 1조로 경추 중립을 유지하며 제거해요.",r:"환자관리 – 헬멧 제거 기준과 기법"},
+{s:"환자관리",d:4,q:"패혈성 쇼크 초기(온난성 쇼크)에서 나타날 수 있는 특징적 소견은?",o:["말초혈관 확장으로 인한 따뜻하고 붉은 피부, 빈맥","말초혈관 수축으로 인한 창백하고 차가운 피부만","서맥과 저체온만","의식 명료 유지"],a:0,
+ e:"패혈성 쇼크 초기에는 전신 혈관 확장으로 피부가 따뜻하고 붉게 보이는 '온난성 쇼크' 양상이 나타날 수 있어요.",r:"환자관리 – 패혈성 쇼크의 특징"},
+{s:"환자관리",d:4,q:"다발성 외상 환자 평가에서 '기전(mechanism of injury)'만으로 판단하기 어려운 손상을 놓치지 않기 위한 접근법은?",o:["손상기전과 무관하게 전신 신체검진을 체계적으로 시행한다","기전이 경미하면 신체검진을 생략한다","환자 진술만 신뢰한다","외견상 이상이 없으면 평가를 종료한다"],a:0,
+ e:"내부 손상은 외견상 드러나지 않을 수 있어, 기전이 의심스러우면 체계적인 전신 검진으로 숨은 손상을 찾아야 해요.",r:"환자관리 – 손상기전과 신체검진의 관계"},
+{s:"환자관리",d:4,q:"급성 심근경색이 의심되는 환자에서 통증 외에 나타날 수 있는 비전형적 증상으로 옳은 것은?",o:["오심, 발한, 소화불량 유사 증상","고열과 발진","관절통과 피부 발적만","시력 저하만"],a:0,
+ e:"특히 여성·당뇨·고령 환자는 흉통 없이 오심, 발한, 소화불량 유사 증상 등 비전형적 증상만 나타날 수 있어요.",r:"환자관리 – 급성 심근경색의 비전형적 증상"},
+{s:"환자관리",d:4,q:"기도 이물질에 의한 완전 폐쇄가 의심되는 의식이 있는 성인 환자의 처치는?",o:["복부밀어내기(하임리히법)를 반복 시행한다","등을 가볍게 두드리기만 한다","즉시 인공호흡을 시도한다","물을 마시게 한다"],a:0,
+ e:"완전 기도폐쇄가 의심되는 의식이 있는 성인에게는 복부밀어내기(하임리히법)를 반복 시행해요.",r:"환자관리 – 기도이물 폐쇄 처치(성인)"},
+{s:"환자관리",d:5,q:"다발성 외상 환자에서 '치명적 3요소(triad of death)'에 해당하는 것은?",o:["저체온, 대사성 산증, 응고장애","고혈압, 고체온, 서맥","빈맥, 고혈당, 부종","저혈당, 고체온, 서맥"],a:0,
+ e:"외상 환자의 치명적 3요소는 저체온-대사성 산증-응고장애로, 서로 악순환을 이루며 사망률을 높여요.",r:"환자관리 – 외상성 치명적 3요소"},
+{s:"환자관리",d:5,q:"허용적 저혈압(permissive hypotension) 전략이 적용될 수 있는 상황은?",o:["활동성 출혈이 조절되지 않은 관통성 외상 환자에서 과도한 수액 투여를 제한할 때","모든 쇼크 환자에게 항상 적용","두부손상이 동반된 모든 환자","소아 환자 전체"],a:0,
+ e:"허용적 저혈압은 지혈 전 과도한 수액으로 혈압을 정상화시키면 오히려 출혈이 악화될 수 있어 일부 관통성 외상에서 제한적으로 적용해요.",r:"환자관리 – 허용적 저혈압 전략"},
+{s:"환자관리",d:5,q:"외상성 심정지(traumatic cardiac arrest) 환자에서 일반 심정지와 다르게 우선 고려해야 할 가역적 원인은?",o:["저혈량증과 긴장성 기흉 등 외상성 원인 교정","전해질 이상만","약물 중독만","저체온만"],a:0,
+ e:"외상성 심정지는 저혈량, 긴장성 기흉, 심낭압전 등 외상성 가역 원인을 우선 교정하는 것이 표준 흉부압박보다 중요할 수 있어요.",r:"환자관리 – 외상성 심정지의 가역적 원인"},
+{s:"환자관리",d:5,q:"중증 두부손상 환자에서 '쿠싱 반응(Cushing's triad)'에 해당하는 소견은?",o:["고혈압, 서맥, 불규칙한 호흡","저혈압, 빈맥, 규칙적 호흡","고혈압, 빈맥, 무호흡만","저체온, 발한, 빈맥"],a:0,
+ e:"쿠싱 반응은 두개내압 상승 시 나타나는 고혈압-서맥-불규칙 호흡의 3대 징후로 뇌탈출의 위험 신호예요.",r:"환자관리 – 두개내압 상승과 쿠싱반응"},
+{s:"환자관리",d:2,q:"두부 손상이 동반된 다발성 외상 환자에서 척추고정 시 유의할 점은?",o:["기도확보를 방해하지 않는 범위 내에서 고정한다","고정보다 신속한 이송이 항상 우선이다","의식이 있으면 고정이 필요 없다","고정 순서는 무관하다"],a:0,
+ e:"척추고정은 중요하지만 기도확보·호흡유지가 항상 우선이며, 고정이 이를 방해하지 않도록 해야 해요.",r:"환자관리 – 기도우선 원칙과 척추고정"},
+{s:"환자관리",d:2,q:"개방성 골절 환자 처치의 기본 원칙으로 옳은 것은?",o:["노출된 뼈를 억지로 밀어넣지 않고 무균 드레싱으로 덮는다","노출된 뼈를 즉시 안으로 밀어넣는다","소독 없이 방치한다","골절 부위를 강하게 압박해 정복한다"],a:0,
+ e:"개방성 골절은 뼈를 무리하게 정복하지 않고 무균 드레싱으로 덮은 뒤 부목 고정을 시행해요.",r:"환자관리 – 개방성 골절 처치 원칙"},
+{s:"환자관리",d:2,q:"의식저하 환자에서 '입인두기도기(oropharyngeal airway)' 삽입이 부적절한 경우는?",o:["구역반사가 살아있는 환자","완전한 무의식 환자","심정지 환자","전신마취 환자"],a:0,
+ e:"구역반사가 살아있는 환자에게 입인두기도기를 삽입하면 구토를 유발할 수 있어 금기예요.",r:"환자관리 – 입인두기도기 적응증/금기"},
+{s:"환자관리",d:2,q:"코인두기도기(nasopharyngeal airway) 삽입이 금기시되는 대표적 상황은?",o:["안면부 골절이 의심되는 경우","구역반사가 살아있는 경우","단순 의식저하 환자","경증 호흡곤란 환자"],a:0,
+ e:"안면부·두개저 골절이 의심되면 코인두기도기가 두개강 내로 잘못 삽입될 위험이 있어 금기예요.",r:"환자관리 – 코인두기도기 금기"},
+{s:"환자관리",d:3,q:"고령 환자의 활력징후 평가 시 주의할 점으로 가장 적절한 것은?",o:["약물 복용 등으로 정상 반응(빈맥 등)이 나타나지 않을 수 있다","항상 젊은 환자와 동일한 기준을 적용한다","혈압은 평가할 필요가 없다","의식 평가는 생략해도 된다"],a:0,
+ e:"베타차단제 복용 등으로 쇼크 상태에서도 빈맥이 나타나지 않는 등 고령 환자는 반응이 다를 수 있어 주의가 필요해요.",r:"환자관리 – 고령 환자 평가 시 주의점"},
+{s:"환자관리",d:3,q:"소아 환자의 쇼크 평가에서 성인과 다른 특징으로 옳은 것은?",o:["혈압 저하가 늦게 나타나며 빈맥이 초기 대표 징후이다","혈압 저하가 가장 먼저 나타난다","서맥이 초기 대표 징후이다","성인과 완전히 동일한 양상을 보인다"],a:0,
+ e:"소아는 강력한 보상기전으로 혈압이 늦게 떨어지고, 빈맥이 쇼크의 초기 경고 징후로 나타나요.",r:"환자관리 – 소아 쇼크의 특징"},
+{s:"환자관리",d:3,q:"익수(물에 빠짐) 환자의 초기 처치에서 가장 우선되는 것은?",o:["기도확보 및 호흡 보조","보온만 우선","복부의 물을 짜내는 것","알코올 섭취"],a:0,
+ e:"익수 환자는 저산소증이 주된 문제이므로 기도확보와 호흡 보조(인공호흡 포함)가 최우선이에요.",r:"환자관리 – 익수 환자 처치"},
+{s:"환자관리",d:3,q:"저체온증 환자를 다룰 때 주의해야 할 점으로 옳은 것은?",o:["거칠게 다루면 심실세동을 유발할 수 있어 조심스럽게 다뤄야 한다","빠르게 마사지하여 체온을 올린다","활동을 격려해 체온을 올린다","뜨거운 물에 급격히 담근다"],a:0,
+ e:"저체온 심장은 자극에 예민해 거친 처치가 치명적 부정맥을 유발할 수 있어 조심스러운 처치가 필요해요.",r:"환자관리 – 저체온증 환자 처치 주의점"},
+{s:"환자관리",d:4,q:"열사병(heat stroke) 환자의 특징적 소견으로 옳은 것은?",o:["중추신경계 이상(의식변화)을 동반한 고체온","정상 체온과 명료한 의식","저체온과 서맥","발한이 왕성하고 의식은 정상"],a:0,
+ e:"열사병은 체온조절 기능이 붕괴되어 고체온과 함께 의식변화·경련 등 중추신경계 이상이 동반되는 응급질환이에요.",r:"환자관리 – 열사병의 특징"},
+{s:"환자관리",d:4,q:"경부 관통상 환자에서 특히 주의해야 할 합병증은?",o:["대혈관 손상에 의한 대량출혈과 기도폐쇄","단순 피부 열상만","경미한 타박상만","가벼운 어지럼증만"],a:0,
+ e:"경부는 주요 혈관·기도·척수가 밀집되어 있어 관통상 시 대량출혈, 기도폐쇄 등 치명적 합병증 위험이 커요.",r:"환자관리 – 경부 관통상의 위험성"},
+{s:"환자관리",d:4,q:"과호흡(hyperventilation) 증후군 환자의 병력청취에서 감별해야 할 중요한 질환은?",o:["폐색전증, 당뇨성 케톤산증 등 기질적 원인","단순 감기","피부질환","근육통"],a:0,
+ e:"과호흡은 불안 외에도 폐색전증, 케톤산증 등 심각한 기질적 질환의 대상성 반응일 수 있어 감별이 중요해요.",r:"환자관리 – 과호흡의 감별진단"},
+{s:"환자관리",d:5,q:"다발성 외상 환자에서 '2차 평가를 이송 중 시행'하도록 권고되는 경우는?",o:["1차 평가상 불안정(load and go 기준)한 경우","환자가 안정적이고 시간 여유가 있는 경우","현장이 매우 안전한 경우","보호자가 요청하는 경우"],a:0,
+ e:"불안정한 중증 외상 환자는 현장 체류시간을 최소화하고 이송 중에 2차 평가를 진행하는 것이 원칙이에요.",r:"환자관리 – 불안정 환자의 2차 평가 시점"},
+{s:"환자관리",d:1,q:"환자 이송 중 활력징후를 반복 측정하는 주된 이유는?",o:["환자 상태의 변화 추세를 파악하기 위해","서류 분량을 늘리기 위해","시간을 보내기 위해","법적 의무이기 때문만"],a:0,
+ e:"단회 측정보다 반복 측정을 통한 추세 파악이 환자 상태 변화를 조기에 감지하는 데 중요해요.",r:"환자관리 – 활력징후 반복측정의 의의"},
+{s:"환자관리",d:1,q:"피부의 색·온도·습도를 관찰하는 것이 임상적으로 중요한 이유는?",o:["말초 관류 상태를 간접적으로 평가할 수 있기 때문","외모 평가를 위해서만","체중을 추정하기 위해서만","연령을 추정하기 위해서만"],a:0,
+ e:"창백·냉습한 피부는 말초 혈관수축과 관류저하(쇼크 등)를 시사하는 중요한 신체 징후예요.",r:"환자관리 – 피부 소견의 임상적 의미"},
+{s:"환자관리",d:2,q:"동공 반응 평가에서 '양측 동공 크기 차이(부동공)'가 시사할 수 있는 것은?",o:["두개내 병변(뇌출혈 등) 가능성","정상 소견","단순 피로","탈수 상태"],a:0,
+ e:"양측 동공 크기가 다른 부동공은 두개내압 상승이나 국소 뇌병변을 시사하는 중요한 신경학적 소견이에요.",r:"환자관리 – 동공평가와 신경학적 의미"},
+{s:"환자관리",d:2,q:"경구 섭취를 제한(NPO)해야 하는 대표적 상황은?",o:["수술이나 처치가 예상되는 급성 복증 환자","단순 감기 환자","경미한 두통 환자","가벼운 타박상 환자"],a:0,
+ e:"급성 복증 등 수술 가능성이 있는 환자는 흡인 위험과 마취 문제로 경구 섭취를 제한해요.",r:"환자관리 – NPO(금식) 원칙"},
+{s:"환자관리",d:3,q:"흉부 압박 시 발생할 수 있는 흔한 합병증은?",o:["늑골 골절","심근경색","폐렴","당뇨병 악화"],a:0,
+ e:"강한 흉부압박은 늑골이나 흉골 골절을 유발할 수 있으나, 소생을 위해 압박은 계속 유지해야 해요.",r:"환자관리 – 흉부압박의 합병증"},
+{s:"환자관리",d:3,q:"과다호흡을 하는 심인성(공황) 환자에게 권장되지 않는 처치는?",o:["종이봉투를 이용한 재호흡법 강요","안심시키고 천천히 호흡하도록 유도","산소포화도 모니터링","의료진과 상담 권유"],a:0,
+ e:"과거의 종이봉투 재호흡법은 저산소증 등 위험이 있어 현재는 권장되지 않고, 안심·호흡 유도가 우선이에요.",r:"환자관리 – 과호흡 환자 처치 시 주의"},
+{s:"환자관리",d:4,q:"복부 관통상에서 내장이 노출된 경우(장기 탈출)의 처치로 옳은 것은?",o:["장기를 억지로 넣지 않고 젖은 무균 드레싱으로 덮는다","즉시 복강 안으로 밀어넣는다","건조한 거즈로 강하게 압박한다","물로 씻어낸다"],a:0,
+ e:"탈출된 장기는 다시 넣지 않고 젖은 멸균 드레싱으로 덮어 건조·오염을 방지해요.",r:"환자관리 – 복부 장기 탈출 처치"},
+{s:"환자관리",d:4,q:"압궤증후군(crush syndrome)이 의심되는 환자를 구조할 때 주의할 점은?",o:["압박 해제 시 고칼륨혈증 등 전신 합병증 위험을 사전에 고려한다","즉시 압박을 제거하면 아무 문제가 없다","압박 부위는 마사지로 풀어준다","수분 섭취를 제한한다"],a:0,
+ e:"장시간 압박된 조직이 갑자기 풀리면 독성 대사산물과 칼륨이 전신으로 방출되어 심장·신장에 치명적일 수 있어요.",r:"환자관리 – 압궤증후군의 위험성"},
+{s:"법령",d:1,q:"응급구조사의 자격과 업무범위를 규정하는 법률은?",o:["응급의료에 관한 법률","의료법","약사법","산업안전보건법"],a:0,
+ e:"응급구조사의 자격, 등급, 업무범위는 「응급의료에 관한 법률」 및 그 시행규칙에서 규정해요.",r:"법령 – 응급구조사 관련 근거법"},
+{s:"법령",d:1,q:"「응급의료에 관한 법률」상 '응급환자'의 정의로 가장 적절한 것은?",o:["즉시 필요한 응급처치를 받지 아니하면 생명을 보존할 수 없거나 심신상 중대한 위해가 발생할 가능성이 있는 자","단순 감기 증상이 있는 자","경미한 찰과상이 있는 자","정기 건강검진을 받는 자"],a:0,
+ e:"응급환자는 즉각적 처치가 없으면 생명이나 심신에 중대한 위해가 발생할 우려가 있는 자로 정의돼요.",r:"법령 – 응급환자의 법적 정의"},
+{s:"법령",d:1,q:"「응급의료에 관한 법률」상 '응급의료'의 정의에 포함되지 않는 것은?",o:["일반 건강검진","응급환자 발생 시의 상담·구조·이송","응급처치","진료"],a:0,
+ e:"응급의료는 상담·구조·이송·응급처치 및 진료를 포함하며, 일반 건강검진은 이에 해당하지 않아요.",r:"법령 – 응급의료의 정의"},
+{s:"법령",d:1,q:"응급의료종사자가 응급환자를 발견했을 때 지켜야 할 기본 의무는?",o:["즉시 응급의료를 제공해야 한다","반드시 병원으로만 이송해야 한다","보호자 동의 없이는 접촉할 수 없다","반드시 경찰에 먼저 신고해야 한다"],a:0,
+ e:"응급의료종사자는 응급환자를 발견하면 즉시 응급의료를 제공해야 할 법적 의무가 있어요.",r:"법령 – 응급의료종사자의 의무"},
+{s:"법령",d:1,q:"응급의료기관이 정당한 사유 없이 응급환자의 진료를 거부할 경우 발생하는 법적 문제는?",o:["응급의료 거부 금지 위반으로 처벌 대상이 될 수 있다","아무 문제가 없다","병원 평가에만 영향을 준다","경고만 받고 끝난다"],a:0,
+ e:"정당한 사유 없는 응급환자 진료 거부는 법률상 금지되며 처벌 대상이 될 수 있어요.",r:"법령 – 응급의료 거부 금지"},
+{s:"법령",d:1,q:"「응급의료에 관한 법률」의 목적으로 가장 적절한 것은?",o:["국민의 생명과 건강을 보호하고 국민 복지 증진에 이바지","의료기관의 영리 활동 촉진","의약품 가격 통제","보험료 산정 기준 마련"],a:0,
+ e:"이 법은 응급의료를 통해 국민의 생명과 건강을 보호하고 국민복지 증진에 이바지함을 목적으로 해요.",r:"법령 – 법의 목적"},
+{s:"법령",d:2,q:"「응급의료에 관한 법률」상 '선의의 응급의료 면책'이 적용되는 경우로 옳은 것은?",o:["고의 또는 중대한 과실 없이 한 응급처치로 발생한 결과","고의로 처치를 잘못한 경우","자격 없이 무단으로 처치한 경우","보수를 받고 한 진료행위"],a:0,
+ e:"고의나 중대한 과실이 없는 선의의 응급처치는 민형사상 책임을 감면받을 수 있어요.",r:"법령 – 선의의 응급의료 면책 요건"},
+{s:"법령",d:2,q:"구급차 등을 운용할 수 있는 기관에 해당하지 않는 것은?",o:["일반 개인 사업자","의료기관","소방기관","이송업체(허가받은)"],a:0,
+ e:"구급차는 의료기관, 소방기관, 허가받은 이송업체 등 법령이 정한 자만 운용할 수 있으며 일반 개인은 해당하지 않아요.",r:"법령 – 구급차 운용 주체"},
+{s:"법령",d:2,q:"응급구조사가 무자격으로 업무범위를 초과한 처치를 했을 때 받을 수 있는 제재는?",o:["자격정지 또는 형사처벌 등 법적 제재","단순 경고로 끝남","아무 제재가 없음","벌금만 부과됨(무조건)"],a:0,
+ e:"업무범위를 벗어난 처치는 법령 위반으로 자격정지·취소 또는 형사처벌 등 제재 대상이 될 수 있어요.",r:"법령 – 업무범위 초과의 법적 책임"},
+{s:"법령",d:2,q:"응급의료기관의 종류에 해당하지 않는 것은?",o:["종합병원(일반)","권역응급의료센터","지역응급의료센터","지역응급의료기관"],a:0,
+ e:"응급의료기관은 권역응급의료센터, 지역응급의료센터, 지역응급의료기관 등으로 구분되며 일반 종합병원 명칭 자체는 별도 분류가 아니에요.",r:"법령 – 응급의료기관의 종류"},
+{s:"법령",d:2,q:"응급의료비 미수금 대지급 제도의 목적으로 가장 적절한 것은?",o:["지불능력이 없는 응급환자도 적기에 치료받을 수 있도록 의료기관 손실을 보전","의료기관의 이윤을 늘리기 위해","보험사의 부담을 줄이기 위해","환자의 병력을 관리하기 위해"],a:0,
+ e:"미수금 대지급 제도는 지불 능력 부족으로 치료가 지연되지 않도록 국가가 의료기관 손실을 보전해주는 제도예요.",r:"법령 – 응급의료비 미수금 대지급제도"},
+{s:"법령",d:2,q:"응급구조사가 업무 수행 중 알게 된 환자의 비밀을 누설했을 때 적용될 수 있는 것은?",o:["비밀누설금지 위반으로 처벌 대상이 될 수 있다","단순 도덕적 비난만 받는다","아무런 법적 책임이 없다","환자에게만 사과하면 된다"],a:0,
+ e:"응급의료종사자는 업무상 알게 된 비밀을 누설해서는 안 되며, 위반 시 처벌 대상이 될 수 있어요.",r:"법령 – 비밀누설 금지 의무"},
+{s:"법령",d:2,q:"응급환자 이송 시 '이송처치료'에 대한 설명으로 옳은 것은?",o:["법령이 정한 기준에 따라 산정·징수한다","전액 무료로 제공된다","이송자가 임의로 정한다","항상 보험사가 전액 부담한다"],a:0,
+ e:"이송처치료는 법령이 정한 기준(요금 체계)에 따라 산정·징수하도록 규정돼 있어요.",r:"법령 – 이송처치료 산정 기준"},
+{s:"법령",d:3,q:"응급의료기관이 응급환자를 다른 병원으로 전원(transfer)할 수 있는 조건으로 옳은 것은?",o:["적절한 진료가 가능한 다른 기관으로, 환자 상태가 이송 가능한 경우","환자가 원치 않아도 무조건","응급실이 붐빈다는 이유만으로","야간이라는 이유만으로"],a:0,
+ e:"전원은 환자에게 더 적합한 치료가 가능한 기관으로, 이송 중 안전이 확보될 때 시행할 수 있어요.",r:"법령 – 응급환자 전원 기준"},
+{s:"법령",d:3,q:"응급의료 종사자가 응급처치 등을 거부·기피할 수 있는 정당한 사유에 해당하는 경우는?",o:["의료인 자신의 안전이 심각하게 위협받는 불가항력적 상황","단순히 업무가 바쁜 경우","환자가 마음에 들지 않는 경우","보수가 적다고 판단되는 경우"],a:0,
+ e:"불가항력적으로 구조자의 생명·신체에 심각한 위협이 있는 경우 등 제한적 사유만 정당한 거부 사유로 인정돼요.",r:"법령 – 응급의료 거부의 정당한 사유"},
+{s:"법령",d:3,q:"「응급의료에 관한 법률」상 구급차 등의 '우선 통행권' 관련 설명으로 옳은 것은?",o:["응급환자 이송 등 긴급한 경우 도로교통법에서 정한 특례가 적용될 수 있다","항상 예외 없이 신호를 지켜야 한다","우선 통행권은 존재하지 않는다","경찰차만 우선 통행권이 있다"],a:0,
+ e:"응급 상황에서 구급차는 도로교통법 특례에 따라 일정한 우선 통행이 인정될 수 있어요.",r:"법령 – 구급차의 우선 통행 특례"},
+{s:"법령",d:3,q:"응급구조사 자격이 취소될 수 있는 사유로 가장 적절한 것은?",o:["거짓이나 부정한 방법으로 자격을 취득한 경우","단순 지각을 반복한 경우","이송을 정중히 거절당한 경우","환자에게 친절하지 않았다는 민원만 접수된 경우"],a:0,
+ e:"거짓·부정한 방법으로 자격을 취득하거나 중대한 법 위반이 있으면 자격이 취소될 수 있어요.",r:"법령 – 응급구조사 자격 취소 사유"},
+{s:"법령",d:3,q:"응급의료기관의 지정 및 평가와 관련한 설명으로 옳은 것은?",o:["보건복지부장관 등이 일정 기준에 따라 지정·평가·관리한다","각 병원이 자율적으로 지정한다","지정 제도는 존재하지 않는다","평가는 민간단체가 임의로 수행한다"],a:0,
+ e:"응급의료기관은 보건복지부 등 관할 기관이 법정 기준에 따라 지정하고 주기적으로 평가·관리해요.",r:"법령 – 응급의료기관 지정·평가"},
+{s:"법령",d:3,q:"응급의료에 관한 법률상 '응급의료지원센터(현 응급의료정보센터 등)'의 주요 기능은?",o:["응급의료 관련 정보 제공 및 병상 조회 등 지원","환자의 진단을 대신 내려주는 기능","약을 처방하는 기능","보험료를 정산하는 기능"],a:0,
+ e:"응급의료지원센터는 병상 정보 제공, 이송병원 안내 등 응급의료체계 운영을 지원하는 역할을 해요.",r:"법령 – 응급의료지원센터의 기능"},
+{s:"법령",d:3,q:"구급차 등에 반드시 갖추어야 할 장비 기준을 정하는 근거는?",o:["응급의료에 관한 법률 시행규칙 등 관련 법령","각 운전자의 개인 판단","제조사의 임의 설정","보험회사의 내부 지침"],a:0,
+ e:"구급차 등에 갖추어야 할 의료장비·구급의약품 기준은 법령(시행규칙)에서 구체적으로 정하고 있어요.",r:"법령 – 구급차 장비기준의 근거"},
+{s:"법령",d:4,q:"응급의료 관련 분쟁에서 '설명의무 위반'이 문제 되는 경우로 가장 적절한 것은?",o:["처치 전 환자에게 위험성 등을 충분히 설명하지 않은 경우","처치가 지연된 경우","이송료를 청구한 경우","기록을 남긴 경우"],a:0,
+ e:"환자의 자기결정권 보장을 위해 처치의 필요성·위험성 등을 설명할 의무가 있으며, 이를 위반하면 법적 분쟁의 원인이 될 수 있어요.",r:"법령 – 설명의무와 법적 책임"},
+{s:"법령",d:4,q:"응급구조사가 현장에서 의료지도 없이 프로토콜 범위를 벗어난 침습적 처치를 시행했을 때 문제가 되는 이유는?",o:["업무범위 초과 및 무면허 의료행위에 해당할 수 있기 때문","항상 환자에게 이익이 되기 때문","시간이 단축되기 때문","기록이 간소화되기 때문"],a:0,
+ e:"프로토콜과 업무범위를 벗어난 침습적 처치는 무면허 의료행위 등 법적 문제로 이어질 수 있어요.",r:"법령 – 업무범위 초과와 무면허의료행위"},
+{s:"법령",d:4,q:"「응급의료에 관한 법률」상 응급의료기관이 아닌 의료기관도 부담하는 응급환자 관련 의무는?",o:["응급처치 후 적절한 기관으로 신속히 이송할 의무","응급의료기관과 동일한 시설을 갖출 의무","모든 응급수술을 직접 시행할 의무","응급의료기금을 직접 운용할 의무"],a:0,
+ e:"응급의료기관이 아니더라도 응급환자를 발견하면 필요한 처치 후 적정한 기관으로 이송해야 할 의무가 있어요.",r:"법령 – 비응급의료기관의 의무"},
+{s:"법령",d:4,q:"「의료법」과 「응급의료에 관한 법률」의 관계에 대한 설명으로 옳은 것은?",o:["응급의료는 의료행위의 특수한 영역으로 두 법이 함께 적용될 수 있다","두 법은 전혀 관련이 없다","응급의료에 관한 법률이 의료법을 완전히 대체한다","의료법은 응급상황에는 적용되지 않는다"],a:0,
+ e:"응급처치도 의료행위의 일종이므로 상황에 따라 의료법과 응급의료에 관한 법률이 함께 적용될 수 있어요.",r:"법령 – 의료법과 응급의료법의 관계"},
+{s:"법령",d:4,q:"응급구조사가 재해·재난 현장에서 관계 법령상 협조해야 할 기관으로 가장 거리가 먼 것은?",o:["민간 기업의 영업 부서","소방관서","경찰관서","보건소 등 보건당국"],a:0,
+ e:"재난 대응 시 소방·경찰·보건당국 등과의 협조가 법령상 요구되며, 민간 기업 영업 부서는 관계 없어요.",r:"법령 – 재난현장 협조기관"},
+{s:"법령",d:4,q:"응급의료기관의 '전문의 등 당직 의료인력 배치' 의무를 두는 취지로 가장 적절한 것은?",o:["야간·휴일에도 신속한 응급의료 제공을 보장하기 위해","인건비를 줄이기 위해","병원 홍보를 위해","환자 수를 제한하기 위해"],a:0,
+ e:"당직 의료인력 배치 의무는 시간대와 무관하게 응급환자에게 신속한 진료를 보장하기 위한 규정이에요.",r:"법령 – 당직의료인력 배치 의무의 취지"},
+{s:"법령",d:5,q:"응급의료 관련 판례에서 '전원 지연으로 인한 손해'가 문제 될 때 판단하는 핵심 기준은?",o:["당시 의료수준에서 합리적으로 전원 결정을 지연 없이 했는지 여부","전원을 아예 하지 않았는지 여부만","환자의 보험 유무","이송 거리의 길이"],a:0,
+ e:"전원 지연 관련 분쟁은 당시 의료 수준에서 합리적 판단과 절차가 지체 없이 이루어졌는지가 핵심 쟁점이 돼요.",r:"법령 – 전원 지연 관련 법적 쟁점"},
+{s:"법령",d:5,q:"응급의료체계 관련 법령에서 '지역책임의료기관' 지정 취지로 가장 적절한 것은?",o:["지역 내 필수 응급의료 접근성을 보장하기 위해","특정 병원의 수익을 보장하기 위해","경쟁을 제한하기 위해","의사 수를 줄이기 위해"],a:0,
+ e:"지역책임의료기관 지정은 지역 간 응급의료 격차를 줄이고 필수 의료 접근성을 보장하려는 취지예요.",r:"법령 – 지역책임의료기관 제도"},
+{s:"법령",d:5,q:"응급의료 관련 법률에서 '중증도 분류 결과에 따른 이송 거부'가 정당화될 수 없는 이유는?",o:["응급의료 거부·기피 금지 원칙에 반하기 때문","분류 자체가 불법이기 때문","시간이 오래 걸리기 때문","환자가 동의했기 때문"],a:0,
+ e:"중증도와 무관하게 정당한 사유 없는 이송·진료 거부는 응급의료 거부금지 원칙 위반이 될 수 있어요.",r:"법령 – 응급의료 거부금지 원칙의 적용범위"},
+{s:"법령",d:5,q:"응급의료 관련 법령 위반 시 '양벌규정'이 적용될 수 있는 대상은?",o:["위반행위를 한 개인뿐 아니라 소속 법인·기관도 함께 처벌될 수 있다","개인만 처벌되고 법인은 면책된다","법인만 처벌되고 개인은 면책된다","처벌 대상이 전혀 없다"],a:0,
+ e:"양벌규정은 실제 행위자뿐 아니라 그가 소속된 법인·기관도 함께 처벌할 수 있도록 하는 규정이에요.",r:"법령 – 양벌규정의 적용범위"},
+{s:"법령",d:1,q:"「응급의료에 관한 법률」상 응급구조사의 최소 자격 등급 구분으로 옳은 것은?",o:["1급과 2급","A급과 B급","특급과 일반급","상급과 하급"],a:0,
+ e:"응급구조사는 1급과 2급으로 등급을 구분하며 등급별 업무범위가 다르게 규정돼 있어요.",r:"법령 – 응급구조사 자격 등급"},
+{s:"법령",d:1,q:"응급구조사가 되기 위해서는 어떤 절차가 필요한가?",o:["국가시험에 합격하고 자격을 취득해야 한다","별도 시험 없이 교육만 이수하면 된다","면허 없이 자율적으로 활동 가능하다","외국 자격만 있으면 국내에서 바로 활동 가능하다"],a:0,
+ e:"응급구조사는 소정의 교육 이수 후 국가시험에 합격해야 자격을 취득할 수 있어요.",r:"법령 – 응급구조사 자격취득 절차"},
+{s:"법령",d:1,q:"응급의료 관련 법령에서 '응급의료기금'의 재원으로 사용될 수 없는 것은?",o:["개인의 사적 유흥비 지원","과징금 및 부담금","국고 보조금","기부금"],a:0,
+ e:"응급의료기금은 응급의료 인프라 지원 등 공익 목적에만 사용되며 사적 유흥 목적과는 무관해요.",r:"법령 – 응급의료기금의 용도"},
+{s:"법령",d:2,q:"응급의료종사자가 응급처치 중 환자로부터 폭행을 당했을 때 관련 법령의 취지는?",o:["응급의료종사자의 안전 보장을 위한 가중처벌 규정이 마련되어 있다","가해자는 전혀 처벌받지 않는다","응급의료종사자에게 책임을 묻는다","해당 상황에는 법이 적용되지 않는다"],a:0,
+ e:"응급의료 방해 행위(폭행 등)에 대해서는 응급의료종사자를 보호하기 위한 가중처벌 규정이 마련되어 있어요.",r:"법령 – 응급의료 방해 행위 가중처벌"},
+{s:"법령",d:2,q:"「응급의료에 관한 법률」상 구급차 등이 아닌 자동차를 이용해 이송업을 하는 행위는?",o:["원칙적으로 금지된다","자유롭게 허용된다","신고만 하면 허용된다","가격만 낮으면 허용된다"],a:0,
+ e:"구급차 등이 아닌 자동차로 응급환자 이송업을 하는 것은 원칙적으로 금지되며 무허가 이송은 처벌 대상이 될 수 있어요.",r:"법령 – 이송업의 허가제"},
+{s:"법령",d:2,q:"응급구조사 보수교육(정기교육)의 목적으로 가장 적절한 것은?",o:["최신 응급처치 지식과 기술을 유지·향상시키기 위해","단순 출석 확인을 위해","승진을 위한 요건 충족만을 위해","벌점을 줄이기 위해서만"],a:0,
+ e:"보수교육은 응급구조사가 최신 지침과 기술을 지속적으로 습득해 처치의 질을 유지하도록 하는 목적이에요.",r:"법령 – 응급구조사 보수교육"},
+{s:"법령",d:3,q:"응급의료기관이 아닌 병원급 의료기관에서 응급실을 표방할 수 있는지에 대한 설명으로 옳은 것은?",o:["법령에 따라 응급의료기관 지정을 받지 않으면 명칭 사용에 제한이 있을 수 있다","누구나 자유롭게 응급실 명칭을 사용할 수 있다","제한 없이 모든 병원이 사용 가능하다","법령과 무관한 사항이다"],a:0,
+ e:"응급의료기관 명칭·표시는 법령상 지정 요건을 충족한 기관만 사용하도록 제한될 수 있어요.",r:"법령 – 응급의료기관 명칭 사용 제한"},
+{s:"법령",d:3,q:"「응급의료에 관한 법률」상 응급환자 이송 중 다른 병원으로부터 수용 거부를 당했을 때 취해야 할 조치로 옳은 것은?",o:["다른 적절한 기관을 신속히 찾아 이송하고 상황을 기록한다","현장에 환자를 두고 철수한다","무조건 그 병원 앞에서 대기만 한다","보호자에게 모든 책임을 넘긴다"],a:0,
+ e:"수용 거부 시 신속히 다른 적정 기관을 탐색해 이송하며, 상황을 기록해 추후 분쟁에 대비해야 해요.",r:"법령 – 병원 수용거부 시 대응"},
+{s:"법령",d:3,q:"「응급의료에 관한 법률」에서 규정하는 '응급의료 전용 헬기(닥터헬기 등)'의 운용 목적은?",o:["원거리·중증 응급환자의 신속한 이송과 처치를 위해","단순 관광용으로 활용하기 위해","화물 운송을 위해","훈련용으로만 사용하기 위해"],a:0,
+ e:"응급의료 전용 헬기는 접근이 어려운 지역의 중증 응급환자를 신속히 이송하기 위한 목적으로 운용돼요.",r:"법령 – 응급의료 전용헬기 제도"},
+{s:"법령",d:4,q:"응급구조사가 사설 구급차 업체에 소속되어 근무할 때도 준수해야 하는 법적 의무는?",o:["응급의료에 관한 법률상 응급구조사로서의 의무와 업무범위 준수","소속 업체 내부 규정만 준수하면 된다","의무가 전혀 없다","환자와의 개인 계약만 따르면 된다"],a:0,
+ e:"소속과 무관하게 응급구조사는 법령상 정해진 업무범위와 의무를 동일하게 준수해야 해요.",r:"법령 – 소속 무관 응급구조사 의무의 일관성"},
+{s:"법령",d:4,q:"응급의료 관련 개인정보(진료기록 등) 보호에 관한 일반 원칙으로 옳은 것은?",o:["법령이 정한 경우를 제외하고 목적 외 제3자 제공이 금지된다","누구나 열람할 수 있다","보호자는 예외 없이 모두 열람 가능하다","기록 자체를 남기지 않아야 한다"],a:0,
+ e:"진료·응급처치 기록 등 개인정보는 법령이 정한 예외를 제외하고 목적 외 제공이 금지돼요.",r:"법령 – 응급의료 개인정보 보호 원칙"},
+{s:"법령",d:4,q:"응급구조사가 허위로 응급처치 기록을 작성했을 때 발생할 수 있는 법적 문제는?",o:["문서 위조·허위작성 등으로 형사처벌 대상이 될 수 있다","단순 실수로 간주되어 면책된다","기록 작성 의무 자체가 없어 문제되지 않는다","병원 내부 문제로만 그친다"],a:0,
+ e:"허위 기록 작성은 문서 관련 범죄나 자격 관련 제재로 이어질 수 있는 중대한 법적 문제예요.",r:"법령 – 허위 기록 작성의 법적 책임"},
+{s:"법령",d:5,q:"응급의료 관련 국가 재난상황(감염병 대유행 등)에서 응급의료체계 운영에 관한 특례가 필요한 이유는?",o:["평시 기준으로는 대응이 어려운 자원 부족·과부하 상황에 유연하게 대처하기 위해","특례가 있으면 항상 의무가 사라지기 때문","평시와 재난 시 법이 완전히 동일하기 때문","특례는 실무에 영향을 주지 않기 때문"],a:0,
+ e:"대규모 재난·감염병 상황에서는 평시 기준으로 대응이 어려워 자원 배분·업무범위 등에 한시적 특례가 필요할 수 있어요.",r:"법령 – 재난 시 응급의료체계 특례"},
+{s:"법령",d:5,q:"응급의료 관련 법령에서 '환자 안전 보고·학습 시스템'과 유사한 제도의 취지는?",o:["의료사고 사례를 분석해 재발을 방지하고 시스템을 개선하기 위해","책임자를 문책하기 위한 목적만","보험료 산정을 위한 자료 수집만","단순 통계 작성만을 위해"],a:0,
+ e:"환자안전 보고·학습 제도는 처벌이 아니라 사례 분석을 통한 재발 방지와 시스템 개선을 목적으로 해요.",r:"법령 – 환자안전 보고학습제도의 취지"},
+{s:"법령",d:2,q:"「응급의료에 관한 법률」상 '응급처치 거부·기피'와 구별되는 '지연'의 경우, 판단 기준으로 가장 적절한 것은?",o:["지연에 합리적 사유(자원 부족, 우선순위 등)가 있었는지 여부","지연 시간이 1분만 넘어도 무조건 위법","지연은 항상 위법으로 간주","환자의 만족도만으로 판단"],a:0,
+ e:"단순 지연은 상황상 합리적 사유(다른 중증환자 우선처치 등)가 있었는지를 기준으로 위법성을 판단해요.",r:"법령 – 지연과 거부·기피의 구별"},
+{s:"법령",d:3,q:"응급구조사가 타인의 자격증을 대여받아 사용하는 행위에 대한 법적 평가로 옳은 것은?",o:["자격증 대여·대여받아 사용하는 행위는 금지되며 처벌 대상이다","자격증은 자유롭게 대여할 수 있다","급한 경우에는 예외적으로 허용된다","대여 자체는 문제 없고 사용만 문제된다"],a:0,
+ e:"자격증의 대여 및 대여받아 사용하는 행위는 법령상 금지되며 처벌 대상이 될 수 있어요.",r:"법령 – 자격증 대여 금지"},
+{s:"법령",d:3,q:"「응급의료에 관한 법률」상 구급차 등의 '유상운송' 관련 원칙으로 옳은 것은?",o:["법령이 정한 요건과 절차를 갖춘 경우에만 허용된다","누구나 자유롭게 유상운송이 가능하다","전면 금지되어 예외가 없다","가격만 저렴하면 허용된다"],a:0,
+ e:"구급차 등의 유상운송은 법령이 정한 허가·신고 요건을 충족한 경우에 한해 허용돼요.",r:"법령 – 구급차 유상운송 원칙"},
+{s:"법령",d:1,q:"응급구조사가 업무 중 착용해야 하는 신분 확인 수단으로 가장 적절한 것은?",o:["자격을 증명할 수 있는 신분증(자격증 등)","사복만 착용","신분증 없이 구두 설명만","소속 명함만"],a:0,
+ e:"업무 수행 시 자격을 증명할 수 있는 신분증(자격증)을 소지·제시할 수 있어야 해요.",r:"법령 – 응급구조사 신분 확인"},
+{s:"법령",d:1,q:"「응급의료에 관한 법률」상 응급의료기관의 장이 매년 이행해야 하는 것으로 옳은 것은?",o:["응급의료 관련 법정 의무(인력·시설 기준 유지 등) 이행","임의로 기준을 조정","특별한 의무 없음","환자 유치 활동만 수행"],a:0,
+ e:"응급의료기관의 장은 법정 인력·시설·장비 기준을 지속적으로 유지할 의무가 있어요.",r:"법령 – 응급의료기관장의 의무"},
+{s:"법령",d:2,q:"「응급의료에 관한 법률」상 구급차 등에 응급구조사를 반드시 탑승시켜야 하는 취지는?",o:["이송 중에도 전문적인 응급처치가 가능하도록 하기 위해","단순 운전 보조를 위해","서류 작성을 위해","비용 청구를 위해서만"],a:0,
+ e:"이송 중 환자 상태가 악화될 수 있어 전문 인력인 응급구조사 탑승이 요구돼요.",r:"법령 – 구급차 응급구조사 탑승 의무"},
+{s:"법령",d:2,q:"응급의료 관련 법령에서 '응급의료계획'을 수립하는 주체로 옳은 것은?",o:["국가와 지방자치단체","개별 병원만","응급구조사 개인","보험회사"],a:0,
+ e:"응급의료계획은 국가와 지방자치단체가 지역 특성을 고려해 수립하도록 규정돼 있어요.",r:"법령 – 응급의료계획 수립 주체"},
+{s:"법령",d:2,q:"응급구조사의 업무범위를 벗어난 처치가 불가피했던 특수한 재난 상황에서 법적 판단 시 고려되는 요소는?",o:["당시 상황의 불가피성과 환자에게 최선을 다했는지 여부","무조건 위법으로만 판단","상황과 무관하게 항상 면책","환자의 동의 여부만"],a:0,
+ e:"극단적 상황에서는 불가피성, 선의성 등 정황을 종합적으로 고려해 법적 판단이 이루어질 수 있어요.",r:"법령 – 특수상황에서의 업무범위 판단"},
+{s:"법령",d:3,q:"「응급의료에 관한 법률」상 국민에게 요구되는 '응급의료 관련 신고 의무'로 옳은 것은?",o:["응급환자를 발견한 경우 구조 요청(신고)을 해야 한다","반드시 직접 응급처치를 해야 한다","신고 의무는 존재하지 않는다","의료인만 신고 의무가 있다"],a:0,
+ e:"일반 국민도 응급환자를 발견하면 구조 요청 등 신고 협조 의무가 있는 것으로 안내돼요.",r:"법령 – 국민의 응급의료 신고 협조"},
+{s:"법령",d:3,q:"응급의료기관 평가 결과가 낮은 경우 취해질 수 있는 조치로 가장 적절한 것은?",o:["지정 취소 등 행정처분이 이루어질 수 있다","아무 조치도 취해지지 않는다","즉시 폐쇄만 가능하다","평가 결과는 비공개로 유지되며 조치가 없다"],a:0,
+ e:"평가 결과가 기준에 미달하면 지정 취소, 시정명령 등 행정처분의 대상이 될 수 있어요.",r:"법령 – 응급의료기관 평가와 행정처분"},
+{s:"법령",d:3,q:"응급구조사가 taxi 등 일반 차량으로 응급환자를 운송하는 행위에 대한 평가로 옳은 것은?",o:["법령상 정해진 이송수단(구급차 등) 요건을 충족하지 못해 문제될 수 있다","항상 합법적이다","비용만 저렴하면 문제없다","응급구조사이므로 무조건 허용된다"],a:0,
+ e:"응급환자 이송은 법령상 정해진 요건을 갖춘 구급차 등을 이용해야 하며 일반차량 이용은 제한될 수 있어요.",r:"법령 – 이송수단의 법적 요건"},
+{s:"법령",d:4,q:"응급의료 관련 분쟁에서 응급구조사 처치의 적절성을 판단하는 기준으로 옳은 것은?",o:["당시 표준 프로토콜과 통상적인 응급구조사 수준의 주의의무 이행 여부","환자의 최종 결과(생존 여부)만으로 판단","응급구조사의 경력 연차만으로 판단","이송 시간의 길이만으로 판단"],a:0,
+ e:"처치의 적절성은 결과가 아니라 당시 프로토콜과 통상적 주의의무를 다했는지를 기준으로 판단해요.",r:"법령 – 처치 적절성 판단 기준"},
+{s:"법령",d:4,q:"응급구조사가 정당한 업무 수행 중 불가피하게 발생시킨 경미한 손해에 대한 법적 취급으로 가장 적절한 것은?",o:["정당행위·업무상 정당한 처치로 평가되어 책임이 조각될 수 있다","항상 전액 배상 책임을 진다","무조건 형사처벌 대상이다","환자가 무조건 승소한다"],a:0,
+ e:"정당한 업무범위 내에서 표준 절차를 따른 불가피한 경미한 손해는 정당행위로 평가되어 책임이 조각될 수 있어요.",r:"법령 – 정당업무행위와 책임조각"},
+{s:"법령",d:4,q:"응급의료 관련 법령에서 '중대한 과실'과 '경과실'을 구분하는 실익으로 가장 적절한 것은?",o:["선의의 응급의료 면책 등 법적 책임 감면 여부가 달라지기 때문","구분의 실익이 전혀 없기 때문","과실의 종류에 따라 이송료가 달라지기 때문","단순 통계 목적일 뿐이기 때문"],a:0,
+ e:"경과실은 면책 대상이 될 수 있으나 중대한 과실은 면책에서 제외되는 등 법적 효과가 달라져요.",r:"법령 – 중과실과 경과실의 구분 실익"},
+{s:"법령",d:5,q:"응급의료 관련 법률과 「형법」상 '긴급피난'이 함께 논의될 수 있는 상황은?",o:["더 큰 위해를 방지하기 위해 부득이하게 다른 법익을 침해한 응급처치 상황","단순한 서류 미비 상황","경미한 지각 상황","단순 행정 실수 상황"],a:0,
+ e:"생명을 구하기 위해 불가피하게 다른 경미한 법익을 침해한 경우 긴급피난 법리가 검토될 수 있어요.",r:"법령 – 긴급피난과 응급처치의 관계"},
+{s:"법령",d:5,q:"응급의료 관련 법령 체계에서 '시행령'과 '시행규칙'의 관계로 옳은 것은?",o:["시행령은 대통령령, 시행규칙은 부령으로 법률의 위임에 따라 세부사항을 정한다","시행규칙이 법률보다 상위 규범이다","시행령과 시행규칙은 동일한 효력을 가진다","시행규칙은 국회가 제정한다"],a:0,
+ e:"시행령(대통령령)과 시행규칙(부령)은 법률의 위임 범위 내에서 세부사항을 정하는 하위 법규범이에요.",r:"법령 – 법령 체계(법률-시행령-시행규칙)"},
+{s:"각론",d:1,q:"급성 심근경색의 대표적 증상은?",o:["30분 이상 지속되는 흉통","1~2초의 순간적 통증","운동 후에만 나타나는 근육통","피부 발진"],a:0,
+ e:"급성 심근경색은 흔히 30분 이상 지속되는 압박감 있는 흉통으로 나타나요.",r:"각론(순환기) – 급성 심근경색 증상"},
+{s:"각론",d:1,q:"뇌졸중(중풍) 의심 환자 평가에 사용하는 대표적 신속 평가 도구는?",o:["신시내티 병원전 뇌졸중 척도(CPSS)","APGAR 점수","GCS만 단독 사용","START 분류"],a:0,
+ e:"신시내티 척도는 안면마비·편측마비·언어장애 3항목으로 뇌졸중을 신속 선별하는 도구예요.",r:"각론(신경계) – 뇌졸중 신속평가"},
+{s:"각론",d:1,q:"천식 발작 시 나타나는 특징적 호흡음은?",o:["천명음(wheezing)","코골이음","딸꾹질음","정상 호흡음"],a:0,
+ e:"천식은 기관지 협착으로 호기 시 천명음(쌕쌕거림)이 특징적으로 나타나요.",r:"각론(호흡기) – 천식의 청진 소견"},
+{s:"각론",d:1,q:"당뇨병성 케톤산증(DKA)의 특징적 호흡 양상은?",o:["과호흡(쿠스말 호흡)","무호흡","서호흡","코골이 호흡"],a:0,
+ e:"DKA는 대사성 산증을 보상하기 위해 깊고 빠른 쿠스말 호흡이 나타나요.",r:"각론(내분비) – 당뇨병성 케톤산증"},
+{s:"각론",d:1,q:"아나필락시스의 대표적 증상 조합으로 옳은 것은?",o:["전신 두드러기, 호흡곤란, 저혈압","국소 발진만","단순 두통만","서맥만 단독으로 나타남"],a:0,
+ e:"아나필락시스는 피부·호흡기·순환기 등 다발성 장기에 걸쳐 급격한 알레르기 반응이 나타나요.",r:"각론(알레르기) – 아나필락시스 증상"},
+{s:"각론",d:1,q:"급성 충수염(맹장염)의 전형적인 통증 이동 양상은?",o:["배꼽 주위 통증 후 우하복부로 이동","좌하복부에서 시작","가슴에서 시작해 배로 이동","통증 없이 발열만"],a:0,
+ e:"급성 충수염은 초기 배꼽 주위 통증이 시간이 지나며 우하복부(맥버니점)로 국한돼요.",r:"각론(소화기) – 급성 충수염 통증 양상"},
+{s:"각론",d:1,q:"저혈당의 대표적 증상으로 옳은 것은?",o:["발한, 떨림, 의식변화","고열과 발진","서맥과 저혈압만","시력 저하 없이 정상"],a:0,
+ e:"저혈당은 교감신경 항진에 의한 발한·떨림·빈맥과 함께 의식변화가 나타날 수 있어요.",r:"각론(내분비) – 저혈당 증상"},
+{s:"각론",d:2,q:"급성 관상동맥증후군에서 니트로글리세린 투여 전 반드시 확인해야 하는 것은?",o:["수축기 혈압과 발기부전치료제 복용 여부","체온","혈당","최근 식사 여부"],a:0,
+ e:"니트로글리세린은 혈압을 낮추므로 저혈압 위험 및 PDE5억제제(발기부전치료제) 병용 시 심한 저혈압 위험이 있어 확인이 필요해요.",r:"각론(순환기) – 니트로글리세린 투여 전 확인사항"},
+{s:"각론",d:2,q:"만성폐쇄성폐질환(COPD) 환자에게 과도한 고농도 산소 투여 시 주의할 점은?",o:["저산소성 호흡자극이 억제되어 호흡저하가 유발될 수 있다","항상 안전하다","혈압이 급격히 상승한다","체온이 상승한다"],a:0,
+ e:"일부 만성 COPD 환자는 저산소증이 호흡 자극제로 작용해, 과도한 고농도 산소가 호흡억제를 유발할 수 있어 목표 산소포화도로 조절이 필요해요.",r:"각론(호흡기) – COPD 환자의 산소요법 주의점"},
+{s:"각론",d:2,q:"급성 뇌졸중 의심 환자에서 '증상 발생 시각' 확인이 중요한 이유는?",o:["혈전용해술 등 치료 가능 시간(골든타임)이 제한되어 있기 때문","이송비 산정을 위해서만","보험 처리를 위해서만","단순 기록 목적일 뿐"],a:0,
+ e:"혈전용해술은 발병 후 일정 시간 내에만 시행 가능해 정확한 발생 시각 확인이 치료 방침을 좌우해요.",r:"각론(신경계) – 뇌졸중 골든타임"},
+{s:"각론",d:2,q:"급성 복부대동맥류 파열이 의심되는 소견으로 가장 적절한 것은?",o:["심한 복통·요통과 함께 박동성 종괴, 저혈압","경미한 소화불량","국소 피부 발진","단순 요통만"],a:0,
+ e:"복부대동맥류 파열은 극심한 복통·요통, 박동성 종괴, 쇼크 징후가 동반되는 치명적 응급질환이에요.",r:"각론(순환기) – 복부대동맥류 파열 징후"},
+{s:"각론",d:2,q:"급성 담낭염의 전형적인 통증 위치와 특징은?",o:["우상복부 통증과 지방식 후 악화","좌하복부 통증","배꼽 주위 산통성 통증","전신 근육통"],a:0,
+ e:"담낭염은 우상복부(우측 늑골하부) 통증이 특징이며 기름진 음식 섭취 후 악화되는 경향이 있어요.",r:"각론(소화기) – 급성 담낭염 특징"},
+{s:"각론",d:2,q:"신장결석(요로결석)의 전형적인 통증 특징은?",o:["옆구리에서 서혜부로 방사되는 산통(colicky pain)","지속적이고 둔한 전신통","가슴 중앙의 압박통","국소 피부 통증"],a:0,
+ e:"요로결석은 옆구리에서 사타구니로 방사되는 극심한 산통이 특징적이에요.",r:"각론(비뇨기) – 요로결석 통증 양상"},
+{s:"각론",d:2,q:"급성 알코올 중독 환자 처치 시 주의할 점으로 가장 적절한 것은?",o:["기도 보호와 저혈당 가능성을 함께 고려한다","알코올을 더 마시게 하여 증상을 완화시킨다","무조건 위세척을 즉시 시행한다","의식이 있어도 무조건 결박한다"],a:0,
+ e:"알코올 중독은 구토에 의한 흡인 위험과 저혈당 동반 가능성이 있어 기도보호와 혈당 확인이 중요해요.",r:"각론(중독) – 급성 알코올 중독 처치"},
+{s:"각론",d:3,q:"급성 심부전(폐부종) 환자의 전형적인 증상으로 옳은 것은?",o:["앉은 자세를 선호하는 호흡곤란과 거품 섞인 객담","앙와위에서 편안함을 느낌","마른기침만 있고 호흡곤란 없음","서맥과 저체온만"],a:0,
+ e:"폐부종은 좌위호흡(orthopnea)과 함께 분홍빛 거품 섞인 객담이 특징적으로 나타나요.",r:"각론(순환기) – 급성 폐부종의 특징"},
+{s:"각론",d:3,q:"급성 뇌출혈(출혈성 뇌졸중)과 허혈성 뇌졸중을 병원 전 단계에서 임상 증상만으로 확실히 구분하기 어려운 이유는?",o:["두 질환 모두 유사한 국소 신경학적 증상을 유발할 수 있기 때문","출혈성은 증상이 전혀 없기 때문","허혈성은 항상 의식소실을 동반하기 때문","두 질환은 원인이 동일하기 때문"],a:0,
+ e:"병원 전 단계에서는 영상검사가 불가능해 임상 증상만으로 출혈성과 허혈성을 확진하기 어려워 신속한 병원 이송이 중요해요.",r:"각론(신경계) – 뇌졸중 유형 감별의 한계"},
+{s:"각론",d:3,q:"급성 상부위장관 출혈이 의심되는 소견으로 옳은 것은?",o:["커피찌꺼기양 구토물 또는 흑색변(melena)","선홍색 혈뇨","맑은 구토물","백색 변"],a:0,
+ e:"상부 위장관 출혈은 위산과 반응해 커피찌꺼기양 구토물이나 흑색변으로 나타나는 경우가 많아요.",r:"각론(소화기) – 상부위장관 출혈 소견"},
+{s:"각론",d:3,q:"급성 정신질환자(조현병 등)의 급성 흥분 상태를 대할 때 응급구조사의 우선 원칙은?",o:["안전 거리를 유지하고 자극을 최소화하며 진정 시도","즉시 물리적으로 제압한다","환자의 말을 무시한다","자극적인 질문을 반복한다"],a:0,
+ e:"급성 흥분 상태에서는 안전을 확보하며 차분하고 비자극적인 접근으로 진정을 유도하는 것이 원칙이에요.",r:"각론(정신응급) – 급성 흥분 환자 대응"},
+{s:"각론",d:3,q:"급성 부신기능부전(애디슨 위기)이 의심되는 환자의 특징적 소견은?",o:["심한 저혈압, 오심, 전신 쇠약","고혈압과 부종","고열과 발진만","서맥 없이 정상 혈압"],a:0,
+ e:"부신위기는 코르티솔 부족으로 심한 저혈압, 저혈당, 전신 쇠약 등이 급격히 나타나는 응급 상황이에요.",r:"각론(내분비) – 급성 부신기능부전"},
+{s:"각론",d:3,q:"소아 열성 경련(열경기) 환자 처치의 기본 원칙은?",o:["기도 유지와 안전 확보, 무리한 억제는 피한다","즉시 찬물에 담근다","입에 물체를 물린다","팔다리를 강하게 붙잡는다"],a:0,
+ e:"열성경련은 대부분 자연 소실되며, 기도유지와 손상방지를 위한 안전 확보가 우선이고 억지로 붙잡지 않아야 해요.",r:"각론(소아과) – 열성 경련 처치"},
+{s:"각론",d:4,q:"급성 대동맥박리(aortic dissection)에서 흔히 나타나는 통증 특징은?",o:["찢어지는 듯한 극심한 흉통이 등쪽으로 방사","서서히 시작되는 둔한 통증","통증 없이 무증상","국소 피부 통증만"],a:0,
+ e:"대동맥박리는 갑작스럽고 찢어지는 듯한 극심한 흉통이 등쪽으로 방사되는 특징적 양상을 보여요.",r:"각론(순환기) – 대동맥박리 통증 특징"},
+{s:"각론",d:4,q:"급성 폐색전증이 의심되는 임상 상황으로 가장 적절한 것은?",o:["장시간 부동 후 갑작스러운 호흡곤란과 흉통","단순 감기 후 기침","경미한 운동 후 피로감","만성적으로 서서히 진행하는 체중감소"],a:0,
+ e:"장시간 부동(장거리 비행, 수술 후 등)은 심부정맥혈전증 및 폐색전증의 위험요인으로, 급성 호흡곤란·흉통과 연관돼요.",r:"각론(호흡기) – 폐색전증 위험요인과 증상"},
+{s:"각론",d:4,q:"산과 응급 중 '전치태반'에서 나타나는 특징적 소견은?",o:["통증 없는 선홍색 질출혈","심한 복통을 동반한 소량 출혈","출혈 없이 심한 복통만","경미한 갈색 분비물만"],a:0,
+ e:"전치태반은 대개 통증 없이 갑작스러운 선홍색 질출혈이 나타나는 것이 특징이에요.",r:"각론(산과) – 전치태반 특징"},
+{s:"각론",d:4,q:"산과 응급 중 '태반조기박리'에서 나타나는 특징적 소견은?",o:["심한 복통과 자궁 압통을 동반한 출혈(외부 출혈은 적을 수 있음)","통증 없는 소량의 갈색 출혈","전혀 증상이 없음","경미한 하복부 불편감만"],a:0,
+ e:"태반조기박리는 심한 복통과 자궁 압통이 동반되며 외부 출혈량과 실제 출혈량이 다를 수 있어 위험해요.",r:"각론(산과) – 태반조기박리 특징"},
+{s:"각론",d:4,q:"급성 고칼륨혈증이 의심되는 심전도 소견으로 옳은 것은?",o:["첨형 T파(peaked T wave)","편평한 T파","짧은 QT 간격","정상 심전도"],a:0,
+ e:"고칼륨혈증은 초기에 뾰족한 첨형 T파가 나타나며 심하면 QRS 확장, 심정지로 진행할 수 있어요.",r:"각론(대사) – 고칼륨혈증 심전도 소견"},
+{s:"각론",d:4,q:"급성 일산화탄소(CO) 중독 환자에서 맥박산소포화도(SpO2) 측정의 한계는?",o:["일산화탄소헤모글로빈을 산소헤모글로빈으로 오인해 정상처럼 높게 측정될 수 있다","항상 정확하게 낮게 측정된다","CO 중독에서는 측정이 불가능하다","체온에 영향을 받지 않는다"],a:0,
+ e:"일반 맥박산소포화도 측정기는 COHb와 O2Hb를 구분하지 못해 실제 저산소증에도 정상 수치로 오인될 수 있어요.",r:"각론(중독) – CO 중독과 SpO2 측정의 한계"},
+{s:"각론",d:5,q:"급성 관상동맥증후군에서 우심실 경색이 동반된 경우 니트로글리세린 투여를 특히 주의해야 하는 이유는?",o:["전부하 감소로 심한 저혈압을 유발할 수 있기 때문","혈당을 급격히 낮추기 때문","서맥을 유발하지 않기 때문","체온을 상승시키기 때문"],a:0,
+ e:"우심실 경색은 전부하 의존적인데 니트로글리세린이 정맥환류를 줄여 심한 저혈압을 유발할 수 있어 주의가 필요해요.",r:"각론(순환기) – 우심실 경색과 니트로글리세린"},
+{s:"각론",d:5,q:"패혈증 조기 인지를 위한 병원전 선별 도구(qSOFA 등)에 포함되는 항목이 아닌 것은?",o:["체온 39℃ 이상 단독 기준","호흡수 22회/분 이상","수축기 혈압 100mmHg 이하","의식 변화(GCS 저하)"],a:0,
+ e:"qSOFA는 호흡수, 수축기혈압, 의식변화 3항목으로 구성되며 체온 단독 기준은 포함되지 않아요.",r:"각론(감염) – 패혈증 선별도구(qSOFA)"},
+{s:"각론",d:5,q:"급성 척수손상 환자에서 '신경성 쇼크(neurogenic shock)'의 특징적 혈역학 소견은?",o:["저혈압과 함께 나타나는 서맥(교감신경 소실)","저혈압과 빈맥","고혈압과 서맥","고혈압과 빈맥"],a:0,
+ e:"신경성 쇼크는 교감신경 긴장 소실로 혈관이 확장되어 저혈압이 생기지만 반사성 빈맥 없이 서맥이 동반되는 것이 특징이에요.",r:"각론(신경계) – 신경성 쇼크의 혈역학"},
+{s:"각론",d:1,q:"급성 편도염·후두개염 등으로 소아에서 기도폐쇄가 의심될 때 주의할 점은?",o:["불필요하게 구강을 자극하지 않고 편안한 자세를 유지시킨다","즉시 설압자로 구강을 강제로 검사한다","눕혀서 강제로 고정한다","울음을 유도해 기도를 확인한다"],a:0,
+ e:"후두개염 등에서 불필요한 자극은 완전 기도폐쇄를 유발할 수 있어 환자가 편안해하는 자세를 유지시키는 것이 중요해요.",r:"각론(소아과) – 상기도 폐쇄 의심 시 주의점"},
+{s:"각론",d:2,q:"급성 안구 화학화상 시 응급처치의 기본 원칙은?",o:["다량의 생리식염수 또는 깨끗한 물로 즉시 세척한다","눈을 비벼서 이물질을 제거한다","안대로 즉시 밀봉하고 세척하지 않는다","시간이 지난 뒤 병원에서만 세척한다"],a:0,
+ e:"화학화상은 즉시 다량의 물로 지속적으로 세척해 화학물질 접촉 시간을 최소화하는 것이 핵심이에요.",r:"각론(안과 응급) – 화학화상 처치"},
+{s:"각론",d:2,q:"동상(frostbite) 환자의 병원 전 처치에서 피해야 할 것은?",o:["환부를 문지르거나 마사지하는 행위","건조하고 부드러운 드레싱","환부의 보온","재동결 방지"],a:0,
+ e:"동상 부위를 문지르면 조직 손상이 악화될 수 있어 마사지나 문지르는 행위는 금기예요.",r:"각론(환경응급) – 동상 처치 시 금기"},
+{s:"장비",d:1,q:"자동심장충격기(AED)를 사용할 때 가장 먼저 해야 할 조치는?",o:["전원을 켜고 음성 안내를 따른다","즉시 패드를 부착하지 않고 대기한다","제세동 버튼부터 누른다","환자를 물기가 있는 곳으로 옮긴다"],a:0,
+ e:"AED는 전원을 켜면 음성 안내가 시작되며 이를 따라 순서대로 조작하는 것이 기본이에요.",r:"장비 – AED 사용 기본순서"},
+{s:"장비",d:1,q:"백밸브마스크(BVM, 앰부백)의 주된 용도는?",o:["무호흡 또는 호흡부전 환자에게 인공환기를 제공","산소 농도만 측정","맥박을 측정","체온을 측정"],a:0,
+ e:"BVM은 백을 짜서 환자에게 양압환기를 제공하는 인공호흡 보조 장비예요.",r:"장비 – 백밸브마스크(BVM)의 용도"},
+{s:"장비",d:1,q:"경성 경추보호대(cervical collar)의 주된 목적은?",o:["목의 움직임을 제한해 척추손상 악화를 방지","체온 유지","기도 확보를 위한 산소 공급","출혈 지혈"],a:0,
+ e:"경추보호대는 경추의 굴곡·신전 움직임을 제한해 척수손상 악화를 예방하는 장비예요.",r:"장비 – 경추보호대의 목적"},
+{s:"장비",d:1,q:"긴 척추고정판(long backboard)의 주된 용도는?",o:["전신 척추 고정 및 이동","단순 하지 골절 고정","산소 공급","혈압 측정"],a:0,
+ e:"긴 척추고정판은 다발성 외상 환자의 전신 척추를 고정하고 안전하게 이동시키는 데 사용돼요.",r:"장비 – 긴 척추고정판(백보드)"},
+{s:"장비",d:1,q:"켄드릭 구조기구(KED)를 주로 사용하는 상황은?",o:["차량 내 협소한 공간에서 척추손상 의심 환자 구조","골절 부위 부목 고정","산소 공급","기도 삽관"],a:0,
+ e:"KED는 좁은 차량 내부 등에서 척추 손상 의심 환자를 안전하게 고정·구조할 때 사용하는 장비예요.",r:"장비 – KED(조끼형 척추고정장비)"},
+{s:"장비",d:1,q:"흡인기(suction unit)의 주된 사용 목적은?",o:["기도 내 이물질·분비물 제거","산소 농도 조절","맥박 측정","체온 측정"],a:0,
+ e:"흡인기는 구토물, 혈액, 분비물 등을 흡인해 기도를 확보하는 데 사용해요.",r:"장비 – 흡인기의 용도"},
+{s:"장비",d:1,q:"산소통(oxygen cylinder)의 압력을 확인하는 계기는?",o:["압력조절기(regulator)의 압력계","체온계","혈압계","청진기"],a:0,
+ e:"산소통에 연결된 압력조절기의 압력계로 잔여 산소량을 확인해요.",r:"장비 – 산소통 압력 확인"},
+{s:"장비",d:1,q:"청진기를 이용해 주로 확인하는 것은?",o:["호흡음, 심음, 장음 등 신체 내부 소리","체온","혈당","동공 반응"],a:0,
+ e:"청진기는 호흡음·심음·장음 등을 들어 신체 내부 상태를 평가하는 기본 진단 도구예요.",r:"장비 – 청진기의 용도"},
+{s:"장비",d:1,q:"수동 혈압계(아네로이드 혈압계)로 혈압을 측정할 때 필요한 보조 장비는?",o:["청진기","산소마스크","흡인기","체온계"],a:0,
+ e:"청진기를 이용해 코로트코프음을 들으며 수동 혈압계로 혈압을 측정해요.",r:"장비 – 수동 혈압측정 방법"},
+{s:"장비",d:1,q:"삼각건(triangular bandage)의 주된 용도는?",o:["팔걸이 고정 및 드레싱 고정","산소 공급","혈당 측정","심전도 측정"],a:0,
+ e:"삼각건은 팔걸이(sling) 제작이나 드레싱 고정 등 다목적으로 활용되는 기본 응급처치 도구예요.",r:"장비 – 삼각건의 용도"},
+{s:"장비",d:2,q:"부목(splint)을 적용하는 주된 목적으로 옳은 것은?",o:["골절·탈구 부위의 움직임을 제한해 추가 손상을 예방","출혈을 멈추기 위해","체온을 유지하기 위해","호흡을 돕기 위해"],a:0,
+ e:"부목은 손상 부위를 고정해 이동 중 뼈·연부조직의 추가 손상과 통증을 줄이는 목적이에요.",r:"장비 – 부목의 목적"},
+{s:"장비",d:2,q:"공기부목(air splint)의 특징으로 옳은 것은?",o:["공기를 주입해 고정하며 압력에 따른 순환 변화를 주의해야 한다","금속으로 만들어져 무겁다","전기로 작동한다","한번 사용 후 재사용이 불가능하다"],a:0,
+ e:"공기부목은 공기압으로 고정하는 장비로, 온도 변화나 고도 변화에 따라 압력이 변해 순환장애를 유발할 수 있어 주의가 필요해요.",r:"장비 – 공기부목의 특징과 주의점"},
+{s:"장비",d:2,q:"진공부목(vacuum splint)의 장점으로 가장 적절한 것은?",o:["환자 신체 모양에 맞춰 고정할 수 있어 다양한 부위에 적용 가능","전기가 반드시 필요하다","가격이 저렴해 일회용으로만 쓰인다","고정력이 전혀 없다"],a:0,
+ e:"진공부목은 내부 공기를 빼내 신체 굴곡에 맞춰 단단하게 고정할 수 있는 장점이 있어요.",r:"장비 – 진공부목의 특징"},
+{s:"장비",d:2,q:"견인부목(traction splint)을 주로 사용하는 손상은?",o:["대퇴골 간부 골절","손목 골절","쇄골 골절","늑골 골절"],a:0,
+ e:"견인부목은 대퇴골 간부 골절 시 근육 경련을 완화하고 정렬을 유지하기 위해 사용해요.",r:"장비 – 견인부목의 적응증"},
+{s:"장비",d:2,q:"이동식 산소포화도 측정기(pulse oximeter)의 측정 원리는?",o:["동맥혈의 산소포화 헤모글로빈 비율을 광학적으로 측정","전기 저항을 측정","초음파를 이용해 측정","방사선을 이용해 측정"],a:0,
+ e:"펄스옥시미터는 적외선·적색광의 흡수 차이를 이용해 동맥혈 산소포화도를 비침습적으로 측정해요.",r:"장비 – 펄스옥시미터의 측정 원리"},
+{s:"장비",d:2,q:"입인두기도기(oropharyngeal airway) 크기 선택 기준으로 옳은 것은?",o:["입꼬리부터 귓불까지의 길이를 기준으로 선택","환자의 체중만으로 선택","환자의 나이만으로 선택","무조건 성인용 최대 크기 사용"],a:0,
+ e:"입인두기도기는 입꼬리에서 귓불(하악각)까지의 거리를 기준으로 적절한 크기를 선택해요.",r:"장비 – 입인두기도기 크기 선택"},
+{s:"장비",d:2,q:"코인두기도기(nasopharyngeal airway) 삽입 시 사용하는 윤활제 종류로 적절한 것은?",o:["수용성 윤활제","오일 기반 윤활제","알코올","전혀 사용하지 않음"],a:0,
+ e:"수용성 윤활제를 사용해야 하며, 오일 기반 윤활제는 점막 손상 및 흡인 위험이 있어 피해야 해요.",r:"장비 – 코인두기도기 삽입 시 윤활제"},
+{s:"장비",d:2,q:"들것(스트레처) 중 계단 등 협소한 공간 이동에 특화된 것은?",o:["계단용 들것(스테어체어/바스켓형)","일반 바퀴형 들것","진공매트리스","척추고정판만"],a:0,
+ e:"계단용 들것(스테어체어 등)은 좁은 계단이나 복도에서 환자를 안전하게 이동시키기 위해 설계됐어요.",r:"장비 – 계단용 들것의 용도"},
+{s:"장비",d:2,q:"진공매트리스(vacuum mattress)의 주된 특징은?",o:["공기를 빼내면 신체 모양대로 굳어 전신을 고정할 수 있다","전기로 작동한다","한 번 사용 후 폐기해야 한다","산소를 공급하는 장비이다"],a:0,
+ e:"진공매트리스는 공기를 빼면 딱딱해져 전신을 환자 체형에 맞게 고정할 수 있는 장비예요.",r:"장비 – 진공매트리스의 특징"},
+{s:"장비",d:2,q:"휴대용 심전도(ECG) 모니터의 병원 전 단계 주된 활용 목적은?",o:["부정맥 및 급성 심근경색 의심 소견을 조기에 확인","체온 측정","혈당 측정","산소 농도 조절"],a:0,
+ e:"병원 전 심전도 모니터링은 부정맥이나 ST 변화 등 급성 심장 문제를 조기에 발견해 이송병원 선정에 활용돼요.",r:"장비 – 병원전 심전도 모니터의 역할"},
+{s:"장비",d:3,q:"AED 패드 부착 위치로 옳은 것은?",o:["우측 쇄골 아래와 좌측 유두 아래 측흉부","양측 발등","양측 손등","머리와 발"],a:0,
+ e:"표준 AED 패드 위치는 우측 쇄골 아래(흉골 우측)와 좌측 유두 아래 측흉부(액와중앙선)예요.",r:"장비 – AED 패드 부착 위치"},
+{s:"장비",d:3,q:"AED 사용 중 '분석 중' 음성이 나올 때 구조자가 취해야 할 행동은?",o:["환자에게서 손을 떼고 접촉하지 않는다","계속 흉부압박을 시행한다","환자를 흔들어 확인한다","즉시 제세동 버튼을 누른다"],a:0,
+ e:"심전도 분석 중에는 인공물 간섭을 막기 위해 환자와의 접촉을 멈춰야 해요.",r:"장비 – AED 분석 중 주의사항"},
+{s:"장비",d:3,q:"소아용 AED 패드가 없을 때 성인용 패드로 대체 사용이 권장되는 경우는?",o:["소아용 패드가 없고 다른 대안이 없는 경우, 패드가 겹치지 않게 전후면 부착 등으로 사용","항상 사용을 금지한다","연령과 무관하게 우선 사용한다","패드 크기를 잘라서 사용한다"],a:0,
+ e:"소아용 패드가 없을 때는 성인용 패드가 서로 닿지 않도록 앞뒤로 부착하는 등의 방법으로 대체 사용할 수 있어요.",r:"장비 – 소아 AED 패드 대체 사용"},
+{s:"장비",d:3,q:"성문상기도기(SGA, 후두마스크 등)의 특징으로 옳은 것은?",o:["기관삽관보다 삽입이 상대적으로 용이하나 완전한 기도 보호는 아니다","반드시 성대를 직접 보며 삽입해야 한다","기관삽관보다 완전한 기도 보호를 제공한다","소아에게는 절대 사용할 수 없다"],a:0,
+ e:"성문상기도기는 후두경 없이 비교적 쉽게 삽입 가능하지만 기관삽관만큼 완전한 흡인 방지는 어려워요.",r:"장비 – 성문상기도기의 특징"},
+{s:"장비",d:3,q:"휴대용 산소포화도 측정기 사용 시 측정값이 부정확할 수 있는 상황이 아닌 것은?",o:["환자가 편안히 안정된 상태","말초 저관류(저체온, 쇼크)","매니큐어 등 손톱 이물질","심한 손 떨림(움직임 인공물)"],a:0,
+ e:"안정된 상태는 오히려 정확한 측정에 유리하며, 저관류·매니큐어·움직임 등이 측정 오류의 원인이에요.",r:"장비 – 펄스옥시미터 측정 오류 요인"},
+{s:"장비",d:3,q:"지혈대(tourniquet)를 적용할 때 기록해야 하는 필수 정보는?",o:["적용 시각","환자의 체중","환자의 혈액형","환자의 알레르기 병력"],a:0,
+ e:"지혈대는 적용 시각을 반드시 기록해 병원에서 허혈시간을 파악하고 적절히 대응할 수 있게 해야 해요.",r:"장비 – 지혈대 적용 시 기록사항"},
+{s:"장비",d:3,q:"산소투여 기구 중 벤츄리마스크(venturi mask)의 특징은?",o:["정확한 산소 농도(FiO2)를 일정하게 유지할 수 있다","산소 농도를 전혀 조절할 수 없다","비강캐뉼라보다 산소농도가 항상 낮다","소아에게만 사용한다"],a:0,
+ e:"벤츄리마스크는 색상별 어댑터로 정확한 산소 농도를 일정하게 공급할 수 있어 COPD 환자 등에 유용해요.",r:"장비 – 벤츄리마스크의 특징"},
+{s:"장비",d:3,q:"부목 적용 후 반드시 재확인해야 하는 것은?",o:["말단부 맥박·감각·운동 기능(원위부 신경혈관 상태)","환자의 혈액형","환자의 알레르기 병력","환자의 체중"],a:0,
+ e:"부목 적용 전후로 말단부의 맥박·감각·운동 기능을 확인해 순환·신경 손상 여부를 점검해야 해요.",r:"장비 – 부목 적용 후 확인사항(PMS check)"},
+{s:"장비",d:3,q:"구급차 내 의료폐기물(사용한 주사바늘, 오염 거즈 등) 처리 시 원칙으로 옳은 것은?",o:["지정된 전용 용기(손상성 폐기물함 등)에 분리 폐기한다","일반 쓰레기와 함께 버린다","현장에 그대로 두고 온다","재사용을 위해 세척 후 보관한다"],a:0,
+ e:"의료폐기물은 감염 예방을 위해 지정된 전용 용기에 분리해 규정에 따라 폐기해야 해요.",r:"장비 – 의료폐기물 처리 원칙"},
+{s:"장비",d:4,q:"수동식 인공소생기(BVM)로 효과적인 환기를 제공하기 위한 마스크 밀착 기법(E-C clamp)의 목적은?",o:["마스크와 안면 사이의 공기 누출을 막아 환기 효율을 높이기 위해","환자를 진정시키기 위해","체온을 유지하기 위해","맥박을 측정하기 위해"],a:0,
+ e:"E-C clamp 기법은 손가락 모양으로 마스크를 안면에 밀착시켜 공기 누출 없이 효과적인 환기를 제공해요.",r:"장비 – BVM 마스크 밀착기법(E-C clamp)"},
+{s:"장비",d:4,q:"제세동기 사용 시 '동시성 심율동전환(synchronized cardioversion)'과 '비동시성 제세동'의 차이는?",o:["동시성은 R파에 맞춰 방전해 심실세동 유발 위험을 줄인다","둘은 완전히 동일한 방식이다","비동시성이 항상 더 안전하다","동시성은 심정지에서만 사용한다"],a:0,
+ e:"동시성 심율동전환은 R파에 동기화해 방전함으로써 취약기 방전으로 인한 심실세동 유발을 방지해요.",r:"장비 – 동시성/비동시성 제세동의 차이"},
+{s:"장비",d:4,q:"이산화탄소 검출기(capnography/colorimetric device)를 기도삽관 후 사용하는 주된 목적은?",o:["튜브의 기관 내 정확한 위치를 확인하기 위해","산소 농도를 측정하기 위해","체온을 측정하기 위해","혈압을 측정하기 위해"],a:0,
+ e:"호기말이산화탄소(EtCO2) 검출은 기관 내 삽관 위치를 확인하는 가장 신뢰도 높은 방법 중 하나예요.",r:"장비 – 이산화탄소 검출기의 활용"},
+{s:"장비",d:4,q:"기계식 흉부압박장치(자동 CPR 기기)의 장점으로 가장 적절한 것은?",o:["이송 중에도 일정한 깊이와 속도의 압박을 지속할 수 있다","구조자의 판단을 완전히 대체한다","항상 수동압박보다 예후가 우수함이 확립돼 있다","전원이 없어도 항상 작동한다"],a:0,
+ e:"자동 압박장치는 이송 중 흔들림에도 일정한 압박을 유지할 수 있는 장점이 있으나, 예후 개선이 항상 확립된 것은 아니에요.",r:"장비 – 기계식 흉부압박장치의 특징"},
+{s:"장비",d:4,q:"휴대용 혈당측정기 사용 시 정확도에 영향을 줄 수 있는 요인은?",o:["채혈 부위의 오염(소독 미흡, 이물질)","실내 조명","환자의 나이","측정 시각(시간)"],a:0,
+ e:"채혈 부위에 소독액이나 당분이 남아있으면 측정값이 왜곡될 수 있어 정확한 채혈 준비가 중요해요.",r:"장비 – 혈당측정기 정확도 영향 요인"},
+{s:"장비",d:4,q:"구급차 내 산소 공급 시스템에서 '중앙 배관식 산소'와 '휴대용 산소통'의 차이로 옳은 것은?",o:["중앙 배관식은 차량 내 대용량 산소를 공급하고, 휴대용은 환자 이동 시 사용한다","휴대용 산소통은 무제한 용량이다","중앙 배관식은 이동 중에는 사용할 수 없다","둘의 기능은 동일하며 차이가 없다"],a:0,
+ e:"중앙 배관식은 차량 내 고정된 대용량 공급원이며, 휴대용 산소통은 환자를 이동시킬 때 연속 공급을 위해 사용해요.",r:"장비 – 구급차 산소공급 시스템"},
+{s:"장비",d:4,q:"경추보호대 크기 선택이 잘못되었을 때(너무 크거나 작을 때) 발생할 수 있는 문제는?",o:["기도 압박 또는 고정력 부족으로 인한 고정 실패","항상 완벽하게 작동한다","산소포화도가 상승한다","체온이 상승한다"],a:0,
+ e:"크기가 맞지 않으면 기도를 압박하거나 반대로 고정력이 부족해 척추 보호 효과가 떨어질 수 있어요.",r:"장비 – 경추보호대 크기 선택의 중요성"},
+{s:"장비",d:5,q:"체외제세동(AED) 패드 부착 시 심장박동기(페이스메이커)가 삽입된 부위를 피해야 하는 이유는?",o:["장치 손상 및 방전 효율 저하를 방지하기 위해","환자가 통증을 느끼지 않기 때문","패드가 잘 붙지 않기 때문","심전도 분석이 불가능해지기 때문"],a:0,
+ e:"페이스메이커 삽입 부위 위에 패드를 부착하면 장치가 손상되거나 제세동 에너지 전달이 방해될 수 있어 최소 몇 cm 이상 떨어뜨려 부착해요.",r:"장비 – 페이스메이커 환자의 AED 패드 부착"},
+{s:"장비",d:5,q:"저체온 심정지 환자에서 제세동 반복 횟수를 제한하는 프로토콜이 있는 이유는?",o:["저체온 상태에서는 심근이 제세동에 반응하지 않을 수 있어 무의미한 반복을 피하기 위해","제세동기가 저체온에서 고장나기 때문","전원이 부족하기 때문","환자가 통증을 느끼기 때문"],a:0,
+ e:"저체온 심장은 정상 체온 회복 전까지 제세동에 잘 반응하지 않을 수 있어, 일정 횟수 이후에는 복온을 우선하는 경우가 있어요.",r:"장비 – 저체온 심정지와 제세동 프로토콜"},
+{s:"장비",d:5,q:"이송 중 산소통 잔량 계산 시 '남은 사용 가능 시간'을 추정하는 데 필요한 정보로 옳은 것은?",o:["통의 압력, 용량, 유량(L/min)","환자의 체중만","환자의 나이만","이송 거리만"],a:0,
+ e:"남은 사용시간은 통의 압력·용량과 설정된 유량을 바탕으로 계산해 산소 부족을 예방해야 해요.",r:"장비 – 산소통 잔량과 사용가능시간 계산"},
+{s:"장비",d:1,q:"구강 대 마스크 인공호흡용 포켓마스크(pocket mask)의 특징은?",o:["일방향 밸브가 있어 구조자를 감염으로부터 보호한다","전기로 작동한다","반드시 산소통과 연결해야만 사용 가능하다","소아에게는 사용할 수 없다"],a:0,
+ e:"포켓마스크는 일방향 밸브로 환자의 호기가 구조자에게 역류하지 않도록 설계돼 있어요.",r:"장비 – 포켓마스크의 특징"},
+{s:"장비",d:1,q:"손전등(랜턴)이 응급구조 현장에서 필수 장비로 분류되는 이유는?",o:["야간·어두운 공간에서 환자 평가와 처치를 위해 필요하기 때문","환자를 놀라게 하기 위해서","체온을 측정하기 위해서","단순 장식용이기 때문"],a:0,
+ e:"어두운 현장에서 정확한 평가와 처치를 위해 조명 장비는 기본 필수품으로 분류돼요.",r:"장비 – 조명장비의 필요성"},
+{s:"장비",d:1,q:"장갑, 마스크, 보안경 등을 통칭하는 용어는?",o:["개인보호장비(PPE)","응급의약품","구급차 장비","이송장비"],a:0,
+ e:"장갑·마스크·보안경 등 감염 및 손상으로부터 구조자를 보호하는 장비를 통칭해 PPE라고 해요.",r:"장비 – 개인보호장비(PPE)의 정의"},
+{s:"장비",d:2,q:"목발이나 지팡이 등 이동보조기구를 응급구조사가 다룰 때 유의점은?",o:["환자의 기존 사용 습관과 손상 상태를 고려해 적절히 활용한다","무조건 사용을 금지시킨다","환자의 것을 임의로 폐기한다","고려 없이 무조건 사용시킨다"],a:0,
+ e:"평소 사용하던 보조기구는 환자의 이동 능력을 반영하므로 상태에 맞게 적절히 고려해 활용해야 해요.",r:"장비 – 이동보조기구 활용 시 유의점"},
+{s:"장비",d:2,q:"드레싱 재료 중 '멸균 거즈'를 사용하는 주된 목적은?",o:["상처 감염을 예방하며 출혈을 흡수하기 위해","체온을 낮추기 위해","혈압을 측정하기 위해","맥박을 측정하기 위해"],a:0,
+ e:"멸균 거즈는 상처를 덮어 오염을 막고 출혈을 흡수하는 기본 드레싱 재료예요.",r:"장비 – 멸균 거즈의 용도"},
+{s:"장비",d:2,q:"압박붕대(elastic bandage)의 주된 용도는?",o:["드레싱 고정 및 압박 지혈 보조","산소 공급","체온 측정","심전도 부착"],a:0,
+ e:"압박붕대는 드레싱을 고정하고 적절한 압박으로 지혈을 돕는 데 사용돼요.",r:"장비 – 압박붕대의 용도"},
+{s:"장비",d:2,q:"들것 이동 시 다수의 구조자가 힘을 맞추기 위해 사용하는 신호(구령)의 목적은?",o:["동시 동작으로 환자와 구조자의 안전을 확보하기 위해","시간을 절약하기 위해서만","환자를 안심시키기 위해서만","장비 고장을 확인하기 위해서만"],a:0,
+ e:"여러 명이 동시에 힘을 맞춰 들지 않으면 환자가 떨어지거나 구조자가 부상당할 수 있어 구령이 필요해요.",r:"장비 – 다인 들것 이동 시 구령의 목적"},
+{s:"장비",d:3,q:"자동제세동기(AED)의 정기 점검 항목에 포함되지 않는 것은?",o:["환자의 개인 병력 기록","배터리 잔량","패드 유효기간","기기 작동 자가점검(self-test) 결과"],a:0,
+ e:"AED 점검은 배터리, 패드 유효기간, 자가점검 결과 등 기기 자체를 대상으로 하며 환자 개인 병력과는 무관해요.",r:"장비 – AED 정기점검 항목"},
+{s:"장비",d:3,q:"구급차 내 약물 보관 시 유의해야 할 환경 조건은?",o:["온도 등 보관 조건을 규정에 맞게 유지","직사광선 아래 보관","고온 상태로 밀폐 보관","무작위로 아무 곳에나 보관"],a:0,
+ e:"약물은 효능 유지를 위해 규정된 온도·습도 등 보관 조건을 지켜야 해요.",r:"장비 – 구급차 내 약물 보관 원칙"},
+{s:"장비",d:3,q:"기도 삽관 보조 장비인 후두경(laryngoscope) 사용 목적은?",o:["성대와 기도 입구를 직접 보며 삽관을 돕기 위해","심음을 듣기 위해","혈압을 측정하기 위해","산소 농도를 조절하기 위해"],a:0,
+ e:"후두경은 혀와 후두개를 젖혀 성대를 직접 보면서 기관 튜브를 삽입할 수 있도록 돕는 장비예요.",r:"장비 – 후두경의 용도"},
+{s:"장비",d:3,q:"휴대용 흡인기 사용 시 흡인 시간을 제한(예: 짧게 끊어서 시행)하는 이유는?",o:["과도한 흡인으로 인한 저산소증과 점막 손상을 예방하기 위해","배터리를 아끼기 위해서만","소음을 줄이기 위해서만","환자를 놀라게 하지 않기 위해서만"],a:0,
+ e:"장시간 지속적인 흡인은 산소 결핍과 점막 손상을 유발할 수 있어 짧게 끊어 시행하는 것이 원칙이에요.",r:"장비 – 흡인 시행 시간 제한의 이유"},
+{s:"장비",d:4,q:"체온 유지를 위한 보온 장비(보온포 등) 사용이 특히 중요한 외상 환자 유형은?",o:["대량 출혈이 있는 다발성 외상 환자","경미한 타박상 환자","단순 열상 환자","가벼운 염좌 환자"],a:0,
+ e:"대량 출혈 환자는 저체온이 응고장애를 악화시켜 치명적 3요소로 이어질 수 있어 적극적 보온이 중요해요.",r:"장비 – 외상 환자의 보온 장비 활용"},
+{s:"장비",d:4,q:"휴대용 초음파(POCUS)가 병원 전 단계에서 제한적으로 활용될 때의 주된 목적은?",o:["기흉, 심낭삼출 등 즉각적 생명 위협 소견을 신속히 확인","일반 건강검진 목적","체온 측정 대체","단순 미용 목적"],a:0,
+ e:"병원 전 초음파는 숙련자에 한해 기흉, 심낭삼출 등 치명적 소견을 신속 확인하는 보조 도구로 제한적으로 활용될 수 있어요.",r:"장비 – 병원전 초음파(POCUS)의 역할"},
+{s:"장비",d:5,q:"체외형 자동제세동기(AED)와 병원용 수동제세동기(manual defibrillator)의 차이로 옳은 것은?",o:["수동제세동기는 의료진이 리듬을 직접 판독하고 에너지를 결정한다","AED가 항상 더 높은 에너지를 전달한다","기능상 완전히 동일하다","AED만 동시성 기능이 있다"],a:0,
+ e:"수동제세동기는 숙련된 의료진이 직접 리듬을 판독하고 에너지 용량을 결정하는 반면, AED는 자동 분석 후 안내에 따라 사용해요.",r:"장비 – AED와 수동제세동기의 차이"},
+{s:"장비",d:2,q:"산소마스크 중 '단순 안면마스크(simple face mask)'의 일반적인 유량 범위는?",o:["분당 6~10L","분당 1~2L","분당 15~20L","분당 0.5L 미만"],a:0,
+ e:"단순 안면마스크는 재호흡 방지를 위해 최소 분당 6L 이상, 통상 6~10L로 투여해요.",r:"장비 – 단순 안면마스크 유량"},
+{s:"장비",d:3,q:"경추보호대 적용 전 반드시 선행되어야 하는 것은?",o:["목 부위의 시진·촉진을 통한 손상 평가","즉시 고정만 시행","보호자 동의서 작성","산소마스크 제거"],a:0,
+ e:"보호대를 대기 전 목의 변형·압통·피하기종 등을 먼저 확인해 손상 여부를 평가해야 해요.",r:"장비 – 경추보호대 적용 전 평가"},
+{s:"장비",d:2,q:"체온계(적외선 고막 체온계 등) 사용 시 측정값에 영향을 줄 수 있는 요인은?",o:["귀지 등 이물질로 인한 측정 오류","실내 습도","환자의 성별","측정자의 손 크기"],a:0,
+ e:"고막 체온계는 귀지 등 이물질이 있으면 적외선 측정이 방해되어 부정확한 값이 나올 수 있어요.",r:"장비 – 고막체온계 측정 오류 요인"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["여러 기관 간 지휘 혼선을 방지하고 자원을 효율적으로 배분하기 위해","외상후스트레스장애(PTSD) 등의 위험이 있으므로 동료지원 및 전문 상담 체계를 활용해야 한다","환자 중증도에 맞는 적절한 병원으로 이송해 치료 지연을 줄이기 위해","환자의 생명을 구하고 상태 악화를 방지한다"],a:3,
+ e:"응급처치는 진단·치료가 아니라 생명 유지와 상태 악화 방지, 병원 이송까지의 시간을 버는 것이 핵심 목적이에요.",r:"기본응급처치학총론 – 응급처치의 정의 및 목적"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["하임리히법(복부 밀어내기)","1급과 2급","의식 수준과 기도(Airway)","1차 평가에서 즉각적인 생명 위협이 발견된 경우"],a:2,
+ e:"1차 평가는 ABCDE(기도-호흡-순환-장애-노출) 순서로 생명을 위협하는 문제부터 신속히 찾아내는 과정이에요.",r:"1차 평가 순서 – ABCDE 접근법"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["head-tilt chin-lift(머리기울임-턱들기)법","환측 호흡음 감소, 경정맥 팽대, 기관 편위(건측으로 이동), 저혈압","의식이 없거나 손상기전이 불명확한 외상환자","지혈대(tourniquet) 적용"],a:2,
+ e:"의식저하·다발성 손상 등 손상기전 파악이 어려운 경우 두부부터 발끝까지 전신 신체검진을 시행해 숨은 손상을 놓치지 않아야 해요.",r:"2차 평가 – 신체검진 범위 선정 기준"},
+{s:"총론",d:4,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["장시간 흡인 시 저산소증을 악화시키고 미주신경 자극으로 서맥·부정맥을 유발할 수 있기 때문","적색(즉각치료)","업무범위 초과 및 무면허 의료행위에 해당할 수 있기 때문","저혈당"],a:1,
+ e:"기도확보 시행 후 호흡이 회복되면 적색(1순위)으로 분류하고, 기도확보 후에도 무호흡이 지속되면 흑색으로 분류하는 것이 START의 핵심 분기점이에요. 많은 수험생이 '무호흡=바로 흑색'으로 오인해 틀리는 대표 문항이에요.",r:"START Triage – 호흡 평가 단계의 기도확보 시행 여부"},
+{s:"총론",d:5,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["지역 내 필수 응급의료 접근성을 보장하기 위해","국가시험에 합격하고 자격을 취득해야 한다","처치의 일관성과 질을 담보하는 핵심 지표이기 때문","보행 가능 여부(walking wounded)로 우선 선별"],a:3,
+ e:"SIEVE(영국식)와 START(미국식) 모두 1단계에서 '걸을 수 있는가'로 경증군을 우선 걸러낸 뒤, 호흡·순환·의식 순으로 세부 분류를 진행한다는 공통점이 있어요. 두 체계의 세부 명칭 차이(SIEVE는 P1~P4, START는 색상)를 헷갈리지 않는 것이 핵심이에요.",r:"다수사상자 분류체계 비교 – SIEVE vs START"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["보건복지부장관 등이 일정 기준에 따라 지정·평가·관리한다","표준주의(standard precaution)","분당 60~100회","통전 순간 다른 사람이 환자와 접촉해 있으면 감전 사고가 발생할 수 있기 때문"],a:2,
+ e:"성인 안정 시 정상 맥박수는 분당 60~100회이며, 100회 초과는 빈맥, 60회 미만은 서맥으로 평가해요.",r:"활력징후 – 정상 맥박수 기준"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["응급의료 관련 정보 제공 및 병상 조회 등 지원","현장에서 의사와 실시간 통신으로 지시를 받는 방식","언어(목소리) 자극에 반응","민간 기업의 영업 부서"],a:2,
+ e:"AVPU는 Alert(자발 각성)-Verbal(언어자극 반응)-Pain(통증자극 반응)-Unresponsive(무반응) 순으로 신속하게 의식수준을 평가하는 척도예요.",r:"의식수준 평가 – AVPU 척도"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["환자 본인의 자기결정권을 우선한다","법령이 정한 기준에 따라 산정·징수한다","고혈압, 서맥, 불규칙한 호흡","3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)"],a:3,
+ e:"GCS는 개안반응(1~4)+언어반응(1~5)+운동반응(1~6)의 합으로 최저 3점, 최고 15점이며, 8점 이하는 중증 의식장애로 기도삽관을 고려하는 기준이 돼요.",r:"글래스고 혼수척도(GCS) 점수 체계"},
+{s:"환자관리",d:5,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["소아는 강력한 혈관수축 능력으로 혈압을 오래 유지하지만 심박출량 예비능이 낮아 대상기전이 소실되면 급격히 저혈압으로 진행한다","환자가 이미 처방받은 자가주사기를 스스로 사용하도록 보조할 수 있다","응급의료 관련 법정 의무(인력·시설 기준 유지 등) 이행","기도확보 및 호흡 보조"],a:0,
+ e:"소아는 말초혈관 수축 능력이 뛰어나 저혈압이 매우 늦게(대상기전이 거의 다 소진된 후) 나타나는 것이 특징이에요. 따라서 '혈압이 정상이니 안심'이 아니라 빈맥·모세혈관재충혈지연·의식변화 등 초기 징후로 쇼크를 조기에 의심해야 하며, 저혈압이 확인되면 이미 실패 직전 단계라는 점이 시험에서 자주 함정으로 출제돼요.",r:"소아 쇼크의 병태생리 – 대상기전과 저혈압 발현 시점"},
+{s:"법령",d:1,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["국가시험에 합격하고 자격을 취득해야 한다","혼란한 현장에서 정확한 판단과 처치를 위해 필요하기 때문","한국보건의료인국가시험원","9%"],a:2,
+ e:"응급구조사 시험은 보건복지부장관의 위탁을 받아 한국보건의료인국가시험원(국시원)이 시행해요.",r:"응급의료에 관한 법률 시행령 제25조 (자격시험 위탁)"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["대상기전이 소실되며 혈압이 급격히 떨어지고 의식저하가 뚜렷해진다","불필요하게 구강을 자극하지 않고 편안한 자세를 유지시킨다","일방향 밸브가 있어 구조자를 감염으로부터 보호한다","현장에서 응급환자에 대한 상담·구조 및 이송업무 수행"],a:3,
+ e:"응급구조사는 응급환자가 발생한 현장에서 상담·구조·이송업무를 수행하며, 의료법상 무면허 의료행위 금지에도 불구하고 보건복지부령이 정하는 범위에서 응급처치를 할 수 있어요.",r:"응급의료에 관한 법률 제41조 (응급구조사의 업무)"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["혈압 저하가 늦게 나타나며 빈맥이 초기 대표 징후이다","생명이 위급한 응급환자에게 응급의료를 제공한 경우","응급의료에 관한 법률","의약품 가격 결정 체계"],a:1,
+ e:"선의의 응급의료 면책 규정은 응급의료종사자뿐 아니라 일반인이 시행한 응급처치에도 적용돼요('일반인'도 대상). 고의·중과실이 없는 응급처치에 대해 민형사상 책임을 감면·면제하는 제도예요.",r:"응급의료에 관한 법률 제5조의2 (선의의 응급의료에 대한 면책)"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["두개내 병변(뇌출혈 등) 가능성","자동제세동기를 이용한 규칙적 심박동 유도","head-tilt chin-lift(머리기울임-턱들기)법","환자의 목 길이와 어깨-턱 간격을 실측하여 맞는 크기를 선택하고 중립위를 유지한 채 적용한다"],a:1,
+ e:"정맥로 확보는 1급 응급구조사의 업무범위이며 2급은 시행할 수 없어요. 2급은 기도기 삽관, 기본 심폐소생술·AED, 산소투여, 부목/척추고정, 지혈, 활력징후 측정, 쇼크방지용 하의 고정, 흉통 시 니트로글리세린 설하투여 보조 등으로 업무가 제한돼요.",r:"응급의료에 관한 법률 시행규칙 별표14 (2급 응급구조사의 업무범위)"},
+{s:"법령",d:5,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["현장에서 응급환자에 대한 상담·구조 및 이송업무 수행","구역반사가 살아있는 환자","하악견인법(jaw-thrust)","환자가 이미 의사로부터 해당 약물을 처방받아 소지하고 있는 경우에 한해 투여를 보조할 수 있다"],a:3,
+ e:"2급 응급구조사는 환자가 이미 처방받아 소지 중인 니트로글리세린(설하)이나 자가 기관지확장제 흡입을 '보조'하는 수준까지만 가능해요. 임의로 약물을 새로 구비해 투여하거나 처방하는 것은 업무범위를 벗어나며, 이 조건(기처방 여부)을 놓치는 수험생이 많아 정답률이 낮은 문항이에요.",r:"응급의료에 관한 법률 시행규칙 별표14 – 2급 업무범위 제10호"},
+{s:"각론",d:1,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["30:2","환자에게 마스크를 착용시키고 구조자도 적절한 보호구를 착용한다","호흡수 22회/분 이상","소아 사망 등 정서적 충격이 큰 사건 대응 후"],a:0,
+ e:"성인 심폐소생술은 가슴압박 30회 후 인공호흡 2회를 반복하는 30:2 비율이 표준이에요(구조자 수와 무관하게 일반인/전문구조자 성인 기준 동일 적용).",r:"KACPR(대한심폐소생협회) 심폐소생술 가이드라인 – 성인 CPR"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["환측 호흡음 감소, 경정맥 팽대, 기관 편위(건측으로 이동), 저혈압","하임리히법(복부 밀어내기)","손상 부위 상하 관절을 포함하여 고정한다","분당 6~10L, 약 40~60%"],a:1,
+ e:"의식이 있는 성인·소아의 완전 기도폐쇄에는 복부 밀어내기(하임리히법)를 시행하며, 영아는 등 두드리기와 가슴 압박을 번갈아 시행해요.",r:"이물질에 의한 기도폐쇄 처치 – 하임리히법"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["호기 시 천명음(wheezing)","저혈당","환부를 문지르거나 마사지하는 행위","동맥혈의 산소포화 헤모글로빈 비율을 광학적으로 측정"],a:0,
+ e:"천식은 하기도 협착으로 인해 특징적으로 호기 시 천명음(쌕쌕거림)이 들리며, 상기도 폐쇄에서는 흡기성 협착음(stridor)이 특징적이에요.",r:"호흡기 응급 – 천식의 청진 소견"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["환자의 직업","유량계(flow meter)","안면 마비(Face)","압력조절기(regulator)의 압력계"],a:2,
+ e:"FAST는 Face(안면 마비)-Arm(팔 처짐)-Speech(언어장애)-Time(증상 발생 시각 확인)의 약자로 뇌졸중 신속 선별에 사용되며 체온은 포함되지 않아요.",r:"신경계 응급 – 뇌졸중 FAST 평가"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["안정된 환자는 약 15분마다, 불안정한 환자는 약 5분마다 재측정한다","지연에 합리적 사유(자원 부족, 우선순위 등)가 있었는지 여부","의식이 없는 응급환자로 즉각적 처치가 필요한 경우","환측 호흡음 감소, 경정맥 팽대, 기관 편위(건측으로 이동), 저혈압"],a:3,
+ e:"긴장성 기흉은 흉강 내 공기가 지속적으로 축적되어 종격동을 반대측(건측)으로 밀며 기관 편위, 경정맥 팽대, 환측 호흡음 소실, 폐쇄성 쇼크(저혈압)를 유발하는 즉각적 생명위협 상태예요. 환측 편위로 오인하는 것이 대표적 오답 패턴이에요.",r:"흉부 외상 응급 – 긴장성 기흉의 병태생리 및 소견"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["단단한 흡인 팁(경성 카테터)","의식 수준 저하 및 심부체온(중심체온) 측정치, 오한 반응 소실 여부","채혈 부위의 오염(소독 미흡, 이물질)","간독성(급성 간부전)"],a:1,
+ e:"저체온증은 심부체온 기준(약 35℃ 미만 경증, 32℃ 미만 중등도~중증)으로 분류하며, 중증으로 갈수록 오한(shivering)이 사라지고 의식이 저하돼요. 오한이 없어졌다고 '좋아진 것'으로 오인하면 안 되는 대표적 함정이에요.",r:"환경응급 – 저체온증의 중증도 분류"},
+{s:"각론",d:5,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["필요한 장비와 인력을 사전에 준비할 수 있기 때문","처치의 일관성과 질을 담보하는 핵심 지표이기 때문","기도확보 및 호흡 보조","갑작스런 극심한 복통·요통, 박동성 복부 종괴, 저혈압(쇼크)"],a:3,
+ e:"복부대동맥류 파열은 갑작스런 극심한 복부·등 통증, 촉진 시 박동성 종괴, 그리고 대량 출혈로 인한 저혈압성 쇼크의 3대 징후가 나타나는 치명적 응급질환으로, 노년 남성에서 급성 복통 시 반드시 감별해야 해요. 정답률이 낮은 고난도 각론 문항이에요.",r:"복부 응급 – 복부대동맥류 파열의 3대 징후"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["척추의 일직선 정렬(long axis alignment)을 유지하며 여러 명이 동시에 몸통을 회전시킨다","적절한 진료가 가능한 다른 기관으로, 환자 상태가 이송 가능한 경우","공기를 빼면 내부 알갱이가 굳어 환자의 신체 윤곽에 맞춰 고정할 수 있다","손상기전이 의심되면 척추 고정을 우선 고려한다"],a:0,
+ e:"통나무 굴리기는 머리부터 골반까지 척추의 일직선 정렬을 유지한 상태로 여러 구조자가 동시에 회전시켜야 이차적 척수손상을 예방할 수 있어요.",r:"외상환자 이동 – 통나무 굴리기(log roll) 원칙"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["무호흡 또는 호흡부전 환자에게 인공환기를 제공","눈뜨기, 언어반응, 운동반응","커진 자궁이 하대정맥을 압박하는 것을 줄여 정맥 환류와 태반 혈류를 개선하기 위해","단일 기관의 자원만으로 대응이 불가능한 대규모 사고에 대비하기 위해"],a:2,
+ e:"임신 후기에는 커진 자궁이 앙와위 시 하대정맥을 눌러 정맥 환류가 감소하고 저혈압(앙와위 저혈압 증후군)을 유발할 수 있어, 좌측위(또는 우측 골반 밑에 쿠션)로 눕혀 하대정맥 압박을 줄여야 해요.",r:"산부인과 응급 – 임신 후기 이송 자세(좌측위)의 근거"},
+{s:"각론",d:5,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["외상후스트레스장애(PTSD) 등의 위험이 있으므로 동료지원 및 전문 상담 체계를 활용해야 한다","장갑 낀 손으로 태아 선진부를 밀어올려 제대 압박을 줄이고, 무릎-가슴 자세로 이송하며 제대를 체내로 밀어넣지 않는다","즉시 필요한 응급처치를 받지 아니하면 생명을 보전할 수 없거나 심신에 중대한 위해가 발생할 가능성이 있는 사람","척추의 일직선 정렬(long axis alignment)을 유지하며 여러 명이 동시에 몸통을 회전시킨다"],a:1,
+ e:"제대탈출은 태아 저산소증을 유발하는 산과적 응급상황으로, 무균장갑을 낀 손으로 선진부를 살짝 밀어올려 제대 압박을 완화하고 무릎-가슴 자세(또는 골반거상)로 신속히 이송하되, 제대를 체내로 다시 밀어넣거나 절단해서는 안 돼요. 드물지만 정답률이 매우 낮은 고난도 산과 응급 문항이에요.",r:"산부인과 응급 – 제대탈출 시 응급처치 원칙"},
+{s:"각론",d:1,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["손상 부위 상하 관절을 포함하여 고정한다","기도확보를 방해하지 않는 범위 내에서 고정한다","응급의료종사자의 안전 보장을 위한 가중처벌 규정이 마련되어 있다","적색(즉각치료)"],a:0,
+ e:"부목은 손상 부위의 상하 관절을 포함해 고정해야 움직임에 의한 추가 손상을 막을 수 있어요. 응급구조사는 명백한 기형이 아니라면 정복을 시도하지 않고 발견된 자세 그대로 고정하는 것이 원칙이에요.",r:"근골격계 손상 – 부목 적용의 기본 원칙"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["고혈압, 서맥, 불규칙한 호흡","의식 수준과 기도(Airway)","head-tilt chin-lift(머리기울임-턱들기)법","외모(의식·근긴장), 호흡 노력, 피부순환 상태"],a:0,
+ e:"쿠싱 반사는 두개내압 상승 시 뇌관류압을 유지하려는 대상반응으로 혈압 상승(고혈압), 반사성 서맥, 불규칙한 호흡패턴의 3대 징후가 나타나며 뇌탈출의 위험 신호예요.",r:"두부 외상 – 쿠싱 반사(Cushing's triad)"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["수술이나 처치가 예상되는 급성 복증 환자","일산화탄소헤모글로빈을 산소헤모글로빈으로 오인해 정상처럼 높게 측정될 수 있다","대퇴골 간부 골절","직접 압박법"],a:3,
+ e:"대부분의 외부출혈은 직접 압박법으로 지혈이 가능하며, 직접 압박으로 조절되지 않는 심한 사지 출혈에 한해 지혈대를 2차적으로 고려해요.",r:"외상 응급 – 지혈법의 단계적 적용 원칙"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["환자의 중증도를 시각적으로 표시해 이송 우선순위를 신속히 공유하기 위해","사람","처치의 일관성과 질을 담보하는 핵심 지표이기 때문","증상만으로 완전한 감별이 불가능하므로 아스피린 등 임의 약물 투여 없이 신속히 뇌졸중센터로 이송하고 발병시각을 정확히 확인·기록한다"],a:3,
+ e:"허혈성·출혈성 뇌졸중은 영상검사(CT 등) 없이는 병원 전 단계에서 확진할 수 없어요. 따라서 임의로 아스피린 등을 투여해서는 안 되며, 정확한 증상발생시각 확인이 치료방침(혈전용해술 가능 여부)을 결정하는 핵심 정보이므로 반드시 확인·기록해 이송해야 해요.",r:"신경계 응급 – 뇌졸중 병원 전 처치 원칙 및 발병시각의 중요성"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["자신의 안전이 명백히 위협받는 불가항력적 상황","psi(제곱인치당 파운드)","안면 마비(Face)","저혈당"],a:1,
+ e:"의료용 산소통의 압력은 psi(pounds per square inch) 단위로 표시되며, 국내에서는 kg/㎠도 병용돼요.",r:"응급의료장비 – 산소공급장치 압력 표시 단위"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["psi(제곱인치당 파운드)","환자에게 마스크를 착용시키고 구조자도 적절한 보호구를 착용한다","응급의료에 관한 법률상 응급구조사로서의 의무와 업무범위 준수","분당 1~6L, 약 24~44%"],a:3,
+ e:"비강 캐뉼라는 분당 1~6L 유량에서 대략 24~44% 정도의 흡입산소농도를 제공하며, 저농도~중등도 산소요법에 사용돼요.",r:"응급의료장비 – 비강 캐뉼라 유량별 산소농도"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["외상후스트레스장애(PTSD) 등의 위험이 있으므로 동료지원 및 전문 상담 체계를 활용해야 한다","고의 또는 중대한 과실 없이 한 응급처치로 발생한 결과","응급처치 후 적절한 기관으로 신속히 이송할 의무","구역반사(gag reflex)가 남아있는 의식 있는 환자"],a:3,
+ e:"구강 인두기도기는 구역반사를 자극해 구토·흡인을 유발할 수 있어 구역반사가 살아있는 환자에게는 금기이며, 이 경우 비강 인두기도기(NPA)를 우선 고려해요.",r:"기도유지 장비 – OPA 삽입 금기"},
+{s:"장비",d:4,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["복막염 등 복막 자극 소견","환측 호흡음 감소, 경정맥 팽대, 기관 편위(건측으로 이동), 저혈압","일산화탄소 중독 환자 (일산화탄소혈색소를 산소혈색소로 오인)","법령이 정한 요건과 절차를 갖춘 경우에만 허용된다"],a:2,
+ e:"펄스옥시미터는 산소포화 혈색소와 일산화탄소 결합 혈색소(COHb)를 구별하지 못해, 일산화탄소 중독 환자에서는 실제 조직 산소화가 매우 나쁨에도 SpO2가 정상~고값으로 표시되는 치명적 오류가 발생할 수 있어요. 말초 관류저하·매니큐어·심한 떨림 등도 오차 요인이에요.",r:"모니터링 장비 – 맥박산소포화도 측정의 한계와 일산화탄소 중독"},
+{s:"장비",d:5,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["고의 또는 중대한 과실 없이 성실히 처치한 경우","법령이 정한 경우를 제외하고 목적 외 제3자 제공이 금지된다","장시간 흡인 시 저산소증을 악화시키고 미주신경 자극으로 서맥·부정맥을 유발할 수 있기 때문","환자의 보험 가입 여부"],a:2,
+ e:"흡인은 기도 내 산소도 함께 제거하므로 장시간(성인 기준 대략 10~15초 이내 권장) 지속하면 저산소증이 악화되고, 인두 자극으로 미주신경이 항진되어 서맥·부정맥이 유발될 수 있어 흡인 전후 산소화와 시간 제한이 중요해요.",r:"기도관리 장비 – 흡인(suction) 시행 시간 제한의 생리적 근거"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["복막 자극(복막염) 가능성","외이도의 귀지나 이물질을 확인하고 탐침을 정확히 고막 방향으로 삽입한다","노출된 뼈를 억지로 밀어넣지 않고 무균 드레싱으로 덮는다","활동성 출혈이 조절되지 않은 관통성 외상 환자에서 과도한 수액 투여를 제한할 때"],a:1,
+ e:"고막 체온계는 귀지 등 이물질이 있으면 적외선 측정이 방해되어 오차가 발생하므로 사전 확인이 필요하고, 탐침을 정확한 각도로 고막을 향해 삽입해야 신뢰할 수 있는 측정값을 얻을 수 있어요.",r:"응급의료장비 – 고막 체온계 측정 원칙"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["명확하고 간결한 표준 용어를 사용하고 불필요한 사적 대화를 피한다","시진 → 촉진 → 타진 → 청진(단, 복부는 청진을 촉진보다 먼저 시행)","기관삽관보다 삽입이 상대적으로 용이하나 완전한 기도 보호는 아니다","직접 압박법"],a:0,
+ e:"무선통신은 채널이 공유되므로 표준화된 용어로 간결하게 전달해야 하며, 개인정보가 노출될 수 있는 사항은 무선보다 유선이나 도착 후 직접 전달이 원칙이에요.",r:"기본응급처치학총론 – 응급의료 무선통신 원칙"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["전부하 감소로 심한 저혈압을 유발할 수 있기 때문","활동성 출혈이 조절되지 않은 관통성 외상 환자에서 과도한 수액 투여를 제한할 때","연령이 어릴수록 정상 맥박수와 호흡수는 성인보다 빠른 것이 일반적이다","자원(인력·장비)을 효율적으로 배분하고 혼란 없이 통일된 지휘 하에 대응하기 위해"],a:3,
+ e:"현장지휘체계(Incident Command System)는 다수의 기관·인력이 동시에 투입되는 재난 상황에서 지휘 계통을 단일화하여 자원 배분과 임무 분담의 혼선을 막는 것이 핵심 목적이에요.",r:"다수사상자 대응 – 현장지휘체계(ICS)의 목적"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["지불능력이 없는 응급환자도 적기에 치료받을 수 있도록 의료기관 손실을 보전","SBAR(상황-배경-평가-권고) 기법","일산화탄소헤모글로빈을 산소헤모글로빈으로 오인해 정상처럼 높게 측정될 수 있다","1차 중증도 분류(triage)"],a:3,
+ e:"다수사상자 발생 시 1차 중증도 분류(triage)는 개별 환자의 정밀 처치보다 전체 환자군을 신속히 4단계(적/황/녹/흑)로 나누어 자원을 우선순위대로 투입하기 위한 절차예요.",r:"다수사상자 대응 – 1차 중증도 분류의 목적과 소요시간"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["시진 → 촉진 → 타진 → 청진(단, 복부는 청진을 촉진보다 먼저 시행)","신시내티 병원전 뇌졸중 척도(CPSS)","저혈압과 함께 나타나는 서맥(교감신경 소실)","장갑 낀 손으로 태아 선진부를 밀어올려 제대 압박을 줄이고, 무릎-가슴 자세로 이송하며 제대를 체내로 밀어넣지 않는다"],a:0,
+ e:"일반적으로 시진-촉진-타진-청진 순서가 원칙이지만, 복부는 촉진과 타진이 장음에 영향을 줄 수 있어 청진을 촉진보다 먼저 시행하는 예외가 있다는 점이 자주 출제돼요.",r:"신체검진 – 기본 순서와 복부 검진의 예외"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["SBAR(상황-배경-평가-권고) 기법","기도 압박 또는 고정력 부족으로 인한 고정 실패","위험물질(HazMat) 유출 사고","폐쇄성 쇼크(obstructive shock)"],a:0,
+ e:"SBAR(Situation-Background-Assessment-Recommendation)는 상황을 놓치지 않고 표준화된 순서로 인계하는 대표적 의사소통 기법으로, 인수인계 누락에 의한 의료사고를 줄이는 데 사용돼요.",r:"응급의료 의사소통 – SBAR 인계기법"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["너구리눈 징후(안와주위 반상출혈)와 배틀 징후(유양돌기부 반상출혈), 뇌척수액 이루/비루","자격증 대여·대여받아 사용하는 행위는 금지되며 처벌 대상이다","외상후스트레스장애(PTSD) 등의 위험이 있으므로 동료지원 및 전문 상담 체계를 활용해야 한다","선의의 응급의료 면책 등 법적 책임 감면 여부가 달라지기 때문"],a:2,
+ e:"반복적으로 참혹한 현장에 노출되는 응급구조사는 PTSD·소진(burnout) 위험이 높아, 동료지원 프로그램(peer support)이나 전문 상담을 통해 조기에 관리하는 것이 권장돼요.",r:"응급구조사 직무 스트레스 관리 – 외상후스트레스장애 예방"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["코로트코프음(Korotkoff sound)","개방성 골절(open fracture)","기흉, 심낭삼출 등 즉각적 생명 위협 소견을 신속히 확인","공기를 빼내면 신체 모양대로 굳어 전신을 고정할 수 있다"],a:0,
+ e:"혈압 측정 시 커프를 감압하면서 청진기로 듣는 특징적인 소리를 코로트코프음이라 하며, 첫 소리가 들리는 지점이 수축기압, 소리가 사라지는 지점이 이완기압이에요.",r:"활력징후 – 혈압 측정과 코로트코프음"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)","입꼬리부터 귓불까지의 길이를 기준으로 선택","위험물질(HazMat) 유출 사고","악화·완화 요인(Provocation/Palliation)"],a:3,
+ e:"OPQRST는 발생(Onset)-악화/완화요인(Provocation/Palliation)-양상(Quality)-방사(Radiation)-중증도(Severity)-시간경과(Time)의 약자로 통증 평가에 널리 쓰여요.",r:"통증 평가 – OPQRST 문진법"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["전·후·측면을 포함해 여러 부위를 대칭적으로 비교 청진한다","전부하 감소로 심한 저혈압을 유발할 수 있기 때문","피부 전층이 손상되어 가죽처럼 창백하거나 그을린 양상을 보이며 신경종말 손상으로 오히려 통증이 적을 수 있다","무면허 응급구조사 업무 수행 및 명칭 사용을 금지하고 위반 시 처벌 대상으로 규정한다"],a:0,
+ e:"호흡음은 좌우 대칭 여러 부위(상·중·하 폐야, 전면과 후면)를 비교 청진하여 편측성 이상(무기폐, 기흉 등)을 놓치지 않는 것이 원칙이에요.",r:"호흡 평가 – 폐음 청진 원칙"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["9%","환자의 보험 가입 여부","고농도 산소를 투여하며 신속히 이송한다","폐쇄성 쇼크(obstructive shock)"],a:3,
+ e:"폐쇄성 쇼크는 심장 근육 자체의 문제(심인성)나 체액 소실(저혈량성)이 아니라, 심낭압전·긴장성 기흉·폐색전증처럼 심장으로의 혈류 유입/박출을 물리적으로 막는 기전으로 발생해요.",r:"쇼크의 병태생리학적 분류 – 폐쇄성 쇼크"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["과징금, 기부금 등 법령이 정하는 재원으로 조성되어 응급의료 지원에 사용된다","순환 및 관류 상태 평가","비밀유지 의무","갑상선 위기(thyroid storm)"],a:1,
+ e:"창백하고 차갑고 축축한 피부는 말초혈관 수축과 관류 저하(쇼크)를 시사하는 대표적 소견으로, 피부 관찰은 순환 평가의 핵심 요소예요.",r:"순환 평가 – 피부 소견의 임상적 의미"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["활동성 출혈이 조절되지 않은 관통성 외상 환자에서 과도한 수액 투여를 제한할 때","전체 현장 자원과 활동을 총괄 조정한다","발한, 떨림, 의식변화","중증 의식장애로 기도유지 능력 상실 위험이 높아 적극적 기도관리가 필요한 상태로 간주한다"],a:3,
+ e:"GCS 8점 이하는 흔히 기도삽관을 고려하는 기준으로 불릴 만큼 기도유지 능력이 저하된 중증 의식장애 상태로, 적극적인 기도·호흡 관리가 필요해요.",r:"신경계 평가 – GCS 8점 이하의 임상적 의미"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["야간·어두운 공간에서 환자 평가와 처치를 위해 필요하기 때문","권역응급의료센터, 지역응급의료센터, 지역응급의료기관 등으로 구분된다","차량 내 협소한 공간에서 척추손상 의심 환자 구조","호흡이 없을 때 인공호흡 5회 시도 후에도 무호흡이면 흑색으로 분류한다"],a:1,
+ e:"응급의료기관은 중증도와 기능에 따라 권역응급의료센터-지역응급의료센터-지역응급의료기관 등으로 지정·구분되어 있으며, 이송 시 환자 중증도에 맞는 기관 선정이 중요해요.",r:"응급의료에 관한 법률 – 응급의료기관의 종별 구분"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["선의의 응급의료 면책 등 법적 책임 감면 여부가 달라지기 때문","지혈대(tourniquet) 적용","응급의료 비용을 지불할 능력이 없는 응급환자도 진료를 거부당하지 않도록 국가가 우선 비용을 지원하는 것","드레싱 고정 및 압박 지혈 보조"],a:2,
+ e:"응급의료비 미수금 대지급제도는 지불능력이 없는 응급환자가 비용 문제로 응급의료를 거부당하지 않도록 국가가 먼저 비용을 부담하고 이후 구상권을 행사하는 제도예요.",r:"응급의료에 관한 법률 – 응급의료비 미수금 대지급"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["조직 관류 저하 상태에서 산소운반능을 최대화하기 위해","우측 쇄골 아래와 좌측 유두 아래 측흉부","손상기전이 의심되면 척추 고정을 우선 고려한다","응급의료 방해 행위로 처벌 대상이 된다"],a:3,
+ e:"응급의료법은 응급의료 종사자의 업무를 폭행·협박·위계 등으로 방해하는 행위에 대해 별도의 처벌 규정(응급의료 방해죄)을 두고 있어요.",r:"응급의료에 관한 법률 – 응급의료 방해 금지 및 처벌"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["자신의 안전이 명백히 위협받는 불가항력적 상황","3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)","대퇴골 간부 골절","안정된 환자는 약 15분마다, 불안정한 환자는 약 5분마다 재측정한다"],a:0,
+ e:"응급의료 거부·기피는 원칙적으로 금지되며, 지불능력 부족은 정당한 거부 사유가 될 수 없어요. 반면 구조자 자신의 안전 위협, 다른 위급 환자 처치 중, 시설·인력의 물리적 한계 등은 예외적으로 인정될 수 있는 사유로 다뤄져요.",r:"응급의료에 관한 법률 제6조 – 응급의료 거부금지의 예외와 한계"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["무면허 응급구조사 업무 수행 및 명칭 사용을 금지하고 위반 시 처벌 대상으로 규정한다","수동제세동기는 의료진이 리듬을 직접 판독하고 에너지를 결정한다","수축기 혈압과 발기부전치료제 복용 여부","시진 → 촉진 → 타진 → 청진(단, 복부는 청진을 촉진보다 먼저 시행)"],a:0,
+ e:"응급의료법은 응급구조사 자격이 없는 사람이 명칭을 사용하거나 그 업무범위에 해당하는 행위를 하는 것을 금지하고, 위반 시 벌칙 규정의 적용을 받도록 하고 있어요.",r:"응급의료에 관한 법률 – 무자격자의 업무수행·명칭사용 금지"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["장갑","법령이 정한 기준에 따라 산정·징수한다","병원 전 단계와 병원 단계","동안신경(제3뇌신경)"],a:3,
+ e:"동안신경(제3뇌신경)은 안구 운동 대부분과 동공 수축(부교감신경 섬유 포함)을 담당하며, 두개내압 상승 시 이 신경이 눌리면 동공이 확대되는 소견이 나타나요.",r:"신경학 – 동안신경(제3뇌신경)의 기능과 동공반사"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["즉시 필요한 응급처치를 받지 아니하면 생명을 보존할 수 없거나 심신상 중대한 위해가 발생할 가능성이 있는 자","기관삽관보다 삽입이 상대적으로 용이하나 완전한 기도 보호는 아니다","깊고 빠른 호흡(쿠스마울 호흡)과 함께 과일향(아세톤향) 호흡이 동반된다","환자의 자기결정권을 존중하되 위험성을 충분히 설명하고 거부 사실을 기록한다"],a:2,
+ e:"당뇨병성 케톤산증은 대사성 산증을 보상하려는 쿠스마울(Kussmaul) 호흡(깊고 빠른 호흡)과, 케톤체 배출로 인한 과일향 호흡이 특징적으로 동반돼요.",r:"내분비 응급 – 당뇨병성 케톤산증의 호흡 양상"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)","환자가 이미 처방받은 자가주사기를 스스로 사용하도록 보조할 수 있다","옆구리(측복부) 통증과 혈뇨가 나타날 수 있다","직접적으로 자살 생각 여부를 침착하게 확인하고 안전을 확보하며 비난하지 않는 태도로 대한다"],a:1,
+ e:"2급 응급구조사는 환자가 이미 처방받아 소지한 자가주사기(에피네프린 등) 사용을 '보조'하는 범위에서 도울 수 있으며, 새로운 약물을 임의로 투여하거나 정맥로를 확보하는 것은 업무범위를 벗어나요.",r:"알레르기 응급 – 2급 구조사의 자가주사기 사용 보조 범위"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["환자의 자세와 통증 양상을 관찰하며, 임의로 진통제를 투여하거나 확정 진단을 내리지 않는다","튜브의 기관 내 정확한 위치를 확인하기 위해","주의의무의 존재","개인의 사적 유흥비 지원"],a:0,
+ e:"응급구조사는 급성 복통의 원인을 확진할 수 없으므로, 통증을 유발하는 촉진은 최소화하고 자세·증상 관찰 위주로 평가하며 임의 약물 투여 없이 신속히 이송하는 것이 원칙이에요.",r:"위장관 응급 – 급성 복통 환자 평가 원칙"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["신전성(prerenal) 급성신부전","공기를 빼내면 신체 모양대로 굳어 전신을 고정할 수 있다","병원 전 단계와 병원 단계","저혈당"],a:0,
+ e:"신전성 급성신부전은 신장 자체의 손상이 아니라 저혈량증·심부전 등으로 신장으로 가는 혈류가 부족해 발생하며, 신성은 신장 실질 손상, 신후성은 요로 폐쇄가 원인이에요.",r:"비뇨기 응급 – 급성신부전의 원인별 분류(신전성/신성/신후성)"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["응급의료 거부 금지 위반으로 처벌 대상이 될 수 있다","간독성(급성 간부전)","외이도의 귀지나 이물질을 확인하고 탐침을 정확히 고막 방향으로 삽입한다","중추신경계 이상(의식변화)을 동반한 고체온"],a:1,
+ e:"아세트아미노펜 과량 복용은 초기에는 증상이 미미할 수 있으나, 대사산물이 간세포를 손상시켜 수일 내 급성 간부전으로 진행할 수 있어 증상이 없어도 반드시 병원 평가가 필요해요.",r:"독성학 – 아세트아미노펜 중독의 간독성"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["구토물 등에 의한 기도 흡인을 방지하기 위해","저체온 상태에서는 심근이 제세동에 반응하지 않을 수 있어 무의미한 반복을 피하기 위해","응급환자이송업 등 구급차 전용 표지","선상 두개골 골절(linear skull fracture)"],a:3,
+ e:"두개골 골절 중 단순히 금이 가는 형태인 선상 골절이 임상적으로 가장 흔하며, 함몰·기저부·복합 골절은 상대적으로 드물지만 중증도는 더 높을 수 있어요.",r:"두경부 손상 – 두개골 골절의 유형별 빈도"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["1차 중증도 분류(triage)","응급의료 관련 법정 의무(인력·시설 기준 유지 등) 이행","오심, 발한, 소화불량 유사 증상","시간이 지나면서 회복될 수도 있어 초기 완전마비 소견만으로 영구적 손상 여부를 단정할 수 없다"],a:3,
+ e:"척수 쇼크는 손상 직후 반사 활동이 일시적으로 억제되는 상태로, 시간이 지나 반사가 일부 회복될 수 있어 급성기 완전마비 소견만으로 예후를 단정하기 어렵다는 점이 중요해요.",r:"척추 손상 – 척수 쇼크(spinal shock)의 개념"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["주의의무의 존재","장시간 부동 후 갑작스러운 호흡곤란과 흉통","발견된 자세대로 부목으로 고정하고 무리하게 정복을 시도하지 않는다","종이봉투를 이용한 재호흡법 강요"],a:2,
+ e:"응급구조사는 명백한 순환장애 등 특수한 상황이 아니라면 관절을 무리하게 정복하지 않고, 발견된 자세 그대로 부목으로 고정해 신경혈관 손상을 예방하며 이송하는 것이 원칙이에요.",r:"근골격계 손상 – 관절 탈구 처치 원칙"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["보수교육","리튬(lithium)","고도가 높아지면 부목 내부 공기가 팽창할 수 있어 압력을 주기적으로 확인·조절해야 한다","경정맥 팽대, 심음 감소(둔탁), 저혈압(맥압 감소)"],a:3,
+ e:"Beck's triad는 경정맥 팽대(JVD), 심음의 둔탁한 감소, 저혈압(좁아진 맥압)의 3가지 소견으로, 심낭 내 출혈·삼출로 심장이 눌려 충분히 확장하지 못해 심박출량이 급격히 감소하는 폐쇄성 쇼크의 대표 예예요.",r:"흉부 손상 – 심낭압전(Beck's triad)"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["마스크와 안면 사이의 공기 누출을 막아 환기 효율을 높이기 위해","3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)","응급의료에 관한 법률 시행규칙 등 관련 법령","돌출된 장기를 억지로 복강 내로 밀어넣지 않고 촉촉한 멸균 드레싱으로 덮어 보호한다"],a:3,
+ e:"복부 장기 탈출(evisceration) 시에는 장기를 다시 밀어넣지 않고, 촉촉한 멸균 거즈로 덮은 뒤 그 위를 마른 드레싱으로 감싸 건조와 추가 오염을 막는 것이 원칙이에요.",r:"복부 손상 – 장기 탈출(evisceration) 처치 원칙"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["B형간염 예방접종","평시 기준으로는 대응이 어려운 자원 부족·과부하 상황에 유연하게 대처하기 위해","폐색전증, 당뇨성 케톤산증 등 기질적 원인","자격증 대여·대여받아 사용하는 행위는 금지되며 처벌 대상이다"],a:0,
+ e:"응급구조사는 혈액·체액 노출 위험이 있어 B형간염, 매년 인플루엔자, 파상풍-디프테리아 등의 접종이 권장되지만, 황열은 국내 근무 환경에서는 일반적으로 해당되지 않는 접종이에요.",r:"감염관리 – 응급구조사 권장 예방접종"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["의식이 있으면 경구 당분을 섭취시키고, 프로토콜에 따라 혈당을 측정한다","신속한 신고 및 심정지 조기 인지","환자 상태의 변화 추세를 파악하기 위해","국민의 생명과 건강을 보호하고 국민 복지 증진에 이바지"],a:1,
+ e:"생존사슬의 첫 고리는 심정지를 조기에 인지하고 신속히 신고하는 것으로, 이후 조기 심폐소생술-조기 제세동-전문소생술-통합 치료로 이어지는 각 고리가 모두 중요해요.",r:"심정지 소생술 – 생존사슬(chain of survival)의 첫 단계"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["압박 해제 시 고칼륨혈증 등 전신 합병증 위험을 사전에 고려한다","리튬(lithium)","피부 전층이 손상되어 가죽처럼 창백하거나 그을린 양상을 보이며 신경종말 손상으로 오히려 통증이 적을 수 있다","불필요하게 구강을 자극하지 않고 편안한 자세를 유지시킨다"],a:1,
+ e:"리튬은 양극성 장애의 대표적 치료제이지만 치료 농도와 중독 농도의 범위가 좁아 혈중 농도 관리가 중요하며, 이 약을 복용 중인 환자의 이상 증상은 리튬 중독 가능성도 고려해야 해요.",r:"정신과적 응급 – 양극성 장애와 리튬 치료의 특성"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["일산화탄소 중독 환자 (일산화탄소혈색소를 산소혈색소로 오인)","안심시키며 천천히 호흡하도록 유도하고 필요시 저농도 산소를 공급하며 관찰한다","하지를 30cm 정도 거상한 앙와위","필요한 장비와 인력을 사전에 준비할 수 있기 때문"],a:1,
+ e:"공황발작의 과호흡은 종이봉투 재호흡법이 저산소증 등 위험을 유발할 수 있어 더 이상 권장되지 않으며, 안심시키고 천천히 호흡하도록 유도하는 것이 중요해요.",r:"정신과적 응급 – 공황발작 및 과호흡 처치의 최신 원칙"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["비말(공기 중 미세입자) 전파","두 질환 모두 유사한 국소 신경학적 증상을 유발할 수 있기 때문","빈맥과 창백한 피부","자궁외임신(파열 시 대량 복강내출혈 위험)"],a:3,
+ e:"자궁외임신은 나팔관 등에 착상된 태아가 성장하며 파열되면 대량 복강내출혈로 급격한 쇼크에 빠질 수 있는 응급질환으로, 가임기 여성의 하복부 통증·질출혈에서 반드시 고려해야 해요.",r:"산과 응급 – 자궁외임신(파열)의 위험성"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["멸균 드레싱으로 상처를 덮고 직접 압박으로 지혈한다","저체온 상태에서는 심근이 제세동에 반응하지 않을 수 있어 무의미한 반복을 피하기 위해","일산화탄소 중독 환자 (일산화탄소혈색소를 산소혈색소로 오인)","개인보호장비(PPE)"],a:0,
+ e:"개방창은 멸균 드레싱으로 덮어 오염을 막고 직접 압박으로 지혈하는 것이 기본 원칙이며, 깊이 박힌 이물질은 함부로 제거하지 않고 고정한 채 이송해야 해요.",r:"연조직 손상 – 개방창 처치의 기본 원칙"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["손상기전과 생리적 지표에 따라 현장처치 시간을 최소화해야 하는 중증외상과, 현장에서 안정화가 더 유리한 내과환자의 전략이 다르기 때문","직접적으로 자살 생각 여부를 침착하게 확인하고 안전을 확보하며 비난하지 않는 태도로 대한다","양팔과 왼다리(또는 몸통 좌우 및 하부) 3곳","자원(인력·장비)을 효율적으로 배분하고 혼란 없이 통일된 지휘 하에 대응하기 위해"],a:2,
+ e:"기본 3유도 심전도는 오른팔·왼팔·왼다리(또는 그에 상응하는 몸통 부위) 3곳에 전극을 부착해 기본적인 심장 리듬을 관찰하는 방식이에요.",r:"응급의료장비 – 심전도 모니터 기본 3유도 부착"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["노출된 뼈를 억지로 밀어넣지 않고 무균 드레싱으로 덮는다","연령이 어릴수록 정상 맥박수와 호흡수는 성인보다 빠른 것이 일반적이다","긴 척추고정판(백보드, long spine board)","처치의 일관성과 질을 담보하는 핵심 지표이기 때문"],a:2,
+ e:"긴 척추고정판(백보드)은 전신을 일직선으로 고정한 채 들어 올리고 이동시킬 수 있도록 설계된 장비로, 척추손상 의심 환자의 표준 이동 장비예요.",r:"응급의료장비 – 긴 척추고정판(백보드)의 용도"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["내용을 이해하고 수신했다","수술이나 처치가 예상되는 급성 복증 환자","색상별 조절기로 비교적 정확하고 일정한 산소 농도를 제공할 수 있다","자율성 존중의 원칙"],a:2,
+ e:"벤츄리 마스크는 색상이 다른 조절기를 교체해 비교적 정밀하게 목표 산소농도를 맞출 수 있어, COPD 환자처럼 정밀한 산소 조절이 필요한 경우에 유용해요.",r:"응급의료장비 – 벤츄리 마스크의 산소농도 조절 특성"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["팔걸이 고정 및 드레싱 고정","신고 접수부터 현장 도착까지 걸린 시간","고도가 높아지면 부목 내부 공기가 팽창할 수 있어 압력을 주기적으로 확인·조절해야 한다","열사병은 중추신경계 이상(의식변화·섬망 등)을 동반하며 체온이 40℃ 이상으로 심하게 상승하는 반면, 열탈진은 의식이 비교적 명료하다"],a:2,
+ e:"항공 이송 등으로 고도가 상승하면 기압이 낮아져 공기부목 내부의 공기가 팽창해 지나친 압박을 유발할 수 있어, 이송 중 주기적으로 압력을 확인하고 필요시 공기를 빼주어야 해요.",r:"응급의료장비 – 공기부목과 고도 변화에 따른 압력 관리"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["구토물 등에 의한 기도 흡인을 방지하기 위해","이송 중 척추의 추가 움직임을 최소화하기 위해","응급환자 이송 등 긴급한 경우 도로교통법에서 정한 특례가 적용될 수 있다","차량 등 좁은 공간에 갇힌 척추손상 의심 환자를 앉은 자세에서 척추 정렬을 유지하며 구출하기 위해"],a:3,
+ e:"KED는 자동차 사고 등으로 좁은 공간에 앉은 자세로 갇힌 환자에게서 척추 정렬을 유지한 채 신속히 구출하기 위해 사용하는 반강성 고정 장비예요.",r:"응급의료장비 – KED(단기 척추고정장비)의 용도"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["늑골 골절","당시 상황의 불가피성과 환자에게 최선을 다했는지 여부","환자 발생부터 병원 도착 전까지의 모든 과정","유량계(flow meter)"],a:3,
+ e:"산소 유량계는 산소통에 부착되어 분당 리터(L/min) 단위로 환자에게 전달되는 산소 유량을 조절하는 장치예요.",r:"응급의료장비 – 산소 유량계의 기능"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["역설적 호흡(paradoxical breathing) - 흡기 시 손상 부위가 함몰되고 호기 시 팽창","탄환이나 흉기가 체내에서 공동현상(cavitation)이나 경로 변화를 일으켜 진입구보다 훨씬 넓은 조직 손상을 유발할 수 있기 때문","단단한 흡인 팁(경성 카테터)","주변의 위험 물건을 치우고 환자를 보호하며 경련이 끝난 후 기도를 확인한다"],a:2,
+ e:"경성(단단한) 흡인 팁은 구강 내 대량의 이물질을 신속히 제거하는 데 적합하며, 부드러운 유연 카테터는 좁고 깊은 경로의 흡인에 주로 사용돼요.",r:"응급의료장비 – 흡인 카테터의 종류와 용도 구분"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["응급의료에 관한 법률","긴 척추고정판(백보드, long spine board)","말단부 맥박·감각·운동 기능(원위부 신경혈관 상태)","외이도의 귀지나 이물질을 확인하고 탐침을 정확히 고막 방향으로 삽입한다"],a:0,
+ e:"응급구조사의 업무범위와 자격은 「응급의료에 관한 법률」 및 시행규칙에서 규정해요.",r:"총론 – 응급구조사 관련 법령 개요"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["환자 발생부터 병원 도착 전까지의 모든 과정","환자의 사생활과 비밀유지 의무를 지키기 위해","SBAR(상황-배경-평가-권고) 기법","고의 또는 중대한 과실 없이 한 응급처치로 발생한 결과"],a:0,
+ e:"병원 전 단계는 신고 접수, 출동, 현장처치, 이송까지 병원 도착 이전의 전 과정을 말해요.",r:"총론 – 응급의료체계 단계 구분"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["고도가 높아지면 부목 내부 공기가 팽창할 수 있어 압력을 주기적으로 확인·조절해야 한다","안전","약 5~6cm","15:2"],a:1,
+ e:"현장 확인 3요소는 안전-상황-인원이며, 과거병력은 이후 병력청취(SAMPLE) 단계에서 확인해요.",r:"총론 – 현장평가(Scene Size-up)"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["보행 가능 여부(walking wounded)로 우선 선별","정당행위·업무상 정당한 처치로 평가되어 책임이 조각될 수 있다","우측 쇄골 아래(흉골 우측)와 좌측 측흉부(액와 중간선, 유두 아래)","중증도 분류(Triage)"],a:3,
+ e:"다수사상자 상황에서는 제한된 자원으로 최대 생존자를 확보하기 위해 중증도 분류를 최우선으로 시행해요.",r:"총론 – 다수사상자 관리 원칙"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["안면 마비(Face)","의료사고 사례를 분석해 재발을 방지하고 시스템을 개선하기 위해","현장에서 의사와 실시간 통신으로 지시를 받는 방식","고농도 산소를 투여하며 신속히 이송한다"],a:2,
+ e:"직접의료지도는 현장 상황을 실시간으로 의사에게 전달받아 지시에 따라 처치하는 방식이에요.",r:"총론 – 의료지도 체계(온라인/오프라인)"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["자율성 존중의 원칙","차량 통제 및 경고 표지 설치 후 접근","호흡수가 분당 30회를 초과하거나 무호흡 후 기도확보로 회복","응급환자 이송 등 긴급한 경우 도로교통법에서 정한 특례가 적용될 수 있다"],a:1,
+ e:"교통사고 등 현장에서는 후속 차량 충돌 등 2차 사고 예방을 위해 경고 표지·차량 통제가 선행되어야 해요.",r:"총론 – 현장안전과 2차 사고 예방"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["전신 척추 고정 및 이동","즉시 필요한 응급처치를 받지 아니하면 생명을 보존할 수 없거나 심신상 중대한 위해가 발생할 가능성이 있는 자","보행 불가하나 호흡·순환·의식이 모두 정상 범위인 환자","생명이 위급한 응급환자에게 응급의료를 제공한 경우"],a:2,
+ e:"보행 불가하지만 호흡·맥박·의식 상태가 기준을 만족하면 황색(응급치료 지연 가능)으로 분류해요.",r:"총론 – START Triage 황색 기준"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["신고 접수부터 현장 도착까지 걸린 시간","기본 심폐소생술을 위한 기도유지기의 삽관, 정맥로 확보를 통한 수액투여, 저혈당 시 포도당 투여","권역응급의료센터, 지역응급의료센터, 지역응급의료기관 등으로 구분된다","멸균 드레싱으로 상처를 덮고 직접 압박으로 지혈한다"],a:0,
+ e:"반응시간은 신고 접수 후 구급차가 현장에 도착하기까지 걸리는 시간으로, EMS 질 평가의 핵심 지표예요.",r:"총론 – EMS 성과지표(반응시간)"},
+{s:"총론",d:4,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["갑상선 위기(thyroid storm)","여러 기관 간 지휘 혼선을 방지하고 자원을 효율적으로 배분하기 위해","즉시 응급의료를 제공해야 한다","지정된 전용 용기(손상성 폐기물함 등)에 분리 폐기한다"],a:1,
+ e:"ICS(Incident Command System)는 다기관 협업 시 지휘체계를 단일화해 혼선을 막고 인력·자원 배분을 효율화해요.",r:"총론 – 재난대응 지휘체계(ICS)"},
+{s:"총론",d:4,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["고의 또는 중대한 과실 없이 성실히 처치한 경우","기흉, 심낭삼출 등 즉각적 생명 위협 소견을 신속히 확인","긴 척추고정판(백보드, long spine board)","의료지도 및 프로토콜에 따른 트리아지 원칙 적용"],a:3,
+ e:"윤리적 딜레마 상황에서도 개인 판단이 아닌 표준 트리아지 프로토콜과 의료지도를 따르는 것이 원칙이에요.",r:"총론 – 현장 윤리적 의사결정"},
+{s:"총론",d:5,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["과소이송은 중증 환자를 경증으로 분류해 치료가 지연되므로 더 치명적이다","입꼬리부터 귓불까지의 길이를 기준으로 선택","분당 12~20회","직접의료지도(on-line medical control)를 포함한 의료지도 체계"],a:0,
+ e:"과소이송(under-triage)은 실제 중증 환자를 경증으로 잘못 분류해 처치가 지연되는 것으로 임상적으로 더 치명적인 오류로 간주돼요.",r:"총론 – 트리아지 오류(과다/과소이송)"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["장갑과 보안경(필요시 마스크)","대상기전이 소실되며 혈압이 급격히 떨어지고 의식저하가 뚜렷해진다","저혈압과 의식수준 저하","증상만으로 완전한 감별이 불가능하므로 아스피린 등 임의 약물 투여 없이 신속히 뇌졸중센터로 이송하고 발병시각을 정확히 확인·기록한다"],a:0,
+ e:"체액 노출이 예상되는 대부분의 현장 처치에서는 장갑이 기본이며, 비말·분사 위험 시 보안경·마스크를 추가해요.",r:"총론 – 개인보호장비 기본 구성"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["비밀누설금지 위반으로 처벌 대상이 될 수 있다","자율성 존중의 원칙","1차 평가상 불안정(load and go 기준)한 경우","환자의 중증도를 시각적으로 표시해 이송 우선순위를 신속히 공유하기 위해"],a:1,
+ e:"의식이 명료한 성인 환자는 처치를 거부할 권리가 있으며, 이를 존중하는 것이 자율성 존중 원칙이에요.",r:"총론 – 생명윤리 4원칙"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["의약품 가격 결정 체계","환자에게 마스크를 착용시키고 구조자도 적절한 보호구를 착용한다","과징금, 기부금 등 법령이 정하는 재원으로 조성되어 응급의료 지원에 사용된다","개방성 골절(open fracture)"],a:0,
+ e:"EMS 구성요소는 인력, 장비, 통신, 이송수단, 의료지도, 병원 연계 등이며 의약품 가격결정은 해당하지 않아요.",r:"총론 – 응급의료체계 구성요소"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["직접의료지도(on-line medical control)를 포함한 의료지도 체계","「응급의료에 관한 법률」상 벌칙 규정에 따라 형사처벌 대상이 될 수 있다","외이도의 귀지나 이물질을 확인하고 탐침을 정확히 고막 방향으로 삽입한다","고의 또는 중대한 과실 없이 성실히 처치한 경우"],a:3,
+ e:"선의의 응급의료 면책은 고의나 중대한 과실 없이 성실하게 응급처치를 한 경우 민형사상 책임을 감면해주는 제도예요.",r:"총론 – 선의의 응급의료 면책제도"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["30:2","분당 10~15L","연령이 어릴수록 정상 맥박수와 호흡수는 성인보다 빠른 것이 일반적이다","소아 사망 등 정서적 충격이 큰 사건 대응 후"],a:3,
+ e:"소아 사망, 동료 순직 등 심리적 충격이 큰 사건 이후에는 CISD 등 스트레스 해소 프로그램이 권장돼요.",r:"총론 – 구조자 스트레스 관리(CISD)"},
+{s:"총론",d:4,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["의식이 없는 응급환자로 즉각적 처치가 필요한 경우","차량 등 좁은 공간에 갇힌 척추손상 의심 환자를 앉은 자세에서 척추 정렬을 유지하며 구출하기 위해","두 질환 모두 유사한 국소 신경학적 증상을 유발할 수 있기 때문","1차 평가상 불안정(load and go 기준)한 경우"],a:0,
+ e:"의식이 없거나 생명이 위급해 동의를 받을 수 없는 경우, 합리적인 사람이라면 동의했을 것이라는 전제하에 묵시적 동의가 적용돼요.",r:"총론 – 동의의 종류(명시적/묵시적)"},
+{s:"총론",d:5,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["단일 기관의 자원만으로 대응이 불가능한 대규모 사고에 대비하기 위해","심근경색 등 심장성 통증의 특징적 소견일 수 있기 때문","응급의료 비용을 지불할 능력이 없는 응급환자도 진료를 거부당하지 않도록 국가가 우선 비용을 지원하는 것","응급처치에 필요한 장비 및 인력(응급구조사 등)을 갖추어 운용해야 한다"],a:0,
+ e:"대규모 재난은 단일 기관 자원으로 대응이 어려워 인접 기관·지자체 간 상호응원(mutual aid) 체계가 필수예요.",r:"총론 – 재난대응 상호응원체계"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["혼란한 현장에서 정확한 판단과 처치를 위해 필요하기 때문","현장 안전 여부","환자의 보험 가입 여부","멸균 드레싱으로 상처를 덮고 직접 압박으로 지혈한다"],a:0,
+ e:"긴박한 현장에서 침착함을 유지해야 정확한 평가와 우선순위 판단이 가능해요.",r:"총론 – 응급구조사 기본 소양"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["저산소성 호흡추진력 저하로 인한 호흡억제 가능성","1차 평가에서 즉각적인 생명 위협이 발견된 경우","현장에서 의사와 실시간 통신으로 지시를 받는 방식","대상기전이 소실되며 혈압이 급격히 떨어지고 의식저하가 뚜렷해진다"],a:1,
+ e:"1차 평가에서 기도·호흡·순환에 즉각적 위협이 확인되면 2차 평가를 생략하고 신속 이송(load and go)을 고려해요.",r:"총론 – Load and Go 원칙"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["안전벨트","정맥로 확보 및 수액투여","환자의 생명을 구하고 상태 악화를 방지한다","소생술을 시행하지 않고 관련 기관에 신고한다"],a:3,
+ e:"부패, 두부 절단 등 명백한 사망 징후가 있으면 소생술을 시행하지 않고 관련 절차(경찰 등)에 따라야 해요.",r:"총론 – 명백한 사망 징후와 대응"},
+{s:"총론",d:4,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["동안신경(제3뇌신경)","처치의 적절성을 입증하기 어려워 분쟁 시 불리해질 수 있다","수축기 혈압과 발기부전치료제 복용 여부","대혈관 손상에 의한 대량출혈과 기도폐쇄"],a:1,
+ e:"기록이 부실하면 추후 의료분쟁 발생 시 적절한 처치가 이루어졌음을 입증하기 어려워져요.",r:"총론 – 기록의 법적 중요성"},
+{s:"총론",d:5,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["탄환이나 흉기가 체내에서 공동현상(cavitation)이나 경로 변화를 일으켜 진입구보다 훨씬 넓은 조직 손상을 유발할 수 있기 때문","대응 과정의 문제점을 분석해 향후 대응력을 개선하기 위해","15:2","장갑 낀 손으로 태아 선진부를 밀어올려 제대 압박을 줄이고, 무릎-가슴 자세로 이송하며 제대를 체내로 밀어넣지 않는다"],a:1,
+ e:"사후 검토는 처벌이 아니라 대응 과정의 강점·약점을 분석해 시스템과 프로토콜을 개선하는 데 목적이 있어요.",r:"총론 – 재난대응 사후검토(AAR)"},
+{s:"총론",d:1,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["환자의 중증도를 시각적으로 표시해 이송 우선순위를 신속히 공유하기 위해","안전벨트","생명 유지","2초 이내"],a:1,
+ e:"이동 중 안전벨트 착용은 구조자 자신의 안전을 위한 가장 기본적인 조치예요.",r:"총론 – 이동 중 안전수칙"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["환자의 직업","일반 건강검진","국가시험에 합격하고 자격을 취득해야 한다","주변의 위험 물건을 치우고 환자를 보호하며 경련이 끝난 후 기도를 확인한다"],a:0,
+ e:"인계 시 손상기전, 활력징후, 처치내용, 반응 등이 핵심이며 직업은 필수 인계 정보가 아니에요.",r:"총론 – 환자 인계(SBAR 등)"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["여러 기관 간 지휘 혼선을 방지하고 자원을 효율적으로 배분하기 위해","튜브의 기관 내 정확한 위치를 확인하기 위해","자신과 동료의 안전을 확보하고 필요시 경찰 지원을 요청한다","청진기"],a:2,
+ e:"폭력적 환자 상황에서는 구조자 안전 확보가 최우선이며, 필요시 경찰 등 지원 요청이 원칙이에요.",r:"총론 – 폭력적 환자 대응 원칙"},
+{s:"총론",d:4,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["응급의료 관련 법정 의무(인력·시설 기준 유지 등) 이행","신시내티 병원전 뇌졸중 척도(CPSS)","환자의 중증도를 시각적으로 표시해 이송 우선순위를 신속히 공유하기 위해","골절·탈구 부위의 움직임을 제한해 추가 손상을 예방"],a:2,
+ e:"트리아지 태그는 색상으로 중증도를 표시해 여러 대원이 이송 우선순위를 빠르게 공유할 수 있게 해줘요.",r:"총론 – 트리아지 태그의 역할"},
+{s:"총론",d:5,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["귀지 등 이물질로 인한 측정 오류","처치의 일관성과 질을 담보하는 핵심 지표이기 때문","다량의 생리식염수 또는 깨끗한 물로 즉시 세척한다","입꼬리부터 귓불까지의 길이를 기준으로 선택"],a:1,
+ e:"프로토콜 준수율은 현장 처치가 표준화된 근거 기반으로 이루어지고 있는지를 보여주는 핵심 질 지표예요.",r:"총론 – EMS 질 관리 지표(프로토콜 준수율)"},
+{s:"총론",d:3,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["성대와 기도 입구를 직접 보며 삽관을 돕기 위해","국가시험에 합격하고 자격을 취득해야 한다","손상기전이 의심되면 척추 고정을 우선 고려한다","심한 복통과 자궁 압통을 동반한 출혈(외부 출혈은 적을 수 있음)"],a:2,
+ e:"낙상, 교통사고 등 척추손상 가능성이 있는 기전에서는 부적절한 이동으로 인한 이차 손상을 막기 위해 고정을 우선해요.",r:"총론 – 이차 손상 예방 원칙"},
+{s:"총론",d:2,q:"다음 중 총론 과목의 내용으로 옳은 것은?",o:["더 큰 위해를 방지하기 위해 부득이하게 다른 법익을 침해한 응급처치 상황","119","환자의 사생활과 비밀유지 의무를 지키기 위해","명확하고 간결한 표준 용어를 사용하고 불필요한 사적 대화를 피한다"],a:2,
+ e:"환자의 신상 및 의료정보는 사생활 보호와 비밀유지 의무에 따라 제3자에게 노출되지 않도록 해야 해요.",r:"총론 – 환자 정보 보호와 비밀유지"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["의식이 있으면 경구 당분을 섭취시키고, 프로토콜에 따라 혈당을 측정한다","기본 심폐소생술을 위한 기도유지기의 삽관, 정맥로 확보를 통한 수액투여, 저혈당 시 포도당 투여","보건복지부장관 등이 일정 기준에 따라 지정·평가·관리한다","90~140mmHg"],a:3,
+ e:"성인의 정상 수축기 혈압은 대략 90~140mmHg 범위로 평가해요.",r:"환자관리 – 활력징후(혈압)"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["구역반사가 살아있는 환자","탄환이나 흉기가 체내에서 공동현상(cavitation)이나 경로 변화를 일으켜 진입구보다 훨씬 넓은 조직 손상을 유발할 수 있기 때문","자발적으로 각성된 상태(Alert)","현장 안전 여부"],a:2,
+ e:"AVPU의 A는 Alert로, 자발적으로 눈을 뜨고 주변을 인지하는 각성 상태를 의미해요.",r:"환자관리 – 의식수준 평가(AVPU)"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["즉시 필요한 응급처치를 받지 아니하면 생명을 보존할 수 없거나 심신상 중대한 위해가 발생할 가능성이 있는 자","하지를 30cm 정도 거상한 앙와위","혈전용해술 등 치료 가능 시간(골든타임)이 제한되어 있기 때문","30분 이상 지속되는 압박성 흉통이 좌측 어깨나 팔로 방사됨"],a:1,
+ e:"쇼크 환자는 뇌·심장으로의 정맥환류를 돕기 위해 하지를 거상한 앙와위(변형 트렌델렌버그)를 취해요.",r:"환자관리 – 쇼크 체위"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["경정맥 팽대, 심음 감소(둔탁), 저혈압(맥압 감소)","대퇴골 간부 골절","하악견인법(jaw-thrust)","탄환이나 흉기가 체내에서 공동현상(cavitation)이나 경로 변화를 일으켜 진입구보다 훨씬 넓은 조직 손상을 유발할 수 있기 때문"],a:2,
+ e:"경추손상이 의심되면 목을 움직이지 않는 하악견인법(jaw-thrust)을 사용해요.",r:"환자관리 – 외상환자 기도개방"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["증상(Signs/Symptoms)","약물 복용 등으로 정상 반응(빈맥 등)이 나타나지 않을 수 있다","환자 상태는 시간에 따라 변할 수 있어 지속적 재평가가 필요하기 때문","질식성 심정지이므로 가슴압박 전에 인공호흡을 우선 고려하고 초기 5회 인공호흡을 먼저 시행할 수 있다"],a:0,
+ e:"SAMPLE의 S는 현재 증상(Signs/Symptoms)을 의미해요.",r:"환자관리 – SAMPLE 병력청취"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["자격을 증명할 수 있는 신분증(자격증 등)","응급처치에 필요한 장비 및 인력(응급구조사 등)을 갖추어 운용해야 한다","빈맥과 창백한 피부","이송 중에도 일정한 깊이와 속도의 압박을 지속할 수 있다"],a:2,
+ e:"쇼크 초기에는 보상기전으로 빈맥, 말초혈관수축에 의한 창백·냉습한 피부가 나타나요.",r:"환자관리 – 쇼크의 대상성 단계 징후"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["현장에서 신속 선별 후 이송 전 재평가로 정확도를 높인다","분당 1~6L","배꼽 주위 통증 후 우하복부로 이동","안심시키며 천천히 호흡하도록 유도하고 필요시 저농도 산소를 공급하며 관찰한다"],a:1,
+ e:"비강캐뉼라는 분당 1~6L 범위로 저농도~중등도 산소를 투여할 때 사용해요.",r:"환자관리 – 비강캐뉼라 산소투여"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["저혈량증과 긴장성 기흉 등 외상성 원인 교정","척추의 일직선(중립) 상태를 유지하기 위해","적색(즉각치료)","저혈당"],a:1,
+ e:"log roll 기법은 여러 명이 협력해 척추를 뒤틀림 없이 일직선으로 유지하며 이동시키는 방법이에요.",r:"환자관리 – 척추손상 환자 이동(log roll)"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["구토물 등에 의한 기도 흡인을 방지하기 위해","동공 확대(산동)","전부하 감소로 심한 저혈압을 유발할 수 있기 때문","안전 거리를 유지하고 자극을 최소화하며 진정 시도"],a:0,
+ e:"측위는 의식저하 환자에서 구토물이나 분비물이 기도로 흡인되는 것을 방지하는 자세예요.",r:"환자관리 – 회복자세(측위)의 목적"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["조직 관류 저하 상태에서 산소운반능을 최대화하기 위해","이송 중에도 일정한 깊이와 속도의 압박을 지속할 수 있다","복막 자극(복막염) 가능성","좌측으로 약간 기울여 대정맥 압박을 예방한다"],a:3,
+ e:"임신 후반기 앙와위는 자궁이 하대정맥을 압박해 저혈압을 유발할 수 있어 좌측위로 기울여야 해요.",r:"환자관리 – 임산부 앙와위 저혈압증후군"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["오심, 발한, 소화불량 유사 증상","주변의 위험 물건을 치우고 환자를 보호하며 경련이 끝난 후 기도를 확인한다","사전에 정해진 표준 프로토콜에 따른 처치","기관 편위(trachea deviation)와 경정맥 확장"],a:3,
+ e:"긴장성 기흉은 흉강 내압 상승으로 기관이 건강한 쪽으로 편위되고 경정맥이 확장되는 특징을 보여요.",r:"환자관리 – 긴장성 기흉 징후"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["기관 편위(trachea deviation)와 경정맥 확장","의식이 있으면 경구 당분을 섭취시키고, 프로토콜에 따라 혈당을 측정한다","질식성 심정지이므로 가슴압박 전에 인공호흡을 우선 고려하고 초기 5회 인공호흡을 먼저 시행할 수 있다","1차 평가상 불안정(load and go 기준)한 경우"],a:1,
+ e:"의식이 있는 저혈당 의심 환자는 경구 당분 섭취가 가능하며, 혈당 측정 후 프로토콜에 따라 대응해요.",r:"환자관리 – 저혈당 의심 환자 처치"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["의식 수준 저하 및 심부체온(중심체온) 측정치, 오한 반응 소실 여부","복막염 등 복막 자극 소견","위반행위를 한 개인뿐 아니라 소속 법인·기관도 함께 처벌될 수 있다","의식이 명료하고 신경학적 이상이 없는 경우"],a:3,
+ e:"선택적 척추고정 기준은 의식 명료, 압통 없음, 신경학적 정상, 주의 분산 손상 없음 등이며, 고에너지 기전 자체는 고정을 지지하는 요인이에요.",r:"환자관리 – 선택적 척추고정 기준(NEXUS 등)"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["법령이 정한 경우를 제외하고 목적 외 제3자 제공이 금지된다","단일 기관의 자원만으로 대응이 불가능한 대규모 사고에 대비하기 위해","심근경색 등 심장성 통증의 특징적 소견일 수 있기 때문","병원 전 단계와 병원 단계"],a:2,
+ e:"팔·턱·등으로 뻗치는 방사통은 급성 관상동맥증후군의 특징적 소견 중 하나예요.",r:"환자관리 – 흉통 평가와 방사통"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["발견된 자세대로 부목으로 고정하고 무리하게 정복을 시도하지 않는다","기도확보 및 호흡 보조","조직 관류 저하 상태에서 산소운반능을 최대화하기 위해","기도확보를 방해하지 않는 범위 내에서 고정한다"],a:2,
+ e:"쇼크는 조직 관류·산소공급이 저하된 상태이므로 고농도 산소로 동맥혈 산소함량을 최대화해 조직 저산소증을 완화해요.",r:"환자관리 – 쇼크와 산소요법의 생리학적 근거"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["기도확보나 호흡평가가 헬멧 때문에 불가능한 경우","안면부 골절이 의심되는 경우","현장 안전 여부","찢어지는 듯한 극심한 흉통이 등쪽으로 방사"],a:0,
+ e:"헬멧 착용이 기도확보·호흡평가·심정지 처치를 방해하면 2인 1조로 경추 중립을 유지하며 제거해요.",r:"환자관리 – 헬멧 제거 기준과 기법"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["손상기전과 무관하게 전신 신체검진을 체계적으로 시행한다","눈뜨기, 언어반응, 운동반응","환자 신체 모양에 맞춰 고정할 수 있어 다양한 부위에 적용 가능","1차 중증도 분류(triage)"],a:0,
+ e:"내부 손상은 외견상 드러나지 않을 수 있어, 기전이 의심스러우면 체계적인 전신 검진으로 숨은 손상을 찾아야 해요.",r:"환자관리 – 손상기전과 신체검진의 관계"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["복부밀어내기(하임리히법)를 반복 시행한다","환자의 생명을 구하고 상태 악화를 방지한다","환자의 목 길이와 어깨-턱 간격을 실측하여 맞는 크기를 선택하고 중립위를 유지한 채 적용한다","현장에서 신속 선별 후 이송 전 재평가로 정확도를 높인다"],a:0,
+ e:"완전 기도폐쇄가 의심되는 의식이 있는 성인에게는 복부밀어내기(하임리히법)를 반복 시행해요.",r:"환자관리 – 기도이물 폐쇄 처치(성인)"},
+{s:"환자관리",d:5,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["기도 내 이물질·분비물 제거","환자의 목 길이와 어깨-턱 간격을 실측하여 맞는 크기를 선택하고 중립위를 유지한 채 적용한다","무면허 응급구조사 업무 수행 및 명칭 사용을 금지하고 위반 시 처벌 대상으로 규정한다","활동성 출혈이 조절되지 않은 관통성 외상 환자에서 과도한 수액 투여를 제한할 때"],a:3,
+ e:"허용적 저혈압은 지혈 전 과도한 수액으로 혈압을 정상화시키면 오히려 출혈이 악화될 수 있어 일부 관통성 외상에서 제한적으로 적용해요.",r:"환자관리 – 허용적 저혈압 전략"},
+{s:"환자관리",d:5,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["환자 본인의 자기결정권을 우선한다","고혈압, 서맥, 불규칙한 호흡","안심시키며 천천히 호흡하도록 유도하고 필요시 저농도 산소를 공급하며 관찰한다","30분 이상 지속되는 압박성 흉통이 좌측 어깨나 팔로 방사됨"],a:1,
+ e:"쿠싱 반응은 두개내압 상승 시 나타나는 고혈압-서맥-불규칙 호흡의 3대 징후로 뇌탈출의 위험 신호예요.",r:"환자관리 – 두개내압 상승과 쿠싱반응"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["정확한 산소 농도(FiO2)를 일정하게 유지할 수 있다","단일 기관의 자원만으로 대응이 불가능한 대규모 사고에 대비하기 위해","노출된 뼈를 억지로 밀어넣지 않고 무균 드레싱으로 덮는다","악화·완화 요인(Provocation/Palliation)"],a:2,
+ e:"개방성 골절은 뼈를 무리하게 정복하지 않고 무균 드레싱으로 덮은 뒤 부목 고정을 시행해요.",r:"환자관리 – 개방성 골절 처치 원칙"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["직접 압박법","안면부 골절이 의심되는 경우","심한 복통·요통과 함께 박동성 종괴, 저혈압","환자가 이미 의사로부터 해당 약물을 처방받아 소지하고 있는 경우에 한해 투여를 보조할 수 있다"],a:1,
+ e:"안면부·두개저 골절이 의심되면 코인두기도기가 두개강 내로 잘못 삽입될 위험이 있어 금기예요.",r:"환자관리 – 코인두기도기 금기"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["지혈대(tourniquet) 적용","조현병(정신분열증)","혈압 저하가 늦게 나타나며 빈맥이 초기 대표 징후이다","양팔과 왼다리(또는 몸통 좌우 및 하부) 3곳"],a:2,
+ e:"소아는 강력한 보상기전으로 혈압이 늦게 떨어지고, 빈맥이 쇼크의 초기 경고 징후로 나타나요.",r:"환자관리 – 소아 쇼크의 특징"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["개인보호장비(PPE)","거칠게 다루면 심실세동을 유발할 수 있어 조심스럽게 다뤄야 한다","악화·완화 요인(Provocation/Palliation)","3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)"],a:1,
+ e:"저체온 심장은 자극에 예민해 거친 처치가 치명적 부정맥을 유발할 수 있어 조심스러운 처치가 필요해요.",r:"환자관리 – 저체온증 환자 처치 주의점"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["9%","대혈관 손상에 의한 대량출혈과 기도폐쇄","청진기","기본 심폐소생술을 위한 기도유지기의 삽관, 정맥로 확보를 통한 수액투여, 저혈당 시 포도당 투여"],a:1,
+ e:"경부는 주요 혈관·기도·척수가 밀집되어 있어 관통상 시 대량출혈, 기도폐쇄 등 치명적 합병증 위험이 커요.",r:"환자관리 – 경부 관통상의 위험성"},
+{s:"환자관리",d:5,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["신시내티 병원전 뇌졸중 척도(CPSS)","고혈압, 서맥, 불규칙한 호흡","유량계(flow meter)","1차 평가상 불안정(load and go 기준)한 경우"],a:3,
+ e:"불안정한 중증 외상 환자는 현장 체류시간을 최소화하고 이송 중에 2차 평가를 진행하는 것이 원칙이에요.",r:"환자관리 – 불안정 환자의 2차 평가 시점"},
+{s:"환자관리",d:1,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["말초 관류 상태를 간접적으로 평가할 수 있기 때문","자발적으로 각성된 상태(Alert)","안정된 환자는 약 15분마다, 불안정한 환자는 약 5분마다 재측정한다","말초혈관 확장으로 인한 따뜻하고 붉은 피부, 빈맥"],a:0,
+ e:"창백·냉습한 피부는 말초 혈관수축과 관류저하(쇼크 등)를 시사하는 중요한 신체 징후예요.",r:"환자관리 – 피부 소견의 임상적 의미"},
+{s:"환자관리",d:2,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["발한, 떨림, 의식변화","수술이나 처치가 예상되는 급성 복증 환자","안심시키며 천천히 호흡하도록 유도하고 필요시 저농도 산소를 공급하며 관찰한다","공기를 빼내면 신체 모양대로 굳어 전신을 고정할 수 있다"],a:1,
+ e:"급성 복증 등 수술 가능성이 있는 환자는 흡인 위험과 마취 문제로 경구 섭취를 제한해요.",r:"환자관리 – NPO(금식) 원칙"},
+{s:"환자관리",d:3,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["안전","저혈량증과 긴장성 기흉 등 외상성 원인 교정","종이봉투를 이용한 재호흡법 강요","보건복지부장관 등이 일정 기준에 따라 지정·평가·관리한다"],a:2,
+ e:"과거의 종이봉투 재호흡법은 저산소증 등 위험이 있어 현재는 권장되지 않고, 안심·호흡 유도가 우선이에요.",r:"환자관리 – 과호흡 환자 처치 시 주의"},
+{s:"환자관리",d:4,q:"다음 중 환자관리 과목의 내용으로 옳은 것은?",o:["압박 해제 시 고칼륨혈증 등 전신 합병증 위험을 사전에 고려한다","의식 수준 저하 및 심부체온(중심체온) 측정치, 오한 반응 소실 여부","악화·완화 요인(Provocation/Palliation)","신시내티 병원전 뇌졸중 척도(CPSS)"],a:0,
+ e:"장시간 압박된 조직이 갑자기 풀리면 독성 대사산물과 칼륨이 전신으로 방출되어 심장·신장에 치명적일 수 있어요.",r:"환자관리 – 압궤증후군의 위험성"},
+{s:"법령",d:1,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["즉시 필요한 응급처치를 받지 아니하면 생명을 보존할 수 없거나 심신상 중대한 위해가 발생할 가능성이 있는 자","중증 뇌손상으로 기도 보호 능력이 저하될 수 있다","적절한 진료가 가능한 다른 기관으로, 환자 상태가 이송 가능한 경우","간독성(급성 간부전)"],a:0,
+ e:"응급환자는 즉각적 처치가 없으면 생명이나 심신에 중대한 위해가 발생할 우려가 있는 자로 정의돼요.",r:"법령 – 응급환자의 법적 정의"},
+{s:"법령",d:1,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["자신의 안전이 명백히 위협받는 불가항력적 상황","법령이 정한 기준에 따라 산정·징수한다","즉시 응급의료를 제공해야 한다","환자의 자기결정권을 존중하되 위험성을 충분히 설명하고 거부 사실을 기록한다"],a:2,
+ e:"응급의료종사자는 응급환자를 발견하면 즉시 응급의료를 제공해야 할 법적 의무가 있어요.",r:"법령 – 응급의료종사자의 의무"},
+{s:"법령",d:1,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["장갑 낀 손으로 태아 선진부를 밀어올려 제대 압박을 줄이고, 무릎-가슴 자세로 이송하며 제대를 체내로 밀어넣지 않는다","환자에게 마스크를 착용시키고 구조자도 적절한 보호구를 착용한다","국민의 생명과 건강을 보호하고 국민 복지 증진에 이바지","거짓이나 부정한 방법으로 자격을 취득한 경우"],a:2,
+ e:"이 법은 응급의료를 통해 국민의 생명과 건강을 보호하고 국민복지 증진에 이바지함을 목적으로 해요.",r:"법령 – 법의 목적"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["목 부위의 시진·촉진을 통한 손상 평가","응급의료는 의료행위의 특수한 영역으로 두 법이 함께 적용될 수 있다","의료기관","자궁외임신(파열 시 대량 복강내출혈 위험)"],a:2,
+ e:"구급차는 의료기관, 소방기관, 허가받은 이송업체 등 법령이 정한 자만 운용할 수 있으며 일반 개인은 해당하지 않아요.",r:"법령 – 구급차 운용 주체"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["권역응급의료센터","95~100%","환자에게서 손을 떼고 접촉하지 않는다","안전벨트"],a:0,
+ e:"응급의료기관은 권역응급의료센터, 지역응급의료센터, 지역응급의료기관 등으로 구분되며 일반 종합병원 명칭 자체는 별도 분류가 아니에요.",r:"법령 – 응급의료기관의 종류"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["비밀누설금지 위반으로 처벌 대상이 될 수 있다","적용 시각","비밀유지 의무","저혈당"],a:0,
+ e:"응급의료종사자는 업무상 알게 된 비밀을 누설해서는 안 되며, 위반 시 처벌 대상이 될 수 있어요.",r:"법령 – 비밀누설 금지 의무"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["심한 복통과 자궁 압통을 동반한 출혈(외부 출혈은 적을 수 있음)","중추신경계 이상(의식변화)을 동반한 고체온","적절한 진료가 가능한 다른 기관으로, 환자 상태가 이송 가능한 경우","장시간 흡인 시 저산소증을 악화시키고 미주신경 자극으로 서맥·부정맥을 유발할 수 있기 때문"],a:2,
+ e:"전원은 환자에게 더 적합한 치료가 가능한 기관으로, 이송 중 안전이 확보될 때 시행할 수 있어요.",r:"법령 – 응급환자 전원 기준"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["응급환자 이송 등 긴급한 경우 도로교통법에서 정한 특례가 적용될 수 있다","안전벨트","조현병(정신분열증)","처치의 일관성과 질을 담보하는 핵심 지표이기 때문"],a:0,
+ e:"응급 상황에서 구급차는 도로교통법 특례에 따라 일정한 우선 통행이 인정될 수 있어요.",r:"법령 – 구급차의 우선 통행 특례"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["보건복지부장관 등이 일정 기준에 따라 지정·평가·관리한다","2초 이내","대퇴골 간부 골절","소아는 강력한 혈관수축 능력으로 혈압을 오래 유지하지만 심박출량 예비능이 낮아 대상기전이 소실되면 급격히 저혈압으로 진행한다"],a:0,
+ e:"응급의료기관은 보건복지부 등 관할 기관이 법정 기준에 따라 지정하고 주기적으로 평가·관리해요.",r:"법령 – 응급의료기관 지정·평가"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["환자의 생명을 구하고 상태 악화를 방지한다","노출된 뼈를 억지로 밀어넣지 않고 무균 드레싱으로 덮는다","개인의 사적 유흥비 지원","응급의료에 관한 법률 시행규칙 등 관련 법령"],a:3,
+ e:"구급차 등에 갖추어야 할 의료장비·구급의약품 기준은 법령(시행규칙)에서 구체적으로 정하고 있어요.",r:"법령 – 구급차 장비기준의 근거"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["저혈압과 의식수준 저하","조현병(정신분열증)","야간·어두운 공간에서 환자 평가와 처치를 위해 필요하기 때문","업무범위 초과 및 무면허 의료행위에 해당할 수 있기 때문"],a:3,
+ e:"프로토콜과 업무범위를 벗어난 침습적 처치는 무면허 의료행위 등 법적 문제로 이어질 수 있어요.",r:"법령 – 업무범위 초과와 무면허의료행위"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["장시간 부동 후 갑작스러운 호흡곤란과 흉통","의료지도 의사의 지시에 따른다","장기를 억지로 넣지 않고 젖은 무균 드레싱으로 덮는다","응급의료는 의료행위의 특수한 영역으로 두 법이 함께 적용될 수 있다"],a:3,
+ e:"응급처치도 의료행위의 일종이므로 상황에 따라 의료법과 응급의료에 관한 법률이 함께 적용될 수 있어요.",r:"법령 – 의료법과 응급의료법의 관계"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["주변의 위험 물건을 치우고 환자를 보호하며 경련이 끝난 후 기도를 확인한다","적절한 진료가 가능한 다른 기관으로, 환자 상태가 이송 가능한 경우","저체온 상태에서는 심근이 제세동에 반응하지 않을 수 있어 무의미한 반복을 피하기 위해","야간·휴일에도 신속한 응급의료 제공을 보장하기 위해"],a:3,
+ e:"당직 의료인력 배치 의무는 시간대와 무관하게 응급환자에게 신속한 진료를 보장하기 위한 규정이에요.",r:"법령 – 당직의료인력 배치 의무의 취지"},
+{s:"법령",d:5,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["1급과 2급","간(liver)","지역 내 필수 응급의료 접근성을 보장하기 위해","응급처치 후 적절한 기관으로 신속히 이송할 의무"],a:2,
+ e:"지역책임의료기관 지정은 지역 간 응급의료 격차를 줄이고 필수 의료 접근성을 보장하려는 취지예요.",r:"법령 – 지역책임의료기관 제도"},
+{s:"법령",d:5,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["즉시 필요한 응급처치를 받지 아니하면 생명을 보존할 수 없거나 심신상 중대한 위해가 발생할 가능성이 있는 자","선의의 응급의료 면책 등 법적 책임 감면 여부가 달라지기 때문","지혈대(tourniquet) 적용","위반행위를 한 개인뿐 아니라 소속 법인·기관도 함께 처벌될 수 있다"],a:3,
+ e:"양벌규정은 실제 행위자뿐 아니라 그가 소속된 법인·기관도 함께 처벌할 수 있도록 하는 규정이에요.",r:"법령 – 양벌규정의 적용범위"},
+{s:"법령",d:1,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["국가시험에 합격하고 자격을 취득해야 한다","압박 해제 시 고칼륨혈증 등 전신 합병증 위험을 사전에 고려한다","위반행위를 한 개인뿐 아니라 소속 법인·기관도 함께 처벌될 수 있다","생명 유지"],a:0,
+ e:"응급구조사는 소정의 교육 이수 후 국가시험에 합격해야 자격을 취득할 수 있어요.",r:"법령 – 응급구조사 자격취득 절차"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["드레싱 고정 및 압박 지혈 보조","선상 두개골 골절(linear skull fracture)","응급의료에 관한 법률상 응급구조사로서의 의무와 업무범위 준수","응급의료종사자의 안전 보장을 위한 가중처벌 규정이 마련되어 있다"],a:3,
+ e:"응급의료 방해 행위(폭행 등)에 대해서는 응급의료종사자를 보호하기 위한 가중처벌 규정이 마련되어 있어요.",r:"법령 – 응급의료 방해 행위 가중처벌"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["고도가 높아지면 부목 내부 공기가 팽창할 수 있어 압력을 주기적으로 확인·조절해야 한다","최신 응급처치 지식과 기술을 유지·향상시키기 위해","자원이 제한된 다수사상자 상황","이송 중 척추의 추가 움직임을 최소화하기 위해"],a:1,
+ e:"보수교육은 응급구조사가 최신 지침과 기술을 지속적으로 습득해 처치의 질을 유지하도록 하는 목적이에요.",r:"법령 – 응급구조사 보수교육"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["다른 적절한 기관을 신속히 찾아 이송하고 상황을 기록한다","비밀누설금지 위반으로 처벌 대상이 될 수 있다","신속한 신고 및 심정지 조기 인지","3점, 완전한 무반응(자발개안·언어·운동반응 모두 없음)"],a:0,
+ e:"수용 거부 시 신속히 다른 적정 기관을 탐색해 이송하며, 상황을 기록해 추후 분쟁에 대비해야 해요.",r:"법령 – 병원 수용거부 시 대응"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["응급의료에 관한 법률상 응급구조사로서의 의무와 업무범위 준수","30:2","2초 이내","현장응급의료소"],a:0,
+ e:"소속과 무관하게 응급구조사는 법령상 정해진 업무범위와 의무를 동일하게 준수해야 해요.",r:"법령 – 소속 무관 응급구조사 의무의 일관성"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["분만 2기","문서 위조·허위작성 등으로 형사처벌 대상이 될 수 있다","9%","시간이 지나면서 회복될 수도 있어 초기 완전마비 소견만으로 영구적 손상 여부를 단정할 수 없다"],a:1,
+ e:"허위 기록 작성은 문서 관련 범죄나 자격 관련 제재로 이어질 수 있는 중대한 법적 문제예요.",r:"법령 – 허위 기록 작성의 법적 책임"},
+{s:"법령",d:5,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["의료사고 사례를 분석해 재발을 방지하고 시스템을 개선하기 위해","안면부 골절이 의심되는 경우","저혈압과 함께 나타나는 서맥(교감신경 소실)","저산소성 호흡추진력 저하로 인한 호흡억제 가능성"],a:0,
+ e:"환자안전 보고·학습 제도는 처벌이 아니라 사례 분석을 통한 재발 방지와 시스템 개선을 목적으로 해요.",r:"법령 – 환자안전 보고학습제도의 취지"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["장시간 부동 후 갑작스러운 호흡곤란과 흉통","환자의 중증도를 시각적으로 표시해 이송 우선순위를 신속히 공유하기 위해","자격증 대여·대여받아 사용하는 행위는 금지되며 처벌 대상이다","병원 전 단계부터 병원 단계까지 전체 소생사슬의 효과를 종합적으로 반영하기 때문"],a:2,
+ e:"자격증의 대여 및 대여받아 사용하는 행위는 법령상 금지되며 처벌 대상이 될 수 있어요.",r:"법령 – 자격증 대여 금지"},
+{s:"법령",d:1,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["대혈관 손상에 의한 대량출혈과 기도폐쇄","자격을 증명할 수 있는 신분증(자격증 등)","안면 마비(Face)","공기를 빼내면 신체 모양대로 굳어 전신을 고정할 수 있다"],a:1,
+ e:"업무 수행 시 자격을 증명할 수 있는 신분증(자격증)을 소지·제시할 수 있어야 해요.",r:"법령 – 응급구조사 신분 확인"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["이송 중에도 일정한 깊이와 속도의 압박을 지속할 수 있다","이송 중에도 전문적인 응급처치가 가능하도록 하기 위해","현장응급의료소","사전에 정해진 표준 프로토콜에 따른 처치"],a:1,
+ e:"이송 중 환자 상태가 악화될 수 있어 전문 인력인 응급구조사 탑승이 요구돼요.",r:"법령 – 구급차 응급구조사 탑승 의무"},
+{s:"법령",d:2,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["구조자 자신의 감염 및 손상을 예방하기 위해","탄환이나 흉기가 체내에서 공동현상(cavitation)이나 경로 변화를 일으켜 진입구보다 훨씬 넓은 조직 손상을 유발할 수 있기 때문","마스크와 안면 사이의 공기 누출을 막아 환기 효율을 높이기 위해","당시 상황의 불가피성과 환자에게 최선을 다했는지 여부"],a:3,
+ e:"극단적 상황에서는 불가피성, 선의성 등 정황을 종합적으로 고려해 법적 판단이 이루어질 수 있어요.",r:"법령 – 특수상황에서의 업무범위 판단"},
+{s:"법령",d:3,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["응급의료에 관한 법률 및 그 시행규칙상 자격정지 사유에 해당하면 보건복지부장관이 처분한다","지정 취소 등 행정처분이 이루어질 수 있다","의료사고 사례를 분석해 재발을 방지하고 시스템을 개선하기 위해","선상 두개골 골절(linear skull fracture)"],a:1,
+ e:"평가 결과가 기준에 미달하면 지정 취소, 시정명령 등 행정처분의 대상이 될 수 있어요.",r:"법령 – 응급의료기관 평가와 행정처분"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["최신 응급처치 지식과 기술을 유지·향상시키기 위해","시진 → 촉진 → 타진 → 청진(단, 복부는 청진을 촉진보다 먼저 시행)","필요한 장비와 인력을 사전에 준비할 수 있기 때문","당시 표준 프로토콜과 통상적인 응급구조사 수준의 주의의무 이행 여부"],a:3,
+ e:"처치의 적절성은 결과가 아니라 당시 프로토콜과 통상적 주의의무를 다했는지를 기준으로 판단해요.",r:"법령 – 처치 적절성 판단 기준"},
+{s:"법령",d:4,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["법령에 따라 응급의료기관 지정을 받지 않으면 명칭 사용에 제한이 있을 수 있다","자발적으로 각성된 상태(Alert)","1차 중증도 분류(triage)","선의의 응급의료 면책 등 법적 책임 감면 여부가 달라지기 때문"],a:3,
+ e:"경과실은 면책 대상이 될 수 있으나 중대한 과실은 면책에서 제외되는 등 법적 효과가 달라져요.",r:"법령 – 중과실과 경과실의 구분 실익"},
+{s:"법령",d:5,q:"다음 중 법령 과목의 내용으로 옳은 것은?",o:["응급의료 비용을 지불할 능력이 없는 응급환자도 진료를 거부당하지 않도록 국가가 우선 비용을 지원하는 것","시행령은 대통령령, 시행규칙은 부령으로 법률의 위임에 따라 세부사항을 정한다","기관 편위(trachea deviation)와 경정맥 확장","필요한 장비와 인력을 사전에 준비할 수 있기 때문"],a:1,
+ e:"시행령(대통령령)과 시행규칙(부령)은 법률의 위임 범위 내에서 세부사항을 정하는 하위 법규범이에요.",r:"법령 – 법령 체계(법률-시행령-시행규칙)"},
+{s:"각론",d:1,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["전·후·측면을 포함해 여러 부위를 대칭적으로 비교 청진한다","의료지도 및 프로토콜에 따른 트리아지 원칙 적용","신시내티 병원전 뇌졸중 척도(CPSS)","갑작스런 극심한 복통·요통, 박동성 복부 종괴, 저혈압(쇼크)"],a:2,
+ e:"신시내티 척도는 안면마비·편측마비·언어장애 3항목으로 뇌졸중을 신속 선별하는 도구예요.",r:"각론(신경계) – 뇌졸중 신속평가"},
+{s:"각론",d:1,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["과호흡(쿠스말 호흡)","사전에 정해진 표준 프로토콜에 따른 처치","소아는 강력한 혈관수축 능력으로 혈압을 오래 유지하지만 심박출량 예비능이 낮아 대상기전이 소실되면 급격히 저혈압으로 진행한다","옆구리에서 서혜부로 방사되는 산통(colicky pain)"],a:0,
+ e:"DKA는 대사성 산증을 보상하기 위해 깊고 빠른 쿠스말 호흡이 나타나요.",r:"각론(내분비) – 당뇨병성 케톤산증"},
+{s:"각론",d:1,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["폐쇄성 쇼크(obstructive shock)","구토물 등에 의한 기도 흡인을 방지하기 위해","환자의 가슴이 젖어있는지, 금속 물질이나 패치가 있는지 확인 후 제거","배꼽 주위 통증 후 우하복부로 이동"],a:3,
+ e:"급성 충수염은 초기 배꼽 주위 통증이 시간이 지나며 우하복부(맥버니점)로 국한돼요.",r:"각론(소화기) – 급성 충수염 통증 양상"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["9%","head-tilt chin-lift(머리기울임-턱들기)법","기도확보 후에도 무호흡이 지속되는 경우","수축기 혈압과 발기부전치료제 복용 여부"],a:3,
+ e:"니트로글리세린은 혈압을 낮추므로 저혈압 위험 및 PDE5억제제(발기부전치료제) 병용 시 심한 저혈압 위험이 있어 확인이 필요해요.",r:"각론(순환기) – 니트로글리세린 투여 전 확인사항"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["채혈 부위의 오염(소독 미흡, 이물질)","혈전용해술 등 치료 가능 시간(골든타임)이 제한되어 있기 때문","대응 과정의 문제점을 분석해 향후 대응력을 개선하기 위해","의식이 없는 응급환자로 즉각적 처치가 필요한 경우"],a:1,
+ e:"혈전용해술은 발병 후 일정 시간 내에만 시행 가능해 정확한 발생 시각 확인이 치료 방침을 좌우해요.",r:"각론(신경계) – 뇌졸중 골든타임"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["우상복부 통증과 지방식 후 악화","무호흡 또는 호흡부전 환자에게 인공환기를 제공","손상기전과 무관하게 전신 신체검진을 체계적으로 시행한다","기본 심폐소생술을 위한 기도유지기의 삽관, 정맥로 확보를 통한 수액투여, 저혈당 시 포도당 투여"],a:0,
+ e:"담낭염은 우상복부(우측 늑골하부) 통증이 특징이며 기름진 음식 섭취 후 악화되는 경향이 있어요.",r:"각론(소화기) – 급성 담낭염 특징"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["오염통제구역 설정 및 제독 전 접근 금지","자신의 안전이 명백히 위협받는 불가항력적 상황","기도 보호와 저혈당 가능성을 함께 고려한다","혼란한 현장에서 정확한 판단과 처치를 위해 필요하기 때문"],a:2,
+ e:"알코올 중독은 구토에 의한 흡인 위험과 저혈당 동반 가능성이 있어 기도보호와 혈당 확인이 중요해요.",r:"각론(중독) – 급성 알코올 중독 처치"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["귀지 등 이물질로 인한 측정 오류","신속한 신고 및 심정지 조기 인지","두 질환 모두 유사한 국소 신경학적 증상을 유발할 수 있기 때문","당시 상황의 불가피성과 환자에게 최선을 다했는지 여부"],a:2,
+ e:"병원 전 단계에서는 영상검사가 불가능해 임상 증상만으로 출혈성과 허혈성을 확진하기 어려워 신속한 병원 이송이 중요해요.",r:"각론(신경계) – 뇌졸중 유형 감별의 한계"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["주변 위험물을 치우고 손상을 예방한다","호기 시 천명음(wheezing)","저산소성 호흡추진력 저하로 인한 호흡억제 가능성","안전 거리를 유지하고 자극을 최소화하며 진정 시도"],a:3,
+ e:"급성 흥분 상태에서는 안전을 확보하며 차분하고 비자극적인 접근으로 진정을 유도하는 것이 원칙이에요.",r:"각론(정신응급) – 급성 흥분 환자 대응"},
+{s:"각론",d:3,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["기도 유지와 안전 확보, 무리한 억제는 피한다","문서 위조·허위작성 등으로 형사처벌 대상이 될 수 있다","소아용 패드가 없고 다른 대안이 없는 경우, 패드가 겹치지 않게 전후면 부착 등으로 사용","호기 시 천명음(wheezing)"],a:0,
+ e:"열성경련은 대부분 자연 소실되며, 기도유지와 손상방지를 위한 안전 확보가 우선이고 억지로 붙잡지 않아야 해요.",r:"각론(소아과) – 열성 경련 처치"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["장시간 부동 후 갑작스러운 호흡곤란과 흉통","정맥로 확보 및 수액투여","생명이 위급한 응급환자에게 응급의료를 제공한 경우","법령이 정한 요건과 절차를 갖춘 경우에만 허용된다"],a:0,
+ e:"장시간 부동(장거리 비행, 수술 후 등)은 심부정맥혈전증 및 폐색전증의 위험요인으로, 급성 호흡곤란·흉통과 연관돼요.",r:"각론(호흡기) – 폐색전증 위험요인과 증상"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["벨(bell) 부분","환자 발생부터 병원 도착 전까지의 모든 과정","현장 안전 여부","심한 복통과 자궁 압통을 동반한 출혈(외부 출혈은 적을 수 있음)"],a:3,
+ e:"태반조기박리는 심한 복통과 자궁 압통이 동반되며 외부 출혈량과 실제 출혈량이 다를 수 있어 위험해요.",r:"각론(산과) – 태반조기박리 특징"},
+{s:"각론",d:4,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["일산화탄소헤모글로빈을 산소헤모글로빈으로 오인해 정상처럼 높게 측정될 수 있다","오심, 발한, 소화불량 유사 증상","증상만으로 완전한 감별이 불가능하므로 아스피린 등 임의 약물 투여 없이 신속히 뇌졸중센터로 이송하고 발병시각을 정확히 확인·기록한다","압력조절기(regulator)의 압력계"],a:0,
+ e:"일반 맥박산소포화도 측정기는 COHb와 O2Hb를 구분하지 못해 실제 저산소증에도 정상 수치로 오인될 수 있어요.",r:"각론(중독) – CO 중독과 SpO2 측정의 한계"},
+{s:"각론",d:5,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["빈맥과 창백한 피부","안면부 골절이 의심되는 경우","호흡수 22회/분 이상","병원 전 단계와 병원 단계"],a:2,
+ e:"qSOFA는 호흡수, 수축기혈압, 의식변화 3항목으로 구성되며 체온 단독 기준은 포함되지 않아요.",r:"각론(감염) – 패혈증 선별도구(qSOFA)"},
+{s:"각론",d:1,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["모든 체액을 감염원으로 간주하고 방어한다","불필요하게 구강을 자극하지 않고 편안한 자세를 유지시킨다","공기를 빼내면 신체 모양대로 굳어 전신을 고정할 수 있다","대량 출혈이 있는 다발성 외상 환자"],a:1,
+ e:"후두개염 등에서 불필요한 자극은 완전 기도폐쇄를 유발할 수 있어 환자가 편안해하는 자세를 유지시키는 것이 중요해요.",r:"각론(소아과) – 상기도 폐쇄 의심 시 주의점"},
+{s:"각론",d:2,q:"다음 중 각론 과목의 내용으로 옳은 것은?",o:["주의의무의 존재","환부를 문지르거나 마사지하는 행위","이송 중 척추의 추가 움직임을 최소화하기 위해","환자의 판단능력을 평가하고 거부 사유를 기록한다"],a:1,
+ e:"동상 부위를 문지르면 조직 손상이 악화될 수 있어 마사지나 문지르는 행위는 금기예요.",r:"각론(환경응급) – 동상 처치 시 금기"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["과징금, 기부금 등 법령이 정하는 재원으로 조성되어 응급의료 지원에 사용된다","자신과 동료의 안전을 확보하고 필요시 경찰 지원을 요청한다","무호흡 또는 호흡부전 환자에게 인공환기를 제공","말초 관류 상태를 간접적으로 평가할 수 있기 때문"],a:2,
+ e:"BVM은 백을 짜서 환자에게 양압환기를 제공하는 인공호흡 보조 장비예요.",r:"장비 – 백밸브마스크(BVM)의 용도"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["전신 척추 고정 및 이동","30분 이상 지속되는 압박성 흉통이 좌측 어깨나 팔로 방사됨","과호흡(쿠스말 호흡)","저산소성 호흡추진력 저하로 인한 호흡억제 가능성"],a:0,
+ e:"긴 척추고정판은 다발성 외상 환자의 전신 척추를 고정하고 안전하게 이동시키는 데 사용돼요.",r:"장비 – 긴 척추고정판(백보드)"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["증상(Signs/Symptoms)","역설적 호흡(paradoxical breathing) - 흡기 시 손상 부위가 함몰되고 호기 시 팽창","악화·완화 요인(Provocation/Palliation)","기도 내 이물질·분비물 제거"],a:3,
+ e:"흡인기는 구토물, 혈액, 분비물 등을 흡인해 기도를 확보하는 데 사용해요.",r:"장비 – 흡인기의 용도"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["호흡음, 심음, 장음 등 신체 내부 소리","환자가 이미 처방받은 자가주사기를 스스로 사용하도록 보조할 수 있다","삼면 밀봉드레싱(3-side occlusive dressing)을 적용해 공기가 빠져나가되 다시 들어가지 못하게 한다","head-tilt chin-lift(머리기울임-턱들기)법"],a:0,
+ e:"청진기는 호흡음·심음·장음 등을 들어 신체 내부 상태를 평가하는 기본 진단 도구예요.",r:"장비 – 청진기의 용도"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["간(liver)","팔걸이 고정 및 드레싱 고정","순환 및 관류 상태 평가","명확하고 간결한 표준 용어를 사용하고 불필요한 사적 대화를 피한다"],a:1,
+ e:"삼각건은 팔걸이(sling) 제작이나 드레싱 고정 등 다목적으로 활용되는 기본 응급처치 도구예요.",r:"장비 – 삼각건의 용도"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["장치 손상 및 방전 효율 저하를 방지하기 위해","고의 또는 중대한 과실 없이 한 응급처치로 발생한 결과","소아용 패드가 없고 다른 대안이 없는 경우, 패드가 겹치지 않게 전후면 부착 등으로 사용","공기를 주입해 고정하며 압력에 따른 순환 변화를 주의해야 한다"],a:3,
+ e:"공기부목은 공기압으로 고정하는 장비로, 온도 변화나 고도 변화에 따라 압력이 변해 순환장애를 유발할 수 있어 주의가 필요해요.",r:"장비 – 공기부목의 특징과 주의점"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["대퇴골 간부 골절","긴 척추고정판(백보드, long spine board)","차량 등 좁은 공간에 갇힌 척추손상 의심 환자를 앉은 자세에서 척추 정렬을 유지하며 구출하기 위해","응급처치 후 적절한 기관으로 신속히 이송할 의무"],a:0,
+ e:"견인부목은 대퇴골 간부 골절 시 근육 경련을 완화하고 정렬을 유지하기 위해 사용해요.",r:"장비 – 견인부목의 적응증"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["신속한 신고 및 심정지 조기 인지","척추의 일직선(중립) 상태를 유지하기 위해","입꼬리부터 귓불까지의 길이를 기준으로 선택","과징금, 기부금 등 법령이 정하는 재원으로 조성되어 응급의료 지원에 사용된다"],a:2,
+ e:"입인두기도기는 입꼬리에서 귓불(하악각)까지의 거리를 기준으로 적절한 크기를 선택해요.",r:"장비 – 입인두기도기 크기 선택"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["차량 등 좁은 공간에 갇힌 척추손상 의심 환자를 앉은 자세에서 척추 정렬을 유지하며 구출하기 위해","계단용 들것(스테어체어/바스켓형)","지역 내 필수 응급의료 접근성을 보장하기 위해","외상후스트레스장애(PTSD) 등의 위험이 있으므로 동료지원 및 전문 상담 체계를 활용해야 한다"],a:1,
+ e:"계단용 들것(스테어체어 등)은 좁은 계단이나 복도에서 환자를 안전하게 이동시키기 위해 설계됐어요.",r:"장비 – 계단용 들것의 용도"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["대상기전이 소실되며 혈압이 급격히 떨어지고 의식저하가 뚜렷해진다","부정맥 및 급성 심근경색 의심 소견을 조기에 확인","리튬(lithium)","환자의 중증도를 시각적으로 표시해 이송 우선순위를 신속히 공유하기 위해"],a:1,
+ e:"병원 전 심전도 모니터링은 부정맥이나 ST 변화 등 급성 심장 문제를 조기에 발견해 이송병원 선정에 활용돼요.",r:"장비 – 병원전 심전도 모니터의 역할"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["주변 위험물을 치우고 손상을 예방한다","배꼽 주위 통증 후 우하복부로 이동","한국보건의료인국가시험원","환자에게서 손을 떼고 접촉하지 않는다"],a:3,
+ e:"심전도 분석 중에는 인공물 간섭을 막기 위해 환자와의 접촉을 멈춰야 해요.",r:"장비 – AED 분석 중 주의사항"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["저혈압과 의식수준 저하","환자 본인의 자기결정권을 우선한다","발견된 자세대로 부목으로 고정하고 무리하게 정복을 시도하지 않는다","기관삽관보다 삽입이 상대적으로 용이하나 완전한 기도 보호는 아니다"],a:3,
+ e:"성문상기도기는 후두경 없이 비교적 쉽게 삽입 가능하지만 기관삽관만큼 완전한 흡인 방지는 어려워요.",r:"장비 – 성문상기도기의 특징"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["기본 심폐소생술을 위한 기도유지기의 삽관, 정맥로 확보를 통한 수액투여, 저혈당 시 포도당 투여","보수교육","적용 시각","환자의 목 길이와 어깨-턱 간격을 실측하여 맞는 크기를 선택하고 중립위를 유지한 채 적용한다"],a:2,
+ e:"지혈대는 적용 시각을 반드시 기록해 병원에서 허혈시간을 파악하고 적절히 대응할 수 있게 해야 해요.",r:"장비 – 지혈대 적용 시 기록사항"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["말초 관류 상태를 간접적으로 평가할 수 있기 때문","말단부 맥박·감각·운동 기능(원위부 신경혈관 상태)","저혈압과 의식수준 저하","즉시 필요한 응급처치를 받지 아니하면 생명을 보전할 수 없거나 심신에 중대한 위해가 발생할 가능성이 있는 사람"],a:1,
+ e:"부목 적용 전후로 말단부의 맥박·감각·운동 기능을 확인해 순환·신경 손상 여부를 점검해야 해요.",r:"장비 – 부목 적용 후 확인사항(PMS check)"},
+{s:"장비",d:4,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["증상만으로 완전한 감별이 불가능하므로 아스피린 등 임의 약물 투여 없이 신속히 뇌졸중센터로 이송하고 발병시각을 정확히 확인·기록한다","법령에 따라 응급의료기관 지정을 받지 않으면 명칭 사용에 제한이 있을 수 있다","마스크와 안면 사이의 공기 누출을 막아 환기 효율을 높이기 위해","선의의 응급의료 면책 등 법적 책임 감면 여부가 달라지기 때문"],a:2,
+ e:"E-C clamp 기법은 손가락 모양으로 마스크를 안면에 밀착시켜 공기 누출 없이 효과적인 환기를 제공해요.",r:"장비 – BVM 마스크 밀착기법(E-C clamp)"},
+{s:"장비",d:4,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["자율성 존중의 원칙","1차 평가에서 즉각적인 생명 위협이 발견된 경우","1차 중증도 분류(triage)","튜브의 기관 내 정확한 위치를 확인하기 위해"],a:3,
+ e:"호기말이산화탄소(EtCO2) 검출은 기관 내 삽관 위치를 확인하는 가장 신뢰도 높은 방법 중 하나예요.",r:"장비 – 이산화탄소 검출기의 활용"},
+{s:"장비",d:4,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["다른 적절한 기관을 신속히 찾아 이송하고 상황을 기록한다","대퇴골 간부 골절","채혈 부위의 오염(소독 미흡, 이물질)","1급과 2급"],a:2,
+ e:"채혈 부위에 소독액이나 당분이 남아있으면 측정값이 왜곡될 수 있어 정확한 채혈 준비가 중요해요.",r:"장비 – 혈당측정기 정확도 영향 요인"},
+{s:"장비",d:4,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["기도 압박 또는 고정력 부족으로 인한 고정 실패","소생술을 시행하지 않고 관련 기관에 신고한다","심한 저혈압, 오심, 전신 쇠약","36.5~37.5℃"],a:0,
+ e:"크기가 맞지 않으면 기도를 압박하거나 반대로 고정력이 부족해 척추 보호 효과가 떨어질 수 있어요.",r:"장비 – 경추보호대 크기 선택의 중요성"},
+{s:"장비",d:5,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["저체온 상태에서는 심근이 제세동에 반응하지 않을 수 있어 무의미한 반복을 피하기 위해","질식성 심정지이므로 가슴압박 전에 인공호흡을 우선 고려하고 초기 5회 인공호흡을 먼저 시행할 수 있다","깊고 빠른 호흡(쿠스마울 호흡)과 함께 과일향(아세톤향) 호흡이 동반된다","소아는 강력한 혈관수축 능력으로 혈압을 오래 유지하지만 심박출량 예비능이 낮아 대상기전이 소실되면 급격히 저혈압으로 진행한다"],a:0,
+ e:"저체온 심장은 정상 체온 회복 전까지 제세동에 잘 반응하지 않을 수 있어, 일정 횟수 이후에는 복온을 우선하는 경우가 있어요.",r:"장비 – 저체온 심정지와 제세동 프로토콜"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["호기 시 천명음(wheezing)","일방향 밸브가 있어 구조자를 감염으로부터 보호한다","환자의 사생활과 비밀유지 의무를 지키기 위해","설탕물이나 사탕 등 흡수가 빠른 당분을 경구로 섭취시킨다"],a:1,
+ e:"포켓마스크는 일방향 밸브로 환자의 호기가 구조자에게 역류하지 않도록 설계돼 있어요.",r:"장비 – 포켓마스크의 특징"},
+{s:"장비",d:1,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["개인보호장비(PPE)","응급의료 거부 금지 위반으로 처벌 대상이 될 수 있다","장갑 낀 손으로 태아 선진부를 밀어올려 제대 압박을 줄이고, 무릎-가슴 자세로 이송하며 제대를 체내로 밀어넣지 않는다","더 큰 위해를 방지하기 위해 부득이하게 다른 법익을 침해한 응급처치 상황"],a:0,
+ e:"장갑·마스크·보안경 등 감염 및 손상으로부터 구조자를 보호하는 장비를 통칭해 PPE라고 해요.",r:"장비 – 개인보호장비(PPE)의 정의"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["옆구리에서 서혜부로 방사되는 산통(colicky pain)","상처 감염을 예방하며 출혈을 흡수하기 위해","36.5~37.5℃","환자를 좌우로 분리·결합해 몸통을 크게 움직이지 않고 들어 올릴 수 있다"],a:1,
+ e:"멸균 거즈는 상처를 덮어 오염을 막고 출혈을 흡수하는 기본 드레싱 재료예요.",r:"장비 – 멸균 거즈의 용도"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["동시 동작으로 환자와 구조자의 안전을 확보하기 위해","업무범위 초과 및 무면허 의료행위에 해당할 수 있기 때문","사전에 정해진 표준 프로토콜에 따른 처치","우측 쇄골 아래와 좌측 유두 아래 측흉부"],a:0,
+ e:"여러 명이 동시에 힘을 맞춰 들지 않으면 환자가 떨어지거나 구조자가 부상당할 수 있어 구령이 필요해요.",r:"장비 – 다인 들것 이동 시 구령의 목적"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["분당 12~20회","온도 등 보관 조건을 규정에 맞게 유지","대량 출혈이 있는 다발성 외상 환자","튜브의 기관 내 정확한 위치를 확인하기 위해"],a:1,
+ e:"약물은 효능 유지를 위해 규정된 온도·습도 등 보관 조건을 지켜야 해요.",r:"장비 – 구급차 내 약물 보관 원칙"},
+{s:"장비",d:3,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["공기를 주입해 고정하며 압력에 따른 순환 변화를 주의해야 한다","내용을 이해하고 수신했다","과도한 흡인으로 인한 저산소증과 점막 손상을 예방하기 위해","자신과 동료의 안전을 확보하고 필요시 경찰 지원을 요청한다"],a:2,
+ e:"장시간 지속적인 흡인은 산소 결핍과 점막 손상을 유발할 수 있어 짧게 끊어 시행하는 것이 원칙이에요.",r:"장비 – 흡인 시행 시간 제한의 이유"},
+{s:"장비",d:4,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["분당 1~6L, 약 24~44%","하악견인법(jaw-thrust)","코로트코프음(Korotkoff sound)","기흉, 심낭삼출 등 즉각적 생명 위협 소견을 신속히 확인"],a:3,
+ e:"병원 전 초음파는 숙련자에 한해 기흉, 심낭삼출 등 치명적 소견을 신속 확인하는 보조 도구로 제한적으로 활용될 수 있어요.",r:"장비 – 병원전 초음파(POCUS)의 역할"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["연령이 어릴수록 정상 맥박수와 호흡수는 성인보다 빠른 것이 일반적이다","중앙 배관식은 차량 내 대용량 산소를 공급하고, 휴대용은 환자 이동 시 사용한다","분당 6~10L","이송 중 척추의 추가 움직임을 최소화하기 위해"],a:2,
+ e:"단순 안면마스크는 재호흡 방지를 위해 최소 분당 6L 이상, 통상 6~10L로 투여해요.",r:"장비 – 단순 안면마스크 유량"},
+{s:"장비",d:2,q:"다음 중 장비 과목의 내용으로 옳은 것은?",o:["1차 중증도 분류(triage)","적절한 진료가 가능한 다른 기관으로, 환자 상태가 이송 가능한 경우","귀지 등 이물질로 인한 측정 오류","시행령은 대통령령, 시행규칙은 부령으로 법률의 위임에 따라 세부사항을 정한다"],a:2,
+ e:"고막 체온계는 귀지 등 이물질이 있으면 적외선 측정이 방해되어 부정확한 값이 나올 수 있어요.",r:"장비 – 고막체온계 측정 오류 요인"},
+];
+// 표기 오류 수정(장비 카테고리 하이픈 방지)
+Q.forEach(q=>{ if(q.s==="장비-") q.s="장비"; });
+
+const SUBJECTS = ["전체","총론","환자관리","법령","각론","장비"];
+
+// ================= 상태 =================
+let state = {
+  subject:"전체",
+  diffs:new Set([1,2,3,4,5]),
+  idx:0,
+  answered:false,
+  correctCount:0,
+  answeredCount:0,
+  pool:[],
+  wrong:[] // {qid, chosen}
+};
+
+function poolFilter(){
+  return Q.map((q,i)=>({...q,id:i})).filter(q=>
+    (state.subject==="전체"||q.s===state.subject) && state.diffs.has(q.d)
+  );
+}
+
+// ================= 오답노트 저장 =================
+async function loadWrong(){
+  try{
+    const r = await window.storage.get('emt2_wrong', false);
+    if(r && r.value) state.wrong = JSON.parse(r.value);
+  }catch(e){ state.wrong = []; }
+  renderWrongCount();
+}
+async function saveWrong(){
+  try{ await window.storage.set('emt2_wrong', JSON.stringify(state.wrong), false); }catch(e){}
+}
+function addWrong(qid){
+  if(!state.wrong.find(w=>w.qid===qid)){
+    state.wrong.push({qid});
+    saveWrong();
+    renderWrongCount();
+  }
+}
+function renderWrongCount(){
+  document.getElementById('wnCount').textContent = state.wrong.length;
+}
+
+// ================= 렌더 =================
+function renderSubjectRow(){
+  const el = document.getElementById('subjectRow');
+  el.innerHTML = "";
+  SUBJECTS.forEach(s=>{
+    const b = document.createElement('div');
+    b.className = 'chip' + (state.subject===s ? ' active':'');
+    b.textContent = s;
+    b.onclick = ()=>{ state.subject=s; resetPool(); render(); };
+    el.appendChild(b);
+  });
+}
+function renderDiffRow(){
+  const el = document.getElementById('diffPanelInner');
+  el.innerHTML = "";
+  const basePool = Q.filter(q=> state.subject==="전체" || q.s===state.subject);
+  [1,2,3,4,5].forEach(d=>{
+    const cnt = basePool.filter(q=>q.d===d).length;
+    const b = document.createElement('div');
+    b.className = 'dchip' + (state.diffs.has(d)?' active':'');
+    b.setAttribute('data-d', d);
+    b.innerHTML = `<span class="swatch"></span><span>${DIFF_LABEL[d]}</span><span class="cnt">${cnt}문항</span>`;
+    b.onclick = ()=>{
+      if(state.diffs.has(d)){ if(state.diffs.size>1) state.diffs.delete(d); }
+      else state.diffs.add(d);
+      resetPool(); render();
+    };
+    el.appendChild(b);
+  });
+  const sel = [1,2,3,4,5].filter(d=>state.diffs.has(d));
+  const summary = document.getElementById('diffSummary');
+  summary.textContent = sel.length===5 ? "(전체)" : "(" + sel.map(d=>DIFF_LABEL[d]).join(", ") + ")";
+}
+const diffToggleBtn = document.getElementById('diffToggleBtn');
+const diffPanel = document.getElementById('diffPanel');
+diffToggleBtn.onclick = ()=>{
+  const willOpen = !diffPanel.classList.contains('open');
+  diffPanel.classList.toggle('open', willOpen);
+  diffToggleBtn.classList.toggle('open', willOpen);
+};
+function resetPool(){
+  state.pool = poolFilter();
+  state.idx = 0;
+  state.answered = false;
+  state.correctCount = 0;
+  state.answeredCount = 0;
+  renderSubjectRow();
+  renderDiffRow();
+}
+function updateStats(){
+  document.getElementById('progText').textContent = `${Math.min(state.idx+ (state.pool.length?1:0), state.pool.length)}/${state.pool.length}`;
+  const pct = state.answeredCount ? Math.round(state.correctCount/state.answeredCount*100) : 0;
+  document.getElementById('scoreText').textContent = pct + '%';
+  const barPct = state.pool.length ? Math.round((state.idx)/state.pool.length*100) : 0;
+  document.getElementById('barfg').style.width = barPct + '%';
+}
+
+function renderCard(){
+  const zone = document.getElementById('cardZone');
+  updateStats();
+  if(state.pool.length===0){
+    zone.innerHTML = `<div class="empty">선택한 조건에 해당하는 문제가 없어요.<br>과목이나 난이도를 다시 선택해보세요.</div>`;
+    return;
+  }
+  if(state.idx >= state.pool.length){
+    zone.innerHTML = `<div class="empty">🎉 이 조건의 문제를 모두 풀었어요!<br>정답률 <b style="color:var(--cyan)">${Math.round(state.correctCount/state.answeredCount*100)||0}%</b><br><br>
+      <button class="btn primary" style="width:auto;padding:11px 22px;" onclick="resetPool(); render();">다시 풀기</button></div>`;
+    return;
+  }
+  const q = state.pool[state.idx];
+  let optsHtml = "";
+  q.o.forEach((opt,i)=>{
+    optsHtml += `<div class="opt" data-i="${i}" onclick="selectOpt(${i})"><div class="num">${i+1}</div><div>${opt}</div></div>`;
+  });
+  zone.innerHTML = `
+    <div class="card">
+      <div class="cardtop">
+        <span class="subjectbadge">${q.s} · 카드 ${state.idx+1}</span>
+        <span class="difbadge" data-d="${q.d}">난이도 : ${DIFF_LABEL[q.d]}</span>
+      </div>
+      <div class="qtext">${q.q}</div>
+      <div id="optsZone">${optsHtml}</div>
+      <div class="explain" id="explainZone"></div>
+      <div class="navrow">
+        <button class="btn primary" id="nextBtn" disabled onclick="nextCard()">다음 문제 →</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectOpt(i){
+  if(state.answered) return;
+  const q = state.pool[state.idx];
+  state.answered = true;
+  state.answeredCount++;
+  if (window.ExamCore) ExamCore.recordSolved('emt2');
+  const isCorrect = (i===q.a);
+  if(isCorrect) state.correctCount++;
+  else addWrong(q.id);
+
+  document.querySelectorAll('#optsZone .opt').forEach((el,idx)=>{
+    el.classList.add('disabled');
+    if(idx===q.a) el.classList.add('correct');
+    else if(idx===i) el.classList.add('wrong');
+    else el.classList.add('dim');
+    el.onclick = null;
+  });
+
+  const exp = document.getElementById('explainZone');
+  exp.innerHTML = `<span class="lbl">${isCorrect?'✅ 정답이에요':'❌ 오답이에요 — 정답은 '+(q.a+1)+'번'}</span>${q.e}
+    <div class="ref"><b>근거</b> · ${q.r}</div>`;
+  exp.classList.add('show');
+  document.getElementById('nextBtn').disabled = false;
+  updateStats();
+}
+
+function nextCard(){
+  state.idx++;
+  state.answered = false;
+  renderCard();
+}
+
+function render(){ renderCard(); }
+
+// ================= 오답노트 모달 =================
+let wnSubject = "전체";
+function renderWnFilter(){
+  const el = document.getElementById('wnFilterRow');
+  el.innerHTML = "";
+  SUBJECTS.forEach(s=>{
+    const b = document.createElement('div');
+    b.className = 'chip' + (wnSubject===s?' active':'');
+    b.textContent = s;
+    b.onclick = ()=>{ wnSubject = s; renderWnFilter(); renderWnList(); };
+    el.appendChild(b);
+  });
+}
+function renderWnList(){
+  const el = document.getElementById('wnList');
+  const items = state.wrong.map(w=>Q[w.qid]).filter(q=> wnSubject==="전체" || q.s===wnSubject);
+  if(items.length===0){
+    el.innerHTML = `<div class="empty" style="padding:30px 10px;">${wnSubject==="전체"?"아직 오답이 없어요. 잘하고 있어요!":"이 과목엔 오답이 없어요."}</div>`;
+    return;
+  }
+  el.innerHTML = items.map(q=>`
+    <div class="wnitem">
+      <div class="wnsub">${q.s}</div>
+      <div class="wnhead">
+        <div class="wnq">${q.q}</div>
+        <div class="wndiftag difbadge" data-d="${q.d}">난이도 : ${DIFF_LABEL[q.d]}</div>
+      </div>
+      <div class="wnans">정답 ${q.a+1}번 · ${q.o[q.a]}</div>
+      <div class="wnexp">${q.e}<br><span style="color:#6C7EA6;">근거 · ${q.r}</span></div>
+    </div>
+  `).join("");
+}
+
+document.getElementById('fabBtn').onclick = ()=>{
+  document.getElementById('modal').classList.add('open');
+  renderWnFilter(); renderWnList();
+};
+document.getElementById('closeModal').onclick = ()=> document.getElementById('modal').classList.remove('open');
+document.getElementById('modal').onclick = (e)=>{ if(e.target.id==='modal') e.currentTarget.classList.remove('open'); };
+document.getElementById('clearWN').onclick = async ()=>{
+  state.wrong = [];
+  await saveWrong();
+  renderWrongCount(); renderWnList();
+};
+
+// ================= 초기화 =================
+resetPool();
+render();
+loadWrong();
+
+// ================= 목표/모의고사 엔진 =================
+if (window.ExamCore) {
+  ExamCore.init({
+    appId: 'emt2',
+    appLabel: '2급 응급구조사 필기',
+    bank: Q,
+    getItemSubject: it => it.s,
+    getQA: it => ({ q: it.q, o: it.o, a: it.a }),
+    subjectsMock: [
+      { key:'총론', label:'기본응급처치학총론', count:20 },
+      { key:'환자관리', label:'기본응급환자관리', count:20 },
+      { key:'법령', label:'응급의료관련법령', count:20 },
+      { key:'각론', label:'기본응급처치학각론', count:60 },
+      { key:'장비', label:'응급의료장비', count:20 }
+    ],
+    passOverallPercent: 60,
+    passSubjectPercent: 40,
+    note: '국시원 공식 2급 응급구조사 필기 과목·문항수(총 140문항) 기준으로 구성했어요.',
+    goalBarTarget: document.getElementById('ecGoalTarget'),
+    examSectionTarget: document.getElementById('ecExamTarget'),
+    drawer: document.getElementById('drawer'),
+    drawerAnchor: document.getElementById('drawerHubLink')
+  });
+}
+</script>
+</body>
+</html>

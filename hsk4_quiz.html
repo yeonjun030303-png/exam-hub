@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSK 4급 카드 퀴즈</title>
+<style>
+  :root{
+    --bg:#160D0D;
+    --surface:#231515;
+    --surface2:#2E1B1B;
+    --line:#4A2A2A;
+    --text:#F6ECE4;
+    --muted:#C9A9A0;
+    --gold:#E8B84B;
+    --gold-dim:#5A4419;
+    --red:#D6473E;
+
+    --d1:#F4F7FB; --d1-ink:#0A1220;
+    --d2:#3ED17E;
+    --d3:#F4C94A;
+    --d4:#FF9142;
+    --d5:#FF4C5E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:radial-gradient(ellipse at top, #2A1414 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
+    min-height:100vh; padding:18px 14px 100px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .seal{width:26px;height:26px;border-radius:6px;background:var(--red);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;}
+  h1{font-size:20px;margin:0;letter-spacing:-.2px;}
+  .sub{color:var(--muted);font-size:12.5px;margin:2px 0 16px 36px;}
+
+  .infobox{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; margin-bottom:16px; font-size:12.8px; color:var(--muted); line-height:1.65;
+  }
+  .infobox b{color:var(--text);}
+  .infobox .tag{
+    display:inline-block;background:var(--gold-dim);color:var(--gold);
+    font-size:10.5px;padding:2px 8px;border-radius:20px;margin:4px 6px 0 0;font-weight:700;
+  }
+
+  .catrow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;
+    -ms-overflow-style:none;scrollbar-width:none;}
+  .catrow::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;padding:7px 13px;border-radius:20px;border:1px solid var(--line);
+    background:var(--surface);color:var(--muted);font-size:12.5px;cursor:pointer;
+    white-space:nowrap;transition:.15s;font-weight:600;
+  }
+  .chip.active{background:var(--gold);color:#2A1B00;border-color:var(--gold);}
+
+  .diffAcc{margin-bottom:14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);}
+  .diffToggleBtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:12px 14px;background:transparent;border:none;color:var(--text);font-size:13.5px;font-weight:700;cursor:pointer;}
+  .diffToggleBtn .chev{color:var(--gold);transition:transform .2s;font-size:11px;}
+  .diffToggleBtn.open .chev{transform:rotate(180deg);}
+  #diffSummary{color:var(--muted);font-weight:500;font-size:12px;margin-left:2px;}
+  .diffPanel{max-height:0;overflow:hidden;transition:max-height .28s ease;border-top:1px solid transparent;}
+  .diffPanel.open{max-height:420px;border-top:1px solid var(--line);}
+  .diffPanelInner{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;}
+  .dchip{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:700;
+    cursor:pointer;border:2px solid transparent;opacity:.5;transition:.15s;background:var(--surface2);}
+  .dchip.active{opacity:1;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset;}
+  .dchip .swatch{width:16px;height:16px;border-radius:5px;flex:0 0 auto;}
+  .dchip .cnt{margin-left:auto;color:var(--muted);font-weight:500;font-size:11.5px;}
+  .dchip[data-d="1"] .swatch{background:var(--d1);} .dchip[data-d="1"].active{border-color:var(--d1);}
+  .dchip[data-d="2"] .swatch{background:var(--d2);} .dchip[data-d="2"].active{border-color:var(--d2);}
+  .dchip[data-d="3"] .swatch{background:var(--d3);} .dchip[data-d="3"].active{border-color:var(--d3);}
+  .dchip[data-d="4"] .swatch{background:var(--d4);} .dchip[data-d="4"].active{border-color:var(--d4);}
+  .dchip[data-d="5"] .swatch{background:var(--d5);} .dchip[data-d="5"].active{border-color:var(--d5);}
+
+  .statrow{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .statrow b{color:var(--gold);}
+  .barbg{height:6px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+  .barfg{height:100%;background:linear-gradient(90deg,var(--gold),#FFDD8A);width:0%;transition:width .35s;}
+
+  .card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);
+    border-radius:20px;padding:22px 18px 18px;box-shadow:0 18px 40px -22px rgba(0,0,0,.7);animation:cardin .28s ease;}
+  @keyframes cardin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .cardtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .catbadge{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.3px;}
+  .difbadge{font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;}
+  .difbadge[data-d="1"]{background:var(--d1);color:var(--d1-ink);}
+  .difbadge[data-d="2"]{background:var(--d2);color:#052915;}
+  .difbadge[data-d="3"]{background:var(--d3);color:#3A2A00;}
+  .difbadge[data-d="4"]{background:var(--d4);color:#331700;}
+  .difbadge[data-d="5"]{background:var(--d5);color:#330008;}
+
+  .hanzi{font-size:42px;font-weight:700;text-align:center;margin:4px 0 2px;letter-spacing:2px;}
+  .pinyin{text-align:center;color:var(--gold);font-size:16px;margin-bottom:4px;font-weight:600;}
+  .pos{text-align:center;color:var(--muted);font-size:11.5px;margin-bottom:16px;}
+  .qtext{font-size:14.5px;line-height:1.55;margin:0 0 14px;font-weight:600;text-align:center;color:var(--muted);}
+
+  .opt{display:flex;gap:10px;align-items:flex-start;background:#1C1010;border:1px solid var(--line);border-radius:12px;
+    padding:11px 13px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.5;transition:.12s;}
+  .opt:hover{border-color:var(--gold);}
+  .opt .num{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface2);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);}
+  .opt.correct{background:rgba(62,209,126,.14);border-color:var(--d2);}
+  .opt.correct .num{background:var(--d2);color:#052915;}
+  .opt.wrong{background:rgba(255,76,94,.14);border-color:var(--d5);}
+  .opt.wrong .num{background:var(--d5);color:#fff;}
+  .opt.disabled{cursor:default;} .opt.dim{opacity:.45;}
+
+  .explain{margin-top:12px;background:#1C1010;border-left:3px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:13px 14px;font-size:13px;line-height:1.7;color:var(--text);opacity:0;max-height:0;overflow:hidden;transition:.3s;}
+  .explain.show{opacity:1;max-height:500px;margin-top:12px;padding:13px 14px;}
+  .explain .lbl{color:var(--gold);font-weight:700;font-size:11.5px;display:block;margin-bottom:4px;}
+  .explain .ex{margin-top:8px;color:#E4C9BE;font-size:12.5px;border-top:1px dashed var(--line);padding-top:8px;}
+  .explain .ex b{color:var(--gold);}
+
+  .navrow{display:flex;gap:8px;margin-top:16px;}
+  .btn{flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
+  .btn.primary{background:var(--gold);color:#2A1B00;}
+  .btn.primary:disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted);}
+
+  .fab{position:fixed;right:16px;bottom:16px;background:var(--red);color:#fff;border:none;border-radius:30px;
+    padding:13px 18px;font-size:13.5px;font-weight:800;box-shadow:0 10px 26px -8px rgba(214,71,62,.6);
+    cursor:pointer;display:flex;align-items:center;gap:7px;z-index:50;}
+  .fab .n{background:rgba(255,255,255,.25);border-radius:20px;padding:1px 8px;font-size:12px;}
+
+  .modal{position:fixed;inset:0;background:rgba(10,4,4,.72);backdrop-filter:blur(3px);display:none;z-index:100;padding:16px;}
+  .modal.open{display:flex;align-items:flex-end;justify-content:center;}
+  .sheet{background:var(--surface2);border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:720px;
+    max-height:82vh;overflow-y:auto;padding:18px 16px 24px;animation:sheetup .25s ease;}
+  @keyframes sheetup{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .sheethead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .sheethead h2{font-size:16px;margin:0;}
+  .closebtn{background:var(--surface);border:none;color:var(--text);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;}
+  .wnfilter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .wnitem{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;}
+  .wnhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;}
+  .wnhz{font-size:20px;font-weight:700;} .wnpy{color:var(--gold);font-size:13px;font-weight:600;}
+  .wncat{font-size:10.5px;color:var(--gold);font-weight:700;margin-bottom:3px;}
+  .wnans{font-size:12.5px;color:var(--d2);margin-top:6px;}
+  .wnexp{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
+  .wnclear{font-size:11.5px;color:var(--muted);text-decoration:underline;cursor:pointer;text-align:center;margin-top:6px;}
+
+  /* ---- 우측 상단 메뉴(자격증 전환) ---- */
+  .menuBtn{position:fixed;top:14px;right:14px;z-index:80;width:38px;height:38px;border-radius:50%;
+    background:var(--surface);border:1px solid var(--line);color:var(--text);font-size:17px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;letter-spacing:2px;}
+  .drawerOverlay{position:fixed;inset:0;background:rgba(4,8,16,.62);backdrop-filter:blur(2px);
+    z-index:85;display:none;}
+  .drawerOverlay.open{display:block;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:80%;max-width:300px;background:var(--bg2);
+    border-left:1px solid var(--line);z-index:90;transform:translateX(100%);
+    transition:transform .25s ease;padding:64px 14px 20px;overflow-y:auto;}
+  .drawer.open{transform:translateX(0);}
+  .drawerTitle{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.4px;margin:0 4px 10px;}
+  .drawerAcc{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);margin-bottom:10px;}
+  .drawerAccBtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:13px 14px;background:transparent;border:none;color:var(--text);font-size:13.5px;
+    font-weight:700;cursor:pointer;text-align:left;}
+  .drawerAccBtn .chev{color:var(--cyan);transition:transform .2s;font-size:11px;}
+  .drawerAccBtn.open .chev{transform:rotate(180deg);}
+  .drawerAccPanel{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .drawerAccPanel.open{max-height:260px;border-top:1px solid var(--line);}
+  .examLink{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600;
+    color:var(--text);text-decoration:none;border-top:1px solid var(--line);}
+  .examLink:first-child{border-top:none;}
+  .examLink .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:0 0 auto;}
+  .examLink.current{color:var(--cyan);cursor:default;pointer-events:none;background:rgba(57,216,200,.08);}
+  .examLink.current .dot{background:var(--cyan);}
+</style>
+</head>
+<body>
+<script src="storage-shim.js"></script>
+<script src="exam-core.js"></script>
+<button class="menuBtn" id="menuBtn">⋮</button>
+<div class="drawerOverlay" id="drawerOverlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawerAcc">
+    <button class="drawerAccBtn" id="examToggleBtn"><span>📋 자격증 선택</span><span class="chev">▾</span></button>
+    <div class="drawerAccPanel" id="examPanel">
+      <a class="examLink" href="./emt2_quiz.html"><span class="dot"></span>🩹 응급구조사 2급 필기</a>
+      <span class="examLink current"><span class="dot"></span>汉 중국어 HSK 4급 (현재)</span>
+      <a class="examLink" href="./comp2_quiz.html"><span class="dot"></span>💻 컴퓨터활용능력 2급 필기</a>
+    </div>
+  </div>
+  <div class="drawerTitle" id="drawerHubLink" style="margin-top:16px;">🏠 <a href="./hub.html" style="color:var(--muted);text-decoration:none;">허브 홈으로</a></div>
+</div>
+
+<div class="wrap">
+  <div class="brand"><div class="seal">汉</div><h1>HSK 4급 카드 퀴즈</h1></div>
+  <div class="sub">신HSK 4급 필수어휘·문법·표현 · 난이도별 카드 학습</div>
+
+  <div id="ecGoalTarget"></div>
+
+  <div class="infobox">
+    <b>HSK 4급이란</b> — 유럽공통언어참조프레임(CEFR) B1~B2에 해당하며, 익숙한 주제에 대해 비교적 유창하게 의사소통할 수 있는 수준을 평가해요. 듣기·독해·쓰기 3개 영역, 총 100문항(약 105분)이며 각 영역 100점씩 총 300점 만점에 <b>180점 이상</b>이면 합격이에요.<br><br>
+    <b>어휘 범위</b> — 1~3급 누적 600단어 + 4급 신출 600단어, 총 1200단어 수준이 시험 범위예요.
+    <div><span class="tag">단어-인물·직업</span><span class="tag">단어-일상생활</span><span class="tag">단어-감정·성격</span><span class="tag">단어-학교·업무</span><span class="tag">단어-자연·시간·수량</span><span class="tag">단어-여행·쇼핑</span><span class="tag">문법포인트</span><span class="tag">듣기·독해 표현</span></div>
+    <div style="margin-top:8px;"><span class="tag">총 카드 수</span>160개</div>
+  </div>
+
+  <div class="catrow" id="catRow"></div>
+
+  <div class="diffAcc">
+    <button class="diffToggleBtn" id="diffToggleBtn">
+      <span>🎚️ 난이도 선택 <span id="diffSummary">(전체)</span></span>
+      <span class="chev">▾</span>
+    </button>
+    <div class="diffPanel" id="diffPanel"><div class="diffPanelInner" id="diffPanelInner"></div></div>
+  </div>
+
+  <div class="statrow">
+    <span>진행 <b id="progText">0/0</b></span>
+    <span>정답률 <b id="scoreText">0%</b></span>
+  </div>
+  <div class="barbg"><div class="barfg" id="barfg"></div></div>
+
+  <div id="cardZone"></div>
+
+  <div id="ecExamTarget"></div>
+</div>
+
+<button class="fab" id="fabBtn">📕 오답노트 <span class="n" id="wnCount">0</span></button>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <div class="sheethead"><h2>오답노트</h2><button class="closebtn" id="closeModal">✕</button></div>
+    <div class="wnfilter" id="wnFilterRow"></div>
+    <div id="wnList"></div>
+    <div class="wnclear" id="clearWN">오답노트 전체 비우기</div>
+  </div>
+</div>
+
+<script>
+// ---- 우측 상단 메뉴(자격증 전환) ----
+(function(){
+  const menuBtn = document.getElementById('menuBtn');
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('drawerOverlay');
+  const examToggleBtn = document.getElementById('examToggleBtn');
+  const examPanel = document.getElementById('examPanel');
+  menuBtn.onclick = ()=>{ drawer.classList.add('open'); overlay.classList.add('open'); };
+  overlay.onclick = ()=>{ drawer.classList.remove('open'); overlay.classList.remove('open'); };
+  examToggleBtn.onclick = ()=>{
+    const willOpen = !examPanel.classList.contains('open');
+    examPanel.classList.toggle('open', willOpen);
+    examToggleBtn.classList.toggle('open', willOpen);
+  };
+})();
+
+const DIFF_LABEL = {1:"개쉬움",2:"쉬움",3:"보통",4:"어려움",5:"개어려움"};
+
+// W = {c:카테고리, d:난이도, h:한자, p:병음(성조), pos:품사, m:뜻, ex:예문한자, exp:예문병음, exm:예문뜻}
+const W = [
+// ---- 인물·직업 ----
+{c:"인물·직업",d:1,h:"律师",p:"lǜshī",pos:"명사",m:"변호사",ex:"我哥哥是一名律师。",exp:"Wǒ gēge shì yì míng lǜshī.",exm:"우리 형은 변호사예요."},
+{c:"인물·직업",d:1,h:"记者",p:"jìzhě",pos:"명사",m:"기자",ex:"记者正在采访市长。",exp:"Jìzhě zhèngzài cǎifǎng shìzhǎng.",exm:"기자가 시장을 인터뷰하고 있어요."},
+{c:"인물·직업",d:1,h:"导游",p:"dǎoyóu",pos:"명사",m:"가이드",ex:"导游带我们参观了博物馆。",exp:"Dǎoyóu dài wǒmen cānguānle bówùguǎn.",exm:"가이드가 우리를 박물관에 데려가 구경시켜 줬어요."},
+{c:"인물·직업",d:1,h:"护士",p:"hùshi",pos:"명사",m:"간호사",ex:"护士每天照顾很多病人。",exp:"Hùshi měitiān zhàogù hěn duō bìngrén.",exm:"간호사는 매일 많은 환자를 돌봐요."},
+{c:"인물·직업",d:2,h:"邻居",p:"línjū",pos:"명사",m:"이웃",ex:"我和邻居的关系很好。",exp:"Wǒ hé línjū de guānxi hěn hǎo.",exm:"저는 이웃과 사이가 좋아요."},
+{c:"인물·직업",d:2,h:"顾客",p:"gùkè",pos:"명사",m:"고객",ex:"顾客对服务很满意。",exp:"Gùkè duì fúwù hěn mǎnyì.",exm:"고객은 서비스에 만족했어요."},
+{c:"인물·직업",d:1,h:"老板",p:"lǎobǎn",pos:"명사",m:"사장",ex:"老板对员工很严格。",exp:"Lǎobǎn duì yuángōng hěn yángé.",exm:"사장님은 직원에게 엄격해요."},
+{c:"인물·직업",d:2,h:"教授",p:"jiàoshòu",pos:"명사",m:"교수",ex:"这位教授的课非常受欢迎。",exp:"Zhè wèi jiàoshòu de kè fēicháng shòu huānyíng.",exm:"이 교수님의 수업은 매우 인기가 있어요."},
+{c:"인물·직업",d:2,h:"演员",p:"yǎnyuán",pos:"명사",m:"배우",ex:"这个演员演技很好。",exp:"Zhège yǎnyuán yǎnjì hěn hǎo.",exm:"이 배우는 연기를 잘해요."},
+{c:"인물·직업",d:1,h:"警察",p:"jǐngchá",pos:"명사",m:"경찰",ex:"警察正在处理交通事故。",exp:"Jǐngchá zhèngzài chǔlǐ jiāotōng shìgù.",exm:"경찰이 교통사고를 처리하고 있어요."},
+{c:"인물·직업",d:1,h:"司机",p:"sījī",pos:"명사",m:"운전기사",ex:"出租车司机很热情。",exp:"Chūzūchē sījī hěn rèqíng.",exm:"택시 기사님이 친절해요."},
+{c:"인물·직업",d:3,h:"秘书",p:"mìshū",pos:"명사",m:"비서",ex:"秘书帮经理安排会议。",exp:"Mìshū bāng jīnglǐ ānpái huìyì.",exm:"비서는 매니저의 회의 일정을 잡아줘요."},
+{c:"인물·직업",d:3,h:"主任",p:"zhǔrèn",pos:"명사",m:"주임",ex:"他被选为部门主任。",exp:"Tā bèi xuǎn wéi bùmén zhǔrèn.",exm:"그는 부서 주임으로 선출되었어요."},
+{c:"인물·직업",d:3,h:"总统",p:"zǒngtǒng",pos:"명사",m:"대통령",ex:"总统访问了这座城市。",exp:"Zǒngtǒng fǎngwènle zhè zuò chéngshì.",exm:"대통령이 이 도시를 방문했어요."},
+{c:"인물·직업",d:2,h:"亲戚",p:"qīnqi",pos:"명사",m:"친척",ex:"过年的时候亲戚们都会聚在一起。",exp:"Guònián de shíhou qīnqimen dōu huì jù zài yìqǐ.",exm:"설날에는 친척들이 모두 함께 모여요."},
+
+// ---- 일상생활 ----
+{c:"일상생활",d:1,h:"厨房",p:"chúfáng",pos:"명사",m:"부엌",ex:"妈妈在厨房做饭。",exp:"Māma zài chúfáng zuò fàn.",exm:"엄마는 부엌에서 요리하고 계세요."},
+{c:"일상생활",d:1,h:"洗澡",p:"xǐzǎo",pos:"동사",m:"목욕하다",ex:"我每天晚上洗澡。",exp:"Wǒ měitiān wǎnshang xǐzǎo.",exm:"저는 매일 저녁 목욕해요."},
+{c:"일상생활",d:2,h:"打扮",p:"dǎban",pos:"동사",m:"꾸미다, 치장하다",ex:"她打扮得很漂亮。",exp:"Tā dǎban de hěn piàoliang.",exm:"그녀는 예쁘게 꾸몄어요."},
+{c:"일상생활",d:2,h:"收拾",p:"shōushi",pos:"동사",m:"정리하다",ex:"请把房间收拾一下。",exp:"Qǐng bǎ fángjiān shōushi yíxià.",exm:"방 좀 정리해 주세요."},
+{c:"일상생활",d:1,h:"干净",p:"gānjìng",pos:"형용사",m:"깨끗하다",ex:"这个房间很干净。",exp:"Zhège fángjiān hěn gānjìng.",exm:"이 방은 깨끗해요."},
+{c:"일상생활",d:2,h:"整齐",p:"zhěngqí",pos:"형용사",m:"단정하다, 가지런하다",ex:"他把书放得很整齐。",exp:"Tā bǎ shū fàng de hěn zhěngqí.",exm:"그는 책을 가지런하게 놓았어요."},
+{c:"일상생활",d:2,h:"温度",p:"wēndù",pos:"명사",m:"온도",ex:"今天的温度比昨天低。",exp:"Jīntiān de wēndù bǐ zuótiān dī.",exm:"오늘 온도는 어제보다 낮아요."},
+{c:"일상생활",d:1,h:"空调",p:"kōngtiáo",pos:"명사",m:"에어컨",ex:"房间里的空调坏了。",exp:"Fángjiān lǐ de kōngtiáo huài le.",exm:"방 안의 에어컨이 고장 났어요."},
+{c:"일상생활",d:1,h:"沙发",p:"shāfā",pos:"명사",m:"소파",ex:"猫在沙发上睡觉。",exp:"Māo zài shāfā shàng shuìjiào.",exm:"고양이가 소파에서 자고 있어요."},
+{c:"일상생활",d:1,h:"厕所",p:"cèsuǒ",pos:"명사",m:"화장실",ex:"厕所在走廊的尽头。",exp:"Cèsuǒ zài zǒuláng de jìntóu.",exm:"화장실은 복도 끝에 있어요."},
+{c:"일상생활",d:2,h:"阳台",p:"yángtái",pos:"명사",m:"베란다",ex:"我在阳台上种了很多花。",exp:"Wǒ zài yángtái shàng zhòngle hěn duō huā.",exm:"저는 베란다에 꽃을 많이 심었어요."},
+{c:"일상생활",d:2,h:"家具",p:"jiājù",pos:"명사",m:"가구",ex:"这套家具是新买的。",exp:"Zhè tào jiājù shì xīn mǎi de.",exm:"이 가구 세트는 새로 산 거예요."},
+{c:"일상생활",d:1,h:"出租车",p:"chūzūchē",pos:"명사",m:"택시",ex:"我们打了一辆出租车。",exp:"Wǒmen dǎle yí liàng chūzūchē.",exm:"우리는 택시를 잡았어요."},
+{c:"일상생활",d:1,h:"地铁",p:"dìtiě",pos:"명사",m:"지하철",ex:"坐地铁比开车快。",exp:"Zuò dìtiě bǐ kāichē kuài.",exm:"지하철을 타는 게 운전하는 것보다 빨라요."},
+{c:"일상생활",d:2,h:"交通",p:"jiāotōng",pos:"명사",m:"교통",ex:"上班时间交通很堵。",exp:"Shàngbān shíjiān jiāotōng hěn dǔ.",exm:"출근 시간에는 교통이 막혀요."},
+
+// ---- 감정·성격 ----
+{c:"감정·성격",d:2,h:"幽默",p:"yōumò",pos:"형용사",m:"유머러스하다",ex:"他是一个很幽默的人。",exp:"Tā shì yí gè hěn yōumò de rén.",exm:"그는 유머러스한 사람이에요."},
+{c:"감정·성격",d:3,h:"骄傲",p:"jiāo'ào",pos:"형용사",m:"자랑스럽다/거만하다",ex:"父母对他的成绩感到骄傲。",exp:"Fùmǔ duì tā de chéngjì gǎndào jiāo'ào.",exm:"부모님은 그의 성적을 자랑스러워하세요."},
+{c:"감정·성격",d:2,h:"诚实",p:"chéngshí",pos:"형용사",m:"성실하다, 정직하다",ex:"做人要诚实。",exp:"Zuòrén yào chéngshí.",exm:"사람은 정직해야 해요."},
+{c:"감정·성격",d:2,h:"耐心",p:"nàixīn",pos:"명사/형용사",m:"인내심(이 있다)",ex:"老师很有耐心地讲解问题。",exp:"Lǎoshī hěn yǒu nàixīn de jiǎngjiě wèntí.",exm:"선생님은 인내심을 가지고 문제를 설명해 주셨어요."},
+{c:"감정·성격",d:3,h:"粗心",p:"cūxīn",pos:"형용사",m:"부주의하다, 세심하지 못하다",ex:"他做题太粗心了。",exp:"Tā zuò tí tài cūxīn le.",exm:"그는 문제를 풀 때 너무 부주의해요."},
+{c:"감정·성격",d:2,h:"害羞",p:"hàixiū",pos:"형용사",m:"부끄러워하다",ex:"她一见到陌生人就害羞。",exp:"Tā yí jiàndào mòshēngrén jiù hàixiū.",exm:"그녀는 낯선 사람을 보면 부끄러워해요."},
+{c:"감정·성격",d:1,h:"兴奋",p:"xīngfèn",pos:"형용사",m:"흥분하다",ex:"听到这个消息我很兴奋。",exp:"Tīngdào zhège xiāoxi wǒ hěn xīngfèn.",exm:"이 소식을 듣고 저는 흥분했어요."},
+{c:"감정·성격",d:2,h:"冷静",p:"lěngjìng",pos:"형용사",m:"냉정하다, 침착하다",ex:"遇到困难要冷静。",exp:"Yùdào kùnnán yào lěngjìng.",exm:"어려움에 부딪히면 침착해야 해요."},
+{c:"감정·성격",d:1,h:"紧张",p:"jǐnzhāng",pos:"형용사",m:"긴장하다",ex:"考试前我很紧张。",exp:"Kǎoshì qián wǒ hěn jǐnzhāng.",exm:"시험 전에 저는 긴장돼요."},
+{c:"감정·성격",d:2,h:"后悔",p:"hòuhuǐ",pos:"동사",m:"후회하다",ex:"我后悔没听你的建议。",exp:"Wǒ hòuhuǐ méi tīng nǐ de jiànyì.",exm:"저는 당신의 조언을 듣지 않은 것을 후회해요."},
+{c:"감정·성격",d:3,h:"羡慕",p:"xiànmù",pos:"동사",m:"부러워하다",ex:"我很羡慕她的生活。",exp:"Wǒ hěn xiànmù tā de shēnghuó.",exm:"저는 그녀의 생활이 부러워요."},
+{c:"감정·성격",d:3,h:"抱怨",p:"bàoyuàn",pos:"동사",m:"원망하다, 불평하다",ex:"他总是抱怨工作太累。",exp:"Tā zǒngshì bàoyuàn gōngzuò tài lèi.",exm:"그는 일이 너무 힘들다고 늘 불평해요."},
+{c:"감정·성격",d:4,h:"感激",p:"gǎnjī",pos:"동사",m:"감격하다, 감사하다",ex:"我非常感激你的帮助。",exp:"Wǒ fēicháng gǎnjī nǐ de bāngzhù.",exm:"당신의 도움에 매우 감사해요."},
+{c:"감정·성격",d:1,h:"失望",p:"shīwàng",pos:"형용사",m:"실망하다",ex:"结果让人很失望。",exp:"Jiéguǒ ràng rén hěn shīwàng.",exm:"결과는 사람을 실망시켰어요."},
+{c:"감정·성격",d:1,h:"满意",p:"mǎnyì",pos:"형용사",m:"만족하다",ex:"我对这次的服务很满意。",exp:"Wǒ duì zhè cì de fúwù hěn mǎnyì.",exm:"저는 이번 서비스에 만족해요."},
+
+// ---- 학교·업무 ----
+{c:"학교·업무",d:1,h:"专业",p:"zhuānyè",pos:"명사",m:"전공",ex:"我的专业是经济学。",exp:"Wǒ de zhuānyè shì jīngjìxué.",exm:"제 전공은 경제학이에요."},
+{c:"학교·업무",d:1,h:"复习",p:"fùxí",pos:"동사",m:"복습하다",ex:"考试前要好好复习。",exp:"Kǎoshì qián yào hǎohāo fùxí.",exm:"시험 전에는 복습을 잘 해야 해요."},
+{c:"학교·업무",d:1,h:"预习",p:"yùxí",pos:"동사",m:"예습하다",ex:"老师让我们预习下一课。",exp:"Lǎoshī ràng wǒmen yùxí xià yí kè.",exm:"선생님은 우리에게 다음 과를 예습하게 하셨어요."},
+{c:"학교·업무",d:1,h:"成绩",p:"chéngjì",pos:"명사",m:"성적",ex:"他的成绩提高了很多。",exp:"Tā de chéngjì tígāole hěn duō.",exm:"그의 성적이 많이 올랐어요."},
+{c:"학교·업무",d:1,h:"毕业",p:"bìyè",pos:"동사",m:"졸업하다",ex:"我明年就要毕业了。",exp:"Wǒ míngnián jiù yào bìyè le.",exm:"저는 내년에 졸업해요."},
+{c:"학교·업무",d:2,h:"申请",p:"shēnqǐng",pos:"동사",m:"신청하다",ex:"我申请了那所大学。",exp:"Wǒ shēnqǐngle nà suǒ dàxué.",exm:"저는 그 대학교에 지원했어요."},
+{c:"학교·업무",d:1,h:"会议",p:"huìyì",pos:"명사",m:"회의",ex:"下午三点开会议。",exp:"Xiàwǔ sān diǎn kāi huìyì.",exm:"오후 3시에 회의를 해요."},
+{c:"학교·업무",d:2,h:"报告",p:"bàogào",pos:"명사/동사",m:"보고(서), 보고하다",ex:"请把报告交给经理。",exp:"Qǐng bǎ bàogào jiāo gěi jīnglǐ.",exm:"보고서를 매니저에게 제출해 주세요."},
+{c:"학교·업무",d:2,h:"任务",p:"rènwu",pos:"명사",m:"임무",ex:"这次的任务很重要。",exp:"Zhè cì de rènwu hěn zhòngyào.",exm:"이번 임무는 매우 중요해요."},
+{c:"학교·업무",d:2,h:"合作",p:"hézuò",pos:"동사",m:"협력하다",ex:"两家公司决定合作。",exp:"Liǎng jiā gōngsī juédìng hézuò.",exm:"두 회사는 협력하기로 결정했어요."},
+{c:"학교·업무",d:1,h:"讨论",p:"tǎolùn",pos:"동사",m:"토론하다",ex:"我们讨论了这个问题。",exp:"Wǒmen tǎolùnle zhège wèntí.",exm:"우리는 이 문제를 토론했어요."},
+{c:"학교·업무",d:2,h:"材料",p:"cáiliào",pos:"명사",m:"자료",ex:"请准备好相关材料。",exp:"Qǐng zhǔnbèi hǎo xiāngguān cáiliào.",exm:"관련 자료를 준비해 주세요."},
+{c:"학교·업무",d:3,h:"项目",p:"xiàngmù",pos:"명사",m:"프로젝트",ex:"这个项目下个月完成。",exp:"Zhège xiàngmù xià gè yuè wánchéng.",exm:"이 프로젝트는 다음 달에 완성돼요."},
+{c:"학교·업무",d:1,h:"通知",p:"tōngzhī",pos:"명사/동사",m:"통지(하다)",ex:"学校通知我们明天放假。",exp:"Xuéxiào tōngzhī wǒmen míngtiān fàngjià.",exm:"학교는 우리에게 내일 휴일이라고 통지했어요."},
+{c:"학교·업무",d:2,h:"建议",p:"jiànyì",pos:"명사/동사",m:"건의(하다), 제안(하다)",ex:"谢谢你的建议。",exp:"Xièxiè nǐ de jiànyì.",exm:"당신의 제안에 감사해요."},
+
+// ---- 자연·시간·수량 ----
+{c:"자연·시간·수량",d:2,h:"气候",p:"qìhòu",pos:"명사",m:"기후",ex:"这里的气候四季分明。",exp:"Zhèlǐ de qìhòu sìjì fēnmíng.",exm:"이곳의 기후는 사계절이 뚜렷해요."},
+{c:"자연·시간·수량",d:1,h:"温暖",p:"wēnnuǎn",pos:"형용사",m:"따뜻하다",ex:"春天的天气很温暖。",exp:"Chūntiān de tiānqì hěn wēnnuǎn.",exm:"봄 날씨는 따뜻해요."},
+{c:"자연·시간·수량",d:2,h:"潮湿",p:"cháoshī",pos:"형용사",m:"습하다",ex:"南方的夏天很潮湿。",exp:"Nánfāng de xiàtiān hěn cháoshī.",exm:"남쪽 지방의 여름은 습해요."},
+{c:"자연·시간·수량",d:1,h:"阳光",p:"yángguāng",pos:"명사",m:"햇빛",ex:"今天的阳光很好。",exp:"Jīntiān de yángguāng hěn hǎo.",exm:"오늘 햇빛이 좋아요."},
+{c:"자연·시간·수량",d:2,h:"森林",p:"sēnlín",pos:"명사",m:"숲, 삼림",ex:"这片森林里有很多动物。",exp:"Zhè piàn sēnlín lǐ yǒu hěn duō dòngwù.",exm:"이 숲에는 동물이 많아요."},
+{c:"자연·시간·수량",d:3,h:"逐渐",p:"zhújiàn",pos:"부사",m:"점차, 점점",ex:"天气逐渐变冷了。",exp:"Tiānqì zhújiàn biàn lěng le.",exm:"날씨가 점차 추워지고 있어요."},
+{c:"자연·시간·수량",d:2,h:"立刻",p:"lìkè",pos:"부사",m:"즉시, 바로",ex:"请立刻回复我。",exp:"Qǐng lìkè huífù wǒ.",exm:"즉시 답장해 주세요."},
+{c:"자연·시간·수량",d:2,h:"大约",p:"dàyuē",pos:"부사",m:"대략, 대개",ex:"这里到机场大约需要一个小时。",exp:"Zhèlǐ dào jīchǎng dàyuē xūyào yí gè xiǎoshí.",exm:"여기서 공항까지 대략 한 시간 걸려요."},
+{c:"자연·시간·수량",d:2,h:"至少",p:"zhìshǎo",pos:"부사",m:"최소한, 적어도",ex:"这个项目至少需要三个月。",exp:"Zhège xiàngmù zhìshǎo xūyào sān gè yuè.",exm:"이 프로젝트는 최소한 3개월이 필요해요."},
+{c:"자연·시간·수량",d:3,h:"平均",p:"píngjūn",pos:"형용사/부사",m:"평균(적으로)",ex:"这个班的平均成绩不错。",exp:"Zhège bān de píngjūn chéngjì búcuò.",exm:"이 반의 평균 성적은 괜찮아요."},
+{c:"자연·시간·수량",d:2,h:"数量",p:"shùliàng",pos:"명사",m:"수량",ex:"订单的数量增加了。",exp:"Dìngdān de shùliàng zēngjiā le.",exm:"주문 수량이 늘었어요."},
+{c:"자연·시간·수량",d:2,h:"增加",p:"zēngjiā",pos:"동사",m:"증가하다",ex:"公司的收入增加了不少。",exp:"Gōngsī de shōurù zēngjiāle bù shǎo.",exm:"회사의 수입이 많이 증가했어요."},
+{c:"자연·시간·수량",d:2,h:"减少",p:"jiǎnshǎo",pos:"동사",m:"감소하다",ex:"污染让森林面积减少了。",exp:"Wūrǎn ràng sēnlín miànjī jiǎnshǎo le.",exm:"오염으로 숲의 면적이 줄었어요."},
+{c:"자연·시간·수량",d:3,h:"阶段",p:"jiēduàn",pos:"명사",m:"단계",ex:"这个计划分为三个阶段。",exp:"Zhège jìhuà fēnwéi sān gè jiēduàn.",exm:"이 계획은 세 단계로 나뉘어요."},
+{c:"자연·시간·수량",d:4,h:"随着",p:"suízhe",pos:"개사",m:"~함에 따라",ex:"随着经济的发展，生活水平提高了。",exp:"Suízhe jīngjì de fāzhǎn, shēnghuó shuǐpíng tígāo le.",exm:"경제 발전에 따라 생활 수준이 높아졌어요."},
+
+// ---- 여행·쇼핑 ----
+{c:"여행·쇼핑",d:1,h:"签证",p:"qiānzhèng",pos:"명사",m:"비자",ex:"我正在办理签证。",exp:"Wǒ zhèngzài bànlǐ qiānzhèng.",exm:"저는 비자를 처리하고 있어요."},
+{c:"여행·쇼핑",d:1,h:"护照",p:"hùzhào",pos:"명사",m:"여권",ex:"出国旅游要带护照。",exp:"Chūguó lǚyóu yào dài hùzhào.",exm:"해외여행을 갈 때는 여권을 챙겨야 해요."},
+{c:"여행·쇼핑",d:1,h:"行李",p:"xíngli",pos:"명사",m:"짐, 수하물",ex:"我的行李超重了。",exp:"Wǒ de xíngli chāozhòng le.",exm:"제 짐이 무게 초과됐어요."},
+{c:"여행·쇼핑",d:3,h:"目的地",p:"mùdìdì",pos:"명사",m:"목적지",ex:"我们的目的地是上海。",exp:"Wǒmen de mùdìdì shì Shànghǎi.",exm:"우리의 목적지는 상하이예요."},
+{c:"여행·쇼핑",d:1,h:"风景",p:"fēngjǐng",pos:"명사",m:"풍경",ex:"这里的风景很美。",exp:"Zhèlǐ de fēngjǐng hěn měi.",exm:"이곳의 풍경은 아름다워요."},
+{c:"여행·쇼핑",d:2,h:"打折",p:"dǎzhé",pos:"동사",m:"할인하다",ex:"这件衣服打八折。",exp:"Zhè jiàn yīfu dǎ bā zhé.",exm:"이 옷은 20% 할인이에요."},
+{c:"여행·쇼핑",d:2,h:"退货",p:"tuìhuò",pos:"동사",m:"반품하다",ex:"这个商品可以退货吗？",exp:"Zhège shāngpǐn kěyǐ tuìhuò ma?",exm:"이 상품은 반품이 가능한가요?"},
+{c:"여행·쇼핑",d:2,h:"收据",p:"shōujù",pos:"명사",m:"영수증",ex:"请给我一张收据。",exp:"Qǐng gěi wǒ yì zhāng shōujù.",exm:"영수증 한 장 주세요."},
+{c:"여행·쇼핑",d:1,h:"价格",p:"jiàgé",pos:"명사",m:"가격",ex:"这里的价格比较便宜。",exp:"Zhèlǐ de jiàgé bǐjiào piányi.",exm:"이곳의 가격은 비교적 저렴해요."},
+{c:"여행·쇼핑",d:2,h:"质量",p:"zhìliàng",pos:"명사",m:"품질",ex:"这件产品的质量很好。",exp:"Zhè jiàn chǎnpǐn de zhìliàng hěn hǎo.",exm:"이 제품의 품질은 좋아요."},
+{c:"여행·쇼핑",d:3,h:"款式",p:"kuǎnshì",pos:"명사",m:"스타일, 디자인",ex:"这个款式很受年轻人欢迎。",exp:"Zhège kuǎnshì hěn shòu niánqīngrén huānyíng.",exm:"이 디자인은 젊은 사람들에게 인기가 많아요."},
+{c:"여행·쇼핑",d:3,h:"尺寸",p:"chǐcùn",pos:"명사",m:"사이즈, 치수",ex:"这双鞋的尺寸不合适。",exp:"Zhè shuāng xié de chǐcùn bù héshì.",exm:"이 신발 사이즈가 안 맞아요."},
+{c:"여행·쇼핑",d:3,h:"讲价",p:"jiǎngjià",pos:"동사",m:"흥정하다",ex:"在这个市场可以讲价。",exp:"Zài zhège shìchǎng kěyǐ jiǎngjià.",exm:"이 시장에서는 흥정할 수 있어요."},
+{c:"여행·쇼핑",d:1,h:"免费",p:"miǎnfèi",pos:"형용사/부사",m:"무료(로)",ex:"这里的停车是免费的。",exp:"Zhèlǐ de tíngchē shì miǎnfèi de.",exm:"이곳의 주차는 무료예요."},
+{c:"여행·쇼핑",d:2,h:"预订",p:"yùdìng",pos:"동사",m:"예약하다",ex:"我已经预订了房间。",exp:"Wǒ yǐjīng yùdìngle fángjiān.",exm:"저는 이미 방을 예약했어요."},
+
+// ---- 문법포인트 ----
+{c:"문법포인트",d:2,h:"虽然…但是…",p:"suīrán…dànshì…",pos:"접속사 구문",m:"비록 ~하지만 ~하다",ex:"虽然下雨，但是我们还是出发了。",exp:"Suīrán xiàyǔ, dànshì wǒmen háishi chūfā le.",exm:"비록 비가 왔지만 우리는 그래도 출발했어요."},
+{c:"문법포인트",d:2,h:"只要…就…",p:"zhǐyào…jiù…",pos:"접속사 구문",m:"~하기만 하면 ~하다",ex:"只要努力，就一定能成功。",exp:"Zhǐyào nǔlì, jiù yídìng néng chénggōng.",exm:"노력하기만 하면 반드시 성공할 수 있어요."},
+{c:"문법포인트",d:3,h:"只有…才…",p:"zhǐyǒu…cái…",pos:"접속사 구문",m:"~해야만 (비로소) ~하다",ex:"只有多练习，才能提高水平。",exp:"Zhǐyǒu duō liànxí, cái néng tígāo shuǐpíng.",exm:"많이 연습해야만 실력을 향상시킬 수 있어요."},
+{c:"문법포인트",d:3,h:"不但…而且…",p:"búdàn…érqiě…",pos:"접속사 구문",m:"~뿐만 아니라 게다가 ~하다",ex:"她不但聪明，而且很努力。",exp:"Tā búdàn cōngming, érqiě hěn nǔlì.",exm:"그녀는 똑똑할 뿐만 아니라 게다가 노력해요."},
+{c:"문법포인트",d:2,h:"一边…一边…",p:"yìbiān…yìbiān…",pos:"부사 구문",m:"~하면서 ~하다",ex:"他一边吃饭一边看电视。",exp:"Tā yìbiān chīfàn yìbiān kàn diànshì.",exm:"그는 밥을 먹으면서 TV를 봐요."},
+{c:"문법포인트",d:2,h:"越来越…",p:"yuèláiyuè…",pos:"부사 구문",m:"점점 더 ~하다",ex:"天气越来越冷了。",exp:"Tiānqì yuèláiyuè lěng le.",exm:"날씨가 점점 더 추워지고 있어요."},
+{c:"문법포인트",d:3,h:"越…越…",p:"yuè…yuè…",pos:"부사 구문",m:"~할수록 (더) ~하다",ex:"这本书越看越有意思。",exp:"Zhè běn shū yuè kàn yuè yǒu yìsi.",exm:"이 책은 보면 볼수록 재미있어요."},
+{c:"문법포인트",d:4,h:"把字句",p:"bǎ zìjù",pos:"문형",m:"把구문 — 목적어를 동사 앞으로 이동시켜 처리 결과를 강조",ex:"请把门关上。",exp:"Qǐng bǎ mén guānshàng.",exm:"문을 좀 닫아주세요."},
+{c:"문법포인트",d:4,h:"被字句",p:"bèi zìjù",pos:"문형",m:"被구문 — 피동(수동)의 의미를 나타냄",ex:"我的手机被弟弟拿走了。",exp:"Wǒ de shǒujī bèi dìdi ná zǒu le.",exm:"제 휴대폰을 남동생이 가져갔어요(당했어요)."},
+{c:"문법포인트",d:3,h:"是…的",p:"shì…de",pos:"문형",m:"이미 발생한 일의 시간·장소·방식 등을 강조",ex:"我是坐飞机来的。",exp:"Wǒ shì zuò fēijī lái de.",exm:"저는 비행기를 타고 왔어요.(강조)"},
+{c:"문법포인트",d:2,h:"除了…以外",p:"chúle…yǐwài",pos:"개사 구문",m:"~을 제외하고, ~외에도",ex:"除了小王以外，大家都到了。",exp:"Chúle Xiǎo Wáng yǐwài, dàjiā dōu dào le.",exm:"샤오왕을 제외하고 모두 도착했어요."},
+{c:"문법포인트",d:3,h:"尽管…但是…",p:"jǐnguǎn…dànshì…",pos:"접속사 구문",m:"비록 ~라도 (그러나) ~하다",ex:"尽管很累，但是他还是坚持完成了任务。",exp:"Jǐnguǎn hěn lèi, dànshì tā háishi jiānchí wánchéngle rènwu.",exm:"비록 힘들었지만 그는 그래도 끝까지 임무를 완수했어요."},
+{c:"문법포인트",d:2,h:"为了",p:"wèile",pos:"개사",m:"~을 위하여",ex:"为了健康，他每天都锻炼。",exp:"Wèile jiànkāng, tā měitiān dōu duànliàn.",exm:"건강을 위해 그는 매일 운동해요."},
+{c:"문법포인트",d:2,h:"由于",p:"yóuyú",pos:"개사/접속사",m:"~때문에, ~로 인하여",ex:"由于天气不好，比赛推迟了。",exp:"Yóuyú tiānqì bù hǎo, bǐsài tuīchí le.",exm:"날씨가 좋지 않아서 경기가 연기됐어요."},
+{c:"문법포인트",d:3,h:"一…就…",p:"yī…jiù…",pos:"부사 구문",m:"~하자마자 ~하다",ex:"他一到家就开始写作业。",exp:"Tā yí dào jiā jiù kāishǐ xiě zuòyè.",exm:"그는 집에 도착하자마자 숙제를 시작해요."},
+{c:"문법포인트",d:2,h:"又…又…",p:"yòu…yòu…",pos:"부사 구문",m:"~하기도 하고 ~하기도 하다",ex:"这道菜又便宜又好吃。",exp:"Zhè dào cài yòu piányi yòu hǎochī.",exm:"이 요리는 싸기도 하고 맛있기도 해요."},
+{c:"문법포인트",d:4,h:"连…都/也…",p:"lián…dōu/yě…",pos:"부사 구문",m:"~조차도, ~마저도",ex:"这个问题连老师都不知道答案。",exp:"Zhège wèntí lián lǎoshī dōu bù zhīdào dá'àn.",exm:"이 문제는 선생님조차도 답을 모르세요."},
+{c:"문법포인트",d:4,h:"无论…都…",p:"wúlùn…dōu…",pos:"접속사 구문",m:"~을 막론하고 (모두) ~하다",ex:"无论发生什么事，我都支持你。",exp:"Wúlùn fāshēng shénme shì, wǒ dōu zhīchí nǐ.",exm:"무슨 일이 생기든 저는 당신을 지지해요."},
+{c:"문법포인트",d:5,h:"与其…不如…",p:"yǔqí…bùrú…",pos:"접속사 구문",m:"~하느니 차라리 ~하는 것이 낫다",ex:"与其在家等消息，不如主动去问问。",exp:"Yǔqí zài jiā děng xiāoxi, bùrú zhǔdòng qù wènwen.",exm:"집에서 소식을 기다리느니 차라리 직접 가서 물어보는 게 나아요."},
+{c:"문법포인트",d:4,h:"即使…也…",p:"jíshǐ…yě…",pos:"접속사 구문",m:"설령 ~하더라도 ~하다",ex:"即使下雨，我也要去。",exp:"Jíshǐ xiàyǔ, wǒ yě yào qù.",exm:"설령 비가 오더라도 저는 갈 거예요."},
+
+// ---- 듣기·독해 표현 ----
+{c:"듣기·독해 표현",d:3,h:"千万",p:"qiānwàn",pos:"부사",m:"부디, 절대로(강조)",ex:"过马路的时候千万要小心。",exp:"Guò mǎlù de shíhou qiānwàn yào xiǎoxīn.",exm:"길을 건널 때는 부디 조심해야 해요."},
+{c:"듣기·독해 표현",d:3,h:"恐怕",p:"kǒngpà",pos:"부사",m:"아마 ~일 것이다(우려)",ex:"今天恐怕要下雨。",exp:"Jīntiān kǒngpà yào xiàyǔ.",exm:"오늘 아마 비가 올 것 같아요."},
+{c:"듣기·독해 표현",d:4,h:"难怪",p:"nánguài",pos:"부사",m:"어쩐지",ex:"难怪他今天没来，原来生病了。",exp:"Nánguài tā jīntiān méi lái, yuánlái shēngbìng le.",exm:"어쩐지 그가 오늘 안 오더라니, 아프대요."},
+{c:"듣기·독해 표현",d:2,h:"其实",p:"qíshí",pos:"부사",m:"사실은",ex:"其实我并不喜欢这个工作。",exp:"Qíshí wǒ bìng bù xǐhuan zhège gōngzuò.",exm:"사실 저는 이 일을 좋아하지 않아요."},
+{c:"듣기·독해 표현",d:3,h:"反正",p:"fǎnzhèng",pos:"부사",m:"어쨌든, 아무튼",ex:"反正我不会去的。",exp:"Fǎnzhèng wǒ bú huì qù de.",exm:"어쨌든 저는 안 갈 거예요."},
+{c:"듣기·독해 표현",d:2,h:"好像",p:"hǎoxiàng",pos:"부사",m:"마치 ~인 것 같다",ex:"她好像不太高兴。",exp:"Tā hǎoxiàng bú tài gāoxìng.",exm:"그녀는 별로 기쁘지 않은 것 같아요."},
+{c:"듣기·독해 표현",d:4,h:"究竟",p:"jiūjìng",pos:"부사",m:"도대체",ex:"你究竟想说什么？",exp:"Nǐ jiūjìng xiǎng shuō shénme?",exm:"당신 도대체 무슨 말을 하고 싶은 거예요?"},
+{c:"듣기·독해 표현",d:4,h:"毕竟",p:"bìjìng",pos:"부사",m:"결국, 어쨌든",ex:"他毕竟是新来的，还不太熟悉。",exp:"Tā bìjìng shì xīn lái de, hái bú tài shúxi.",exm:"그는 어쨌든 새로 왔으니 아직 잘 몰라요."},
+{c:"듣기·독해 표현",d:4,h:"显然",p:"xiǎnrán",pos:"부사",m:"분명히, 명백히",ex:"显然，他对这个结果不满意。",exp:"Xiǎnrán, tā duì zhège jiéguǒ bù mǎnyì.",exm:"분명히 그는 이 결과에 만족하지 않아요."},
+{c:"듣기·독해 표현",d:3,h:"果然",p:"guǒrán",pos:"부사",m:"과연, 아니나 다를까",ex:"天气预报说要下雨，果然下雨了。",exp:"Tiānqì yùbào shuō yào xiàyǔ, guǒrán xiàyǔ le.",exm:"일기예보에서 비가 온다더니 정말로 비가 왔어요."},
+// ---- 추가 어휘(2차 확장) ----
+{c:"인물·직업",d:2,h:"同事",p:"tóngshì",pos:"명사",m:"동료",ex:"我和同事们一起吃午饭。",exp:"Wǒ hé tóngshìmen yìqǐ chī wǔfàn.",exm:"저는 동료들과 함께 점심을 먹어요."},
+{c:"인물·직업",d:1,h:"客人",p:"kèrén",pos:"명사",m:"손님",ex:"今天家里来了很多客人。",exp:"Jīntiān jiā lǐ láile hěn duō kèrén.",exm:"오늘 집에 손님이 많이 오셨어요."},
+{c:"인물·직업",d:2,h:"主人",p:"zhǔrén",pos:"명사",m:"주인",ex:"这只狗对主人很忠诚。",exp:"Zhè zhī gǒu duì zhǔrén hěn zhōngchéng.",exm:"이 개는 주인에게 충성스러워요."},
+{c:"인물·직업",d:3,h:"学者",p:"xuézhě",pos:"명사",m:"학자",ex:"这位学者研究了三十年历史。",exp:"Zhè wèi xuézhě yánjiūle sānshí nián lìshǐ.",exm:"이 학자는 30년간 역사를 연구했어요."},
+{c:"인물·직업",d:2,h:"观众",p:"guānzhòng",pos:"명사",m:"관중, 청중",ex:"观众对这场演出反应热烈。",exp:"Guānzhòng duì zhè chǎng yǎnchū fǎnyìng rèliè.",exm:"관중들은 이번 공연에 뜨겁게 반응했어요."},
+{c:"일상생활",d:2,h:"家务",p:"jiāwù",pos:"명사",m:"집안일",ex:"周末我要做很多家务。",exp:"Zhōumò wǒ yào zuò hěn duō jiāwù.",exm:"주말에 저는 집안일을 많이 해야 해요."},
+{c:"일상생활",d:2,h:"卫生",p:"wèishēng",pos:"명사",m:"위생",ex:"饭前要注意卫生,先洗手。",exp:"Fàn qián yào zhùyì wèishēng, xiān xǐshǒu.",exm:"식사 전에는 위생에 신경 써서 먼저 손을 씻어야 해요."},
+{c:"일상생활",d:1,h:"舒适",p:"shūshì",pos:"형용사",m:"편안하다",ex:"这张床睡起来很舒适。",exp:"Zhè zhāng chuáng shuì qǐlái hěn shūshì.",exm:"이 침대는 자기에 아주 편안해요."},
+{c:"일상생활",d:1,h:"整理",p:"zhěnglǐ",pos:"동사",m:"정리하다",ex:"我每天整理自己的房间。",exp:"Wǒ měitiān zhěnglǐ zìjǐ de fángjiān.",exm:"저는 매일 제 방을 정리해요."},
+{c:"일상생활",d:1,h:"打扫",p:"dǎsǎo",pos:"동사",m:"청소하다",ex:"我们一起打扫教室吧。",exp:"Wǒmen yìqǐ dǎsǎo jiàoshì ba.",exm:"우리 같이 교실 청소하자."},
+{c:"감정·성격",d:2,h:"激动",p:"jīdòng",pos:"형용사",m:"흥분하다, 감격하다",ex:"听到这个消息,她非常激动。",exp:"Tīngdào zhège xiāoxi, tā fēicháng jīdòng.",exm:"이 소식을 듣고 그녀는 매우 흥분했어요."},
+{c:"감정·성격",d:2,h:"孤独",p:"gūdú",pos:"형용사",m:"외롭다",ex:"一个人在外地生活有点孤独。",exp:"Yí gè rén zài wàidì shēnghuó yǒudiǎn gūdú.",exm:"타지에서 혼자 생활하는 것은 조금 외로워요."},
+{c:"감정·성격",d:2,h:"勇敢",p:"yǒnggǎn",pos:"형용사",m:"용감하다",ex:"消防员非常勇敢。",exp:"Xiāofángyuán fēicháng yǒnggǎn.",exm:"소방관은 매우 용감해요."},
+{c:"감정·성격",d:3,h:"谦虚",p:"qiānxū",pos:"형용사",m:"겸손하다",ex:"他虽然很优秀,但为人很谦虚。",exp:"Tā suīrán hěn yōuxiù, dàn wéirén hěn qiānxū.",exm:"그는 뛰어나지만 사람됨이 매우 겸손해요."},
+{c:"감정·성격",d:2,h:"乐观",p:"lèguān",pos:"형용사",m:"낙관적이다",ex:"她对未来一直很乐观。",exp:"Tā duì wèilái yìzhí hěn lèguān.",exm:"그녀는 미래에 대해 항상 낙관적이에요."},
+{c:"학교·업무",d:2,h:"加班",p:"jiābān",pos:"동사",m:"야근하다, 초과 근무하다",ex:"这周他每天都要加班。",exp:"Zhè zhōu tā měitiān dōu yào jiābān.",exm:"이번 주 그는 매일 야근을 해야 해요."},
+{c:"학교·업무",d:2,h:"面试",p:"miànshì",pos:"명사/동사",m:"면접(하다)",ex:"明天我要去公司面试。",exp:"Míngtiān wǒ yào qù gōngsī miànshì.",exm:"내일 저는 회사에 면접을 보러 가요."},
+{c:"학교·업무",d:3,h:"培训",p:"péixùn",pos:"명사/동사",m:"연수, 훈련(하다)",ex:"新员工都要参加培训。",exp:"Xīn yuángōng dōu yào cānjiā péixùn.",exm:"신입 직원은 모두 연수에 참가해야 해요."},
+{c:"학교·업무",d:3,h:"汇报",p:"huìbào",pos:"동사",m:"보고하다",ex:"下午我要向经理汇报工作进度。",exp:"Xiàwǔ wǒ yào xiàng jīnglǐ huìbào gōngzuò jìndù.",exm:"오후에 저는 매니저에게 업무 진행 상황을 보고해야 해요."},
+{c:"학교·업무",d:2,h:"考试",p:"kǎoshì",pos:"명사/동사",m:"시험(을 보다)",ex:"下周我们要考试。",exp:"Xià zhōu wǒmen yào kǎoshì.",exm:"다음 주에 우리는 시험을 봐요."},
+{c:"자연·시간·수량",d:2,h:"湿度",p:"shīdù",pos:"명사",m:"습도",ex:"夏天这里的湿度很高。",exp:"Xiàtiān zhèlǐ de shīdù hěn gāo.",exm:"여름에 이곳의 습도는 아주 높아요."},
+{c:"자연·시간·수량",d:2,h:"气温",p:"qìwēn",pos:"명사",m:"기온",ex:"今天的气温比昨天低五度。",exp:"Jīntiān de qìwēn bǐ zuótiān dī wǔ dù.",exm:"오늘 기온은 어제보다 5도 낮아요."},
+{c:"자연·시간·수량",d:3,h:"光线",p:"guāngxiàn",pos:"명사",m:"빛, 광선",ex:"房间里的光线不太好。",exp:"Fángjiān lǐ de guāngxiàn bú tài hǎo.",exm:"방 안의 채광(빛)이 그다지 좋지 않아요."},
+{c:"자연·시간·수량",d:1,h:"数字",p:"shùzì",pos:"명사",m:"숫자",ex:"请写出正确的数字。",exp:"Qǐng xiěchū zhèngquè de shùzì.",exm:"정확한 숫자를 써 주세요."},
+{c:"자연·시간·수량",d:2,h:"比例",p:"bǐlì",pos:"명사",m:"비율",ex:"男女的比例大约是一比一。",exp:"Nánnǚ de bǐlì dàyuē shì yī bǐ yī.",exm:"남녀의 비율은 대략 1대1이에요."},
+{c:"여행·쇼핑",d:2,h:"导航",p:"dǎoháng",pos:"명사/동사",m:"내비게이션(하다)",ex:"开车的时候最好用导航。",exp:"Kāichē de shíhou zuìhǎo yòng dǎoháng.",exm:"운전할 때는 내비게이션을 쓰는 게 가장 좋아요."},
+{c:"여행·쇼핑",d:1,h:"景点",p:"jǐngdiǎn",pos:"명사",m:"관광지, 명소",ex:"这个城市有很多有名的景点。",exp:"Zhège chéngshì yǒu hěn duō yǒumíng de jǐngdiǎn.",exm:"이 도시에는 유명한 관광지가 많아요."},
+{c:"여행·쇼핑",d:2,h:"纪念品",p:"jìniànpǐn",pos:"명사",m:"기념품",ex:"我给朋友买了一些纪念品。",exp:"Wǒ gěi péngyou mǎile yìxiē jìniànpǐn.",exm:"저는 친구에게 줄 기념품을 좀 샀어요."},
+{c:"여행·쇼핑",d:2,h:"打包",p:"dǎbāo",pos:"동사",m:"포장하다, 싸다",ex:"剩下的菜可以打包带走。",exp:"Shèngxià de cài kěyǐ dǎbāo dàizǒu.",exm:"남은 음식은 포장해서 가져갈 수 있어요."},
+{c:"여행·쇼핑",d:1,h:"试穿",p:"shìchuān",pos:"동사",m:"입어 보다",ex:"这件衣服我可以试穿一下吗?",exp:"Zhè jiàn yīfu wǒ kěyǐ shìchuān yíxià ma?",exm:"이 옷 좀 입어봐도 될까요?"},
+{c:"문법포인트",d:3,h:"一方面…一方面…",p:"yì fāngmiàn... yì fāngmiàn...",pos:"접속 표현",m:"한편으로는 ~하고, 한편으로는 ~하다",ex:"他一方面工作,一方面学习。",exp:"Tā yì fāngmiàn gōngzuò, yì fāngmiàn xuéxí.",exm:"그는 한편으로는 일하고, 한편으로는 공부해요."},
+{c:"문법포인트",d:3,h:"不仅…还…",p:"bùjǐn... hái...",pos:"접속 표현",m:"~뿐만 아니라 또한 ~하다",ex:"她不仅会说英语,还会说法语。",exp:"Tā bùjǐn huì shuō Yīngyǔ, hái huì shuō Fǎyǔ.",exm:"그녀는 영어뿐만 아니라 프랑스어도 할 줄 알아요."},
+{c:"문법포인트",d:3,h:"不管…都…",p:"bùguǎn... dōu...",pos:"접속 표현",m:"~에 관계없이 모두 ~하다",ex:"不管天气怎么样,我们都要出发。",exp:"Bùguǎn tiānqì zěnmeyàng, wǒmen dōu yào chūfā.",exm:"날씨가 어떻든 관계없이 우리는 출발해야 해요."},
+{c:"문법포인트",d:3,h:"甚至",p:"shènzhì",pos:"부사",m:"심지어",ex:"他忙得甚至没有时间吃饭。",exp:"Tā mángde shènzhì méiyǒu shíjiān chīfàn.",exm:"그는 바빠서 심지어 밥 먹을 시간도 없어요."},
+{c:"문법포인트",d:2,h:"于是",p:"yúshì",pos:"접속사",m:"그래서, 그리하여",ex:"下雨了,于是我们改变了计划。",exp:"Xiàyǔ le, yúshì wǒmen gǎibiànle jìhuà.",exm:"비가 와서, 그래서 우리는 계획을 바꿨어요."},
+{c:"듣기·독해 표현",d:3,h:"确实",p:"quèshí",pos:"부사",m:"확실히",ex:"这个方法确实有效。",exp:"Zhège fāngfǎ quèshí yǒuxiào.",exm:"이 방법은 확실히 효과가 있어요."},
+{c:"듣기·독해 표현",d:3,h:"显得",p:"xiǎnde",pos:"동사",m:"~하게 보이다",ex:"她今天显得特别高兴。",exp:"Tā jīntiān xiǎnde tèbié gāoxìng.",exm:"그녀는 오늘 유독 기뻐 보여요."},
+{c:"듣기·독해 표현",d:3,h:"值得",p:"zhíde",pos:"동사",m:"~할 가치가 있다",ex:"这本书很值得一读。",exp:"Zhè běn shū hěn zhíde yì dú.",exm:"이 책은 한 번 읽어볼 가치가 있어요."},
+{c:"듣기·독해 표현",d:3,h:"何况",p:"hékuàng",pos:"접속사",m:"하물며",ex:"大人都觉得难,何况小孩子呢。",exp:"Dàrén dōu juéde nán, hékuàng xiǎoháizi ne.",exm:"어른도 어렵다고 느끼는데, 하물며 아이는 어떻겠어요."},
+{c:"듣기·독해 표현",d:3,h:"未必",p:"wèibì",pos:"부사",m:"반드시 ~한 것은 아니다",ex:"贵的东西未必是最好的。",exp:"Guì de dōngxi wèibì shì zuì hǎo de.",exm:"비싼 물건이 반드시 가장 좋은 것은 아니에요."},
+];
+
+const CATS = ["전체","인물·직업","일상생활","감정·성격","학교·업무","자연·시간·수량","여행·쇼핑","문법포인트","듣기·독해 표현"];
+
+let state = { cat:"전체", diffs:new Set([1,2,3,4,5]), idx:0, answered:false, correctCount:0, answeredCount:0, pool:[], wrong:[] };
+
+function poolFilter(){
+  return W.map((w,i)=>({...w,id:i})).filter(w=> (state.cat==="전체"||w.c===state.cat) && state.diffs.has(w.d));
+}
+
+async function loadWrong(){
+  try{ const r = await window.storage.get('hsk4_wrong', false); if(r && r.value) state.wrong = JSON.parse(r.value); }catch(e){ state.wrong = []; }
+  renderWrongCount();
+}
+async function saveWrong(){ try{ await window.storage.set('hsk4_wrong', JSON.stringify(state.wrong), false); }catch(e){} }
+function addWrong(id){ if(!state.wrong.find(w=>w.qid===id)){ state.wrong.push({qid:id}); saveWrong(); renderWrongCount(); } }
+function renderWrongCount(){ document.getElementById('wnCount').textContent = state.wrong.length; }
+
+function renderCatRow(){
+  const el = document.getElementById('catRow'); el.innerHTML = "";
+  CATS.forEach(c=>{
+    const b = document.createElement('div');
+    b.className = 'chip' + (state.cat===c ? ' active':'');
+    b.textContent = c;
+    b.onclick = ()=>{ state.cat=c; resetPool(); render(); };
+    el.appendChild(b);
+  });
+}
+function renderDiffRow(){
+  const el = document.getElementById('diffPanelInner'); el.innerHTML = "";
+  const basePool = W.filter(w=> state.cat==="전체" || w.c===state.cat);
+  [1,2,3,4,5].forEach(d=>{
+    const cnt = basePool.filter(w=>w.d===d).length;
+    const b = document.createElement('div');
+    b.className = 'dchip' + (state.diffs.has(d)?' active':'');
+    b.setAttribute('data-d', d);
+    b.innerHTML = `<span class="swatch"></span><span>${DIFF_LABEL[d]}</span><span class="cnt">${cnt}개</span>`;
+    b.onclick = ()=>{
+      if(state.diffs.has(d)){ if(state.diffs.size>1) state.diffs.delete(d); } else state.diffs.add(d);
+      resetPool(); render();
+    };
+    el.appendChild(b);
+  });
+  const sel = [1,2,3,4,5].filter(d=>state.diffs.has(d));
+  document.getElementById('diffSummary').textContent = sel.length===5 ? "(전체)" : "(" + sel.map(d=>DIFF_LABEL[d]).join(", ") + ")";
+}
+const diffToggleBtn = document.getElementById('diffToggleBtn');
+const diffPanel = document.getElementById('diffPanel');
+diffToggleBtn.onclick = ()=>{
+  const willOpen = !diffPanel.classList.contains('open');
+  diffPanel.classList.toggle('open', willOpen);
+  diffToggleBtn.classList.toggle('open', willOpen);
+};
+
+function resetPool(){
+  state.pool = poolFilter(); state.idx = 0; state.answered = false; state.correctCount = 0; state.answeredCount = 0;
+  renderCatRow(); renderDiffRow();
+}
+function updateStats(){
+  document.getElementById('progText').textContent = `${Math.min(state.idx+(state.pool.length?1:0), state.pool.length)}/${state.pool.length}`;
+  const pct = state.answeredCount ? Math.round(state.correctCount/state.answeredCount*100) : 0;
+  document.getElementById('scoreText').textContent = pct + '%';
+  const barPct = state.pool.length ? Math.round((state.idx)/state.pool.length*100) : 0;
+  document.getElementById('barfg').style.width = barPct + '%';
+}
+
+function buildOptions(correctWord){
+  const sameCat = W.filter(w=>w.m!==correctWord.m);
+  const shuffled = sameCat.sort(()=>Math.random()-0.5).slice(0,3).map(w=>w.m);
+  const opts = [correctWord.m, ...shuffled].sort(()=>Math.random()-0.5);
+  return opts;
+}
+
+function renderCard(){
+  const zone = document.getElementById('cardZone');
+  updateStats();
+  if(state.pool.length===0){
+    zone.innerHTML = `<div class="empty">선택한 조건에 해당하는 단어가 없어요.<br>카테고리나 난이도를 다시 선택해보세요.</div>`; return;
+  }
+  if(state.idx >= state.pool.length){
+    zone.innerHTML = `<div class="empty">🎉 이 조건의 카드를 모두 풀었어요!<br>정답률 <b style="color:var(--gold)">${Math.round(state.correctCount/state.answeredCount*100)||0}%</b><br><br>
+      <button class="btn primary" style="width:auto;padding:11px 22px;" onclick="resetPool(); render();">다시 풀기</button></div>`; return;
+  }
+  const w = state.pool[state.idx];
+  const opts = buildOptions(w);
+  w._opts = opts;
+  let optsHtml = "";
+  opts.forEach((opt,i)=>{ optsHtml += `<div class="opt" data-i="${i}" onclick="selectOpt(${i})"><div class="num">${i+1}</div><div>${opt}</div></div>`; });
+  zone.innerHTML = `
+    <div class="card">
+      <div class="cardtop">
+        <span class="catbadge">${w.c} · 카드 ${state.idx+1}</span>
+        <span class="difbadge" data-d="${w.d}">난이도 : ${DIFF_LABEL[w.d]}</span>
+      </div>
+      <div class="hanzi">${w.h}</div>
+      <div class="pinyin">${w.p}</div>
+      <div class="pos">${w.pos}</div>
+      <div class="qtext">이 단어(표현)의 뜻으로 알맞은 것은?</div>
+      <div id="optsZone">${optsHtml}</div>
+      <div class="explain" id="explainZone"></div>
+      <div class="navrow"><button class="btn primary" id="nextBtn" disabled onclick="nextCard()">다음 카드 →</button></div>
+    </div>`;
+}
+
+function selectOpt(i){
+  if(state.answered) return;
+  const w = state.pool[state.idx];
+  state.answered = true; state.answeredCount++;
+  if (window.ExamCore) ExamCore.recordSolved('hsk4');
+  const chosen = w._opts[i];
+  const isCorrect = (chosen === w.m);
+  if(isCorrect) state.correctCount++; else addWrong(w.id);
+  const correctIdx = w._opts.indexOf(w.m);
+  document.querySelectorAll('#optsZone .opt').forEach((el,idx)=>{
+    el.classList.add('disabled');
+    if(idx===correctIdx) el.classList.add('correct');
+    else if(idx===i) el.classList.add('wrong');
+    else el.classList.add('dim');
+    el.onclick = null;
+  });
+  const exp = document.getElementById('explainZone');
+  exp.innerHTML = `<span class="lbl">${isCorrect?'✅ 정답이에요':'❌ 오답이에요 — 정답은 "'+w.m+'"'}</span>
+    ${w.h}（${w.p}）은 <b>${w.pos}</b>로 <b>${w.m}</b>라는 뜻이에요.
+    <div class="ex"><b>예문</b> · ${w.ex}<br>${w.exp}<br>${w.exm}</div>`;
+  exp.classList.add('show');
+  document.getElementById('nextBtn').disabled = false;
+  updateStats();
+}
+function nextCard(){ state.idx++; state.answered = false; renderCard(); }
+function render(){ renderCard(); }
+
+let wnCat = "전체";
+function renderWnFilter(){
+  const el = document.getElementById('wnFilterRow'); el.innerHTML = "";
+  CATS.forEach(c=>{
+    const b = document.createElement('div');
+    b.className = 'chip' + (wnCat===c?' active':'');
+    b.textContent = c;
+    b.onclick = ()=>{ wnCat = c; renderWnFilter(); renderWnList(); };
+    el.appendChild(b);
+  });
+}
+function renderWnList(){
+  const el = document.getElementById('wnList');
+  const items = state.wrong.map(x=>W[x.qid]).filter(w=> wnCat==="전체" || w.c===wnCat);
+  if(items.length===0){ el.innerHTML = `<div class="empty" style="padding:30px 10px;">${wnCat==="전체"?"아직 오답이 없어요. 잘하고 있어요!":"이 카테고리엔 오답이 없어요."}</div>`; return; }
+  el.innerHTML = items.map(w=>`
+    <div class="wnitem">
+      <div class="wncat">${w.c}</div>
+      <div class="wnhead">
+        <div><span class="wnhz">${w.h}</span> <span class="wnpy">${w.p}</span></div>
+        <div class="difbadge" data-d="${w.d}">난이도 : ${DIFF_LABEL[w.d]}</div>
+      </div>
+      <div class="wnans">뜻 · ${w.m} (${w.pos})</div>
+      <div class="wnexp">${w.ex}<br>${w.exp}<br><span style="color:#8C6B5F;">${w.exm}</span></div>
+    </div>`).join("");
+}
+document.getElementById('fabBtn').onclick = ()=>{ document.getElementById('modal').classList.add('open'); renderWnFilter(); renderWnList(); };
+document.getElementById('closeModal').onclick = ()=> document.getElementById('modal').classList.remove('open');
+document.getElementById('modal').onclick = (e)=>{ if(e.target.id==='modal') e.currentTarget.classList.remove('open'); };
+document.getElementById('clearWN').onclick = async ()=>{ state.wrong = []; await saveWrong(); renderWrongCount(); renderWnList(); };
+
+resetPool(); render(); loadWrong();
+
+// ================= 목표/모의고사 엔진 =================
+if (window.ExamCore) {
+  ExamCore.init({
+    appId: 'hsk4',
+    appLabel: 'HSK 4급',
+    bank: W,
+    getItemSubject: it => it.c,
+    getQA: it => { const opts = buildOptions(it); return { q: `"${it.h}" (${it.p}) 의 뜻으로 알맞은 것은?`, o: opts, a: opts.indexOf(it.m) }; },
+    subjectsMock: [
+      { key:'인물·직업', count:13 },
+      { key:'일상생활', count:13 },
+      { key:'감정·성격', count:13 },
+      { key:'학교·업무', count:13 },
+      { key:'자연·시간·수량', count:12 },
+      { key:'여행·쇼핑', count:12 },
+      { key:'문법포인트', count:12 },
+      { key:'듣기·독해 표현', count:12 }
+    ],
+    passOverallPercent: 60,
+    passSubjectPercent: null,
+    note: '실제 HSK4급은 청해45·독해40·쓰기15(총100문항, 300점 만점 180점 합격)로 구성되지만, 이 앱은 어휘·문법 카드 기반이라 청해·쓰기를 제외한 어휘력 중심 100문항으로 재구성했어요.',
+    goalBarTarget: document.getElementById('ecGoalTarget'),
+    examSectionTarget: document.getElementById('ecExamTarget'),
+    drawer: document.getElementById('drawer'),
+    drawerAnchor: document.getElementById('drawerHubLink')
+  });
+}
+</script>
+</body>
+</html>
