@@ -496,6 +496,24 @@ const OB = {
       App.profile = profile;
       document.getElementById('onboard').classList.remove('show');
       App.boot();
+      return;
+    }
+    // 이 기기엔 저장된 프로필이 없으면, 다른 기기에서 이미 설정해둔 서버 프로필이 있는지 확인해서 이어서 사용
+    if(window.socket){
+      socket.emit('profile:get', {}, (res)=>{
+        const profiles = (res && res.success && res.profiles) || {};
+        const subjects = Object.keys(profiles);
+        if(subjects.length){
+          const latest = subjects.sort((a,b)=>(profiles[b].updatedAt||0)-(profiles[a].updatedAt||0))[0];
+          const p = profiles[latest];
+          App.profile = { subject: latest, subjectLabel: (SUBJECTS_META[latest]||{}).label || latest, goalType: p.goalType, goalNum: p.goalNum, examDate: p.examDate, done: true };
+          LS_set('eh_profile', App.profile);
+          document.getElementById('onboard').classList.remove('show');
+          App.boot();
+        }else{
+          document.getElementById('onboard').classList.add('show');
+        }
+      });
     }else{
       document.getElementById('onboard').classList.add('show');
     }
@@ -549,6 +567,9 @@ const OB = {
   confirm(){
     App.profile.done = true;
     LS_set('eh_profile', App.profile);
+    if(window.socket){
+      socket.emit('profile:save', { subject: App.profile.subject, goalType: App.profile.goalType, goalNum: App.profile.goalNum, examDate: App.profile.examDate || null });
+    }
     document.getElementById('onboard').classList.remove('show');
     App.boot();
   }
