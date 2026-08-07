@@ -885,10 +885,11 @@ const ExamTake = {
     const unanswered = [];
     p.pool.forEach((q,i)=>{ if(p.answers[i]===undefined) unanswered.push(i+1); });
     if(unanswered.length>0){
+      const nums = unanswered.map(n=>n+'번').join(', ');
       document.getElementById('submitMsg').textContent =
-        `${unanswered.join(', ')}번 문제를 아직 풀지 않았습니다. 그래도 제출하시겠습니까?`;
+        `${unanswered.length}문제(${nums})를 안 푸셨습니다. 그래도 제출하시겠습니까?`;
     }else{
-      document.getElementById('submitMsg').textContent = `제출하시겠습니까?`;
+      document.getElementById('submitMsg').textContent = `모든 문제를 다 푸셨습니다. 제출하시겠습니까?`;
     }
     document.getElementById('submitModal').classList.add('open');
   },
