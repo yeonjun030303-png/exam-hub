@@ -89,12 +89,14 @@ button{font-family:inherit;}
   border-radius:18px;padding:18px 16px;margin-bottom:14px;}
 
 /* ===== 홈(카드 넘기기) ===== */
-.flip-card{min-height:220px;display:flex;flex-direction:column;justify-content:center;}
+.flip-card{min-height:220px;display:flex;flex-direction:column;justify-content:flex-start;}
 .flip-card .qnum{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
 .flip-card .subj{color:var(--cyan);font-size:11.5px;font-weight:700;margin-bottom:6px;}
 .flip-card .qtext{font-size:16px;font-weight:600;line-height:1.55;margin-bottom:14px;}
+.flip-card .opts .qd-opt{cursor:pointer;}
+.flip-card .opts .qd-opt.correct-ans,.flip-card .opts .qd-opt.mine-wrong{cursor:default;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
-  padding:12px 13px;font-size:13px;line-height:1.6;display:none;}
+  padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;}
 .flip-card .ans.show{display:block;}
 .flip-nav{display:flex;gap:8px;margin-top:14px;}
 .flip-nav .btn{flex:1;}
@@ -322,11 +324,11 @@ button{font-family:inherit;}
       <div class="subj" id="fcSubj"></div>
       <div class="qnum" id="fcNum"></div>
       <div class="qtext" id="fcQ"></div>
+      <div class="opts" id="fcOpts"></div>
       <div class="ans" id="fcAns"></div>
     </div>
     <div class="flip-nav">
       <button class="btn ghost" onclick="Home.prev()">◀ 이전</button>
-      <button class="btn ghost" onclick="Home.flip()">뒤집기</button>
       <button class="btn primary" onclick="Home.next()">다음 ▶</button>
     </div>
   </div>
@@ -600,7 +602,7 @@ const Nav = {
 
 /* ---------------- 홈: 카드 넘기기 ---------------- */
 const Home = {
-  pool:[], idx:0, flipped:false,
+  pool:[], idx:0, picked:null,
   init(){
     const meta = SUBJECTS_META[App.profile.subject];
     this.pool = meta.data().Q;
@@ -613,12 +615,34 @@ const Home = {
     document.getElementById('fcSubj').textContent = q.s;
     document.getElementById('fcNum').textContent = `${this.idx+1} / ${this.pool.length}`;
     document.getElementById('fcQ').textContent = q.q;
+    this.picked = null;
+    const optsBox = document.getElementById('fcOpts');
+    optsBox.innerHTML = '';
+    q.o.forEach((opt,i)=>{
+      const div = document.createElement('div');
+      div.className = 'qd-opt';
+      div.innerHTML = `<b>${i+1}.</b> ${opt}`;
+      div.onclick = ()=>this.pick(i);
+      optsBox.appendChild(div);
+    });
+    const ansBox = document.getElementById('fcAns');
+    ansBox.innerHTML = '';
+    ansBox.classList.remove('show');
+  },
+  pick(i){
+    if(this.picked !== null) return;
+    this.picked = i;
+    const q = this.pool[this.idx];
+    const optsBox = document.getElementById('fcOpts');
+    Array.from(optsBox.children).forEach((div,idx)=>{
+      div.onclick = null;
+      if(idx === q.a) div.classList.add('correct-ans');
+      else if(idx === i) div.classList.add('mine-wrong');
+    });
     const ansBox = document.getElementById('fcAns');
     ansBox.innerHTML = `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}`;
-    ansBox.classList.remove('show');
-    this.flipped = false;
+    ansBox.classList.add('show');
   },
-  flip(){ this.flipped = !this.flipped; document.getElementById('fcAns').classList.toggle('show', this.flipped); },
   next(){ this.idx = (this.idx+1) % this.pool.length; LS_set('eh_home_idx_'+App.profile.subject, this.idx); this.render(); },
   prev(){ this.idx = (this.idx-1+this.pool.length) % this.pool.length; LS_set('eh_home_idx_'+App.profile.subject, this.idx); this.render(); }
 };
