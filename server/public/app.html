@@ -403,6 +403,7 @@ button{font-family:inherit;}
       <div class="num" id="resScoreNum">0/0</div>
       <div class="lbl" id="resScoreLbl">모의고사 결과</div>
     </div>
+    <button class="btn primary block" id="resRetryBtn" onclick="ResultView.retryWrong()" style="margin-bottom:14px;">🔁 오답만 다시 풀기</button>
     <div class="res-section">
       <h3>📉 약점 분석</h3>
       <div id="resWeak"></div>
@@ -714,7 +715,7 @@ const Exam = {
       card.className = 'exam-hist-card';
       card.innerHTML = `
         <div class="eh-top" onclick="Exam.toggleCard(${i})">
-          <div><div class="eh-round">${h.round}회차 · ${new Date(h.submittedAt).toLocaleDateString('ko-KR')}</div>
+          <div><div class="eh-round">${h.isRetry ? '오답재도전('+h.retryOf+'회차) · ' : ''}${h.round}회차 · ${new Date(h.submittedAt).toLocaleDateString('ko-KR')}</div>
           <div class="eh-score">${h.correct}<small>/${h.total}점</small></div></div>
           <div class="eh-chev" id="ehChev-${i}">▾</div>
         </div>
@@ -951,7 +952,9 @@ const ExamTake = {
       correct: correct,
       answers: p.answers,
       poolSnapshot: p.pool,
-      subjectBreakdown: subjectBreakdown
+      subjectBreakdown: subjectBreakdown,
+      isRetry: !!p.isRetry,
+      retryOf: p.retryOf || null
     };
     const hist = LS_get('eh_exam_history_'+subj, []);
     hist.push(entry);
@@ -987,7 +990,7 @@ const ResultView = {
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
 
     document.getElementById('resScoreNum').textContent = `${h.correct}/${h.total}`;
-    document.getElementById('resScoreLbl').textContent = `${h.round}회차 · ${new Date(h.submittedAt).toLocaleDateString('ko-KR')}`;
+    document.getElementById('resScoreLbl').textContent = `${h.isRetry ? '오답재도전('+h.retryOf+'회차) · ' : ''}${h.round}회차 · ${new Date(h.submittedAt).toLocaleDateString('ko-KR')}`;
 
     // 약점 분석: 과목별 정답률이 가장 낮은 곳 + 그 과목 내 오답이 몰린 출처(r) 태그
     const weakBox = document.getElementById('resWeak');
@@ -1062,6 +1065,30 @@ const ResultView = {
   toggleSubj(sname){
     document.getElementById('rsPanel-'+sname).classList.toggle('open');
     document.getElementById('rsChev-'+sname).classList.toggle('open');
+  },
+  retryWrong(){
+    const subj = App.profile.subject;
+    const hist = LS_get('eh_exam_history_'+subj, []);
+    const h = hist[this.entryIdx];
+    const wrongQs = [];
+    Object.values(h.subjectBreakdown).forEach(sb=>{ sb.wrongPoolIdx.forEach(pi=>wrongQs.push(h.poolSnapshot[pi])); });
+    if(wrongQs.length===0){ alert('이 회차는 오답이 없어요, 다시 풀 문제가 없습니다!'); return; }
+    const meta = SUBJECTS_META[subj];
+    const prog = {
+      round: hist.length+1,
+      pool: wrongQs,
+      answers: {},
+      current: 0,
+      startedAt: Date.now(),
+      timeLimitSec: meta.timeLimitMin*60,
+      timeLeftSec: meta.timeLimitMin*60,
+      isRetry: true,
+      retryOf: h.round
+    };
+    LS_set('eh_exam_progress_'+subj, prog);
+    if(window.socket) socket.emit('examProgress:save', { subject: subj, state: prog });
+    this.close();
+    ExamTake.start(prog);
   },
   close(){
     document.getElementById('examResult').classList.remove('show');
