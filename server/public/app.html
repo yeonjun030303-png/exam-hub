@@ -15,7 +15,7 @@ html,body{height:100%;}
 body{
   margin:0;background:radial-gradient(ellipse at top,#0F1B33 0%,var(--bg) 55%);
   color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
-  min-height:100vh;padding-bottom:78px;
+  min-height:100vh;padding-bottom:calc(100px + env(safe-area-inset-bottom));
 }
 .wrap{max-width:480px;margin:0 auto;padding:18px 14px 24px;}
 button{font-family:inherit;}
@@ -154,7 +154,7 @@ button{font-family:inherit;}
   color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;}
 .et-jbtn.answered{background:var(--cyan-dim);color:var(--cyan);border-color:var(--cyan-dim);}
 .et-jbtn.current{border-color:var(--cyan);border-width:2px;color:var(--text);}
-.et-submitbtn{width:100%;margin-top:6px;}
+.et-submitbtn{width:100%;margin-top:6px;margin-bottom:20px;}
 
 /* ===== 모달 ===== */
 .modal{position:fixed;inset:0;background:rgba(4,8,16,.75);display:none;z-index:300;
