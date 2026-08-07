@@ -17,7 +17,7 @@ body{
   color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
   min-height:100vh;padding-bottom:78px;
 }
-.wrap{max-width:720px;margin:0 auto;padding:18px 14px 24px;}
+.wrap{max-width:480px;margin:0 auto;padding:18px 14px 24px;}
 button{font-family:inherit;}
 
 /* ===== 공통 버튼 ===== */
@@ -73,8 +73,8 @@ button{font-family:inherit;}
 .ob-confirm{margin-top:20px;}
 
 /* ===== 하단 네비 ===== */
-#bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--bg2);
-  border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+#bottomnav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:150;background:var(--bg2);
+  border-top:1px solid var(--line);border-left:1px solid var(--line);border-right:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
 #bottomnav.hide{display:none;}
 .navbtn{flex:1;background:none;border:none;color:var(--muted);display:flex;flex-direction:column;
   align-items:center;gap:2px;padding:6px 2px;cursor:pointer;font-size:10.5px;font-weight:700;}
@@ -197,7 +197,7 @@ button{font-family:inherit;}
 /* ===== 문제 상세(오답노트 스타일) ===== */
 #qDetail{position:fixed;inset:0;background:var(--bg);z-index:250;display:none;overflow:hidden;}
 #qDetail.show{display:block;}
-.qd-scroll{height:100%;overflow-y:auto;padding:18px 16px 40px;}
+.qd-scroll{height:100%;overflow-y:auto;padding:18px 16px 40px;max-width:480px;margin:0 auto;}
 .qd-top{display:flex;justify-content:center;margin-bottom:10px;}
 .qd-up{background:var(--surface);border:1px solid var(--line);color:var(--cyan);border-radius:20px;
   padding:8px 18px;font-size:12.5px;font-weight:700;cursor:pointer;}
@@ -759,6 +759,17 @@ const ExamTake = {
       if(!document.getElementById('examTaking').classList.contains('show')) return;
       if(e.key==='Enter'){ e.preventDefault(); this.next(); }
       if(e.key==='Backspace'){ e.preventDefault(); this.prev(); }
+      if(e.key>='1' && e.key<='9'){
+        const idx = parseInt(e.key,10)-1;
+        const q = this.prog.pool[this.prog.current];
+        if(idx < q.o.length){
+          e.preventDefault();
+          this.prog.answers[this.prog.current] = idx;
+          this.save();
+          this.renderQuestion();
+          this.renderJumpGrid();
+        }
+      }
     });
   },
   save(){ LS_set('eh_exam_progress_'+App.profile.subject, this.prog); },
