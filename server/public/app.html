@@ -609,6 +609,16 @@ const Home = {
     this.idx = LS_get('eh_home_idx_'+App.profile.subject, 0);
     if(this.idx >= this.pool.length) this.idx = 0;
     this.render();
+    // 서버에 저장된 마지막 카드 위치가 있으면(다른 기기 등) 그걸로 이어서 보기
+    if(window.socket){
+      socket.emit('cardProgress:get', { subject: App.profile.subject }, (res)=>{
+        if(res && res.success && typeof res.index === 'number' && res.index !== this.idx && res.index < this.pool.length){
+          this.idx = res.index;
+          LS_set('eh_home_idx_'+App.profile.subject, this.idx);
+          this.render();
+        }
+      });
+    }
   },
   render(){
     const q = this.pool[this.idx];
@@ -643,8 +653,12 @@ const Home = {
     ansBox.innerHTML = `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}`;
     ansBox.classList.add('show');
   },
-  next(){ this.idx = (this.idx+1) % this.pool.length; LS_set('eh_home_idx_'+App.profile.subject, this.idx); this.render(); },
-  prev(){ this.idx = (this.idx-1+this.pool.length) % this.pool.length; LS_set('eh_home_idx_'+App.profile.subject, this.idx); this.render(); }
+  next(){ this.idx = (this.idx+1) % this.pool.length; this._save(); this.render(); },
+  prev(){ this.idx = (this.idx-1+this.pool.length) % this.pool.length; this._save(); this.render(); },
+  _save(){
+    LS_set('eh_home_idx_'+App.profile.subject, this.idx);
+    if(window.socket) socket.emit('cardProgress:save', { subject: App.profile.subject, index: this.idx });
+  }
 };
 
 /* ---------------- 모의고사: 목록 ---------------- */
