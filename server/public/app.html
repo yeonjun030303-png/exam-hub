@@ -735,13 +735,26 @@ const Exam = {
     const subj = App.profile.subject;
     const prog = LS_get('eh_exam_progress_'+subj, null);
     if(prog){
-      const answeredCount = Object.keys(prog.answers).length;
-      document.getElementById('resumeMsg').textContent =
-        `기존에 풀던 ${prog.round}회차 (${answeredCount}/${prog.pool.length}문제 진행중)이 있습니다. 이어서 진행할까요?`;
-      document.getElementById('resumeModal').classList.add('open');
+      this._showResumePrompt(prog);
+    }else if(window.socket){
+      // 이 기기엔 진행중 기록이 없으면, 다른 기기에서 풀던 게 서버에 남아있는지 확인
+      socket.emit('examProgress:get', { subject: subj }, (res)=>{
+        if(res && res.success && res.state){
+          LS_set('eh_exam_progress_'+subj, res.state);
+          this._showResumePrompt(res.state);
+        }else{
+          this.beginNewExam();
+        }
+      });
     }else{
       this.beginNewExam();
     }
+  },
+  _showResumePrompt(prog){
+    const answeredCount = Object.keys(prog.answers).length;
+    document.getElementById('resumeMsg').textContent =
+      `기존에 풀던 ${prog.round}회차 (${answeredCount}/${prog.pool.length}문제 진행중)이 있습니다. 이어서 진행할까요?`;
+    document.getElementById('resumeModal').classList.add('open');
   },
   resumeChoice(resume){
     document.getElementById('resumeModal').classList.remove('open');
@@ -776,6 +789,7 @@ const Exam = {
       timeLeftSec: meta.timeLimitMin*60
     };
     LS_set('eh_exam_progress_'+subj, prog);
+    if(window.socket) socket.emit('examProgress:save', { subject: subj, state: prog });
     ExamTake.start(prog);
   }
 };
@@ -810,7 +824,11 @@ const ExamTake = {
       }
     });
   },
-  save(){ LS_set('eh_exam_progress_'+App.profile.subject, this.prog); },
+  save(){
+    const subj = App.profile.subject;
+    LS_set('eh_exam_progress_'+subj, this.prog);
+    if(window.socket) socket.emit('examProgress:save', { subject: subj, state: this.prog });
+  },
   startTimer(){
     clearInterval(this.timerHandle);
     this.timerHandle = setInterval(()=>{
@@ -904,6 +922,10 @@ const ExamTake = {
     hist.push(entry);
     LS_set('eh_exam_history_'+subj, hist);
     localStorage.removeItem('eh_exam_progress_'+subj);
+    if(window.socket){
+      socket.emit('examHistory:save', { subject: subj, record: entry });
+      socket.emit('examProgress:clear', { subject: subj });
+    }
     ResultView.open(hist.length-1);
   }
 };
