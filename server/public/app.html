@@ -98,6 +98,21 @@ button{font-family:inherit;}
 .fc-filter{display:flex;gap:8px;margin-bottom:10px;}
 .fc-filter select{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--text);
   border-radius:10px;padding:8px 10px;font-size:12.5px;font-weight:600;}
+.fc-actions{display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;}
+.fc-icon-btn{background:none;border:1px solid var(--line);border-radius:8px;color:var(--muted);
+  font-size:13px;padding:5px 9px;cursor:pointer;}
+.fc-icon-btn.active{color:var(--amber);border-color:var(--amber);}
+
+/* ===== 설정 화면 인라인 아코디언(온보딩 스타일 재사용) ===== */
+.set-streak{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+.set-streak .val{color:var(--amber);font-weight:800;font-size:15px;}
+#view-settings .ob-bar{margin-bottom:10px;}
+#view-settings .ob-panel.open{max-height:900px;}
+.ai-diag-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;}
+.ai-diag-row:last-child{border-bottom:none;}
+.ai-diag-note{margin-top:12px;padding:12px;background:var(--bg2);border-left:3px solid var(--cyan);
+  border-radius:0 12px 12px 0;font-size:13px;line-height:1.6;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;}
 .flip-card .ans.show{display:block;}
@@ -322,12 +337,19 @@ button{font-family:inherit;}
 
   <!-- 홈 -->
   <div class="view" id="view-home">
-    <div class="pagehead" id="homeSubjTitle">홈</div>
+    <div class="pagehead" style="display:flex;justify-content:space-between;align-items:center;">
+      <span id="homeSubjTitle">홈</span>
+      <span id="homeDday" style="color:var(--cyan);font-size:13px;font-weight:800;"></span>
+    </div>
     <div class="fc-filter">
       <select id="fcFilterSubj" onchange="Home.applyFilter()"></select>
       <select id="fcFilterDiff" onchange="Home.applyFilter()"></select>
     </div>
     <div class="card flip-card" id="flipCardBox">
+      <div class="fc-actions">
+        <button class="fc-icon-btn" id="fcBookmarkBtn" onclick="Home.toggleBookmark()">☆ 즐겨찾기</button>
+        <button class="fc-icon-btn" onclick="Home.reportQuestion()">🚩 오류신고</button>
+      </div>
       <div class="subj" id="fcSubj"></div>
       <div class="qnum" id="fcNum"></div>
       <div class="qtext" id="fcQ"></div>
@@ -356,19 +378,68 @@ button{font-family:inherit;}
   <!-- 설정 -->
   <div class="view" id="view-settings">
     <div class="pagehead">설정</div>
-    <div class="set-row">
-      <div>
-        <div class="lbl">과목</div>
-        <div class="val" id="setSubjVal"></div>
-      </div>
-      <button class="set-edit-btn" onclick="Settings.editSubject()">수정</button>
+
+    <div class="set-streak">
+      <span>🔥 연속 학습</span>
+      <span class="val" id="setStreakVal">-</span>
     </div>
-    <div class="set-row">
-      <div>
-        <div class="lbl">오늘의 목표</div>
-        <div class="val" id="setGoalVal"></div>
+
+    <div class="ob-bar">
+      <button class="ob-bar-head" id="setSubjHead" onclick="SettingsOB.toggle('subj')">
+        <span class="lbl">📘 자격증 선택 <span class="val" id="setSubjInlineVal"></span></span>
+        <span class="ob-chev" id="setSubjChev">▾</span>
+      </button>
+      <div class="ob-panel" id="setSubjPanel">
+        <div class="ob-panel-inner">
+          <div class="ob-opt-grid" id="setSubjGrid"></div>
+        </div>
       </div>
-      <button class="set-edit-btn" onclick="Settings.editGoal()">수정</button>
+    </div>
+
+    <div class="ob-bar">
+      <button class="ob-bar-head" id="setGoalHead" onclick="SettingsOB.toggle('goal')">
+        <span class="lbl">🎯 오늘의 목표 선택 <span class="val" id="setGoalInlineVal"></span></span>
+        <span class="ob-chev" id="setGoalChev">▾</span>
+      </button>
+      <div class="ob-panel" id="setGoalPanel">
+        <div class="ob-panel-inner">
+          <div class="ob-goal-row">
+            <button class="ob-opt" data-g="daily" onclick="SettingsOB.pickGoalType('daily')">하루</button>
+            <button class="ob-opt" data-g="weekly" onclick="SettingsOB.pickGoalType('weekly')">일주일</button>
+            <button class="ob-opt" data-g="monthly" onclick="SettingsOB.pickGoalType('monthly')">한달</button>
+          </div>
+          <div class="ob-num-row">
+            <input type="number" id="setGoalNum" value="20" min="1" placeholder="문제 수">
+            <span class="muted" style="font-size:13px;">문제</span>
+          </div>
+          <button class="btn primary block" onclick="SettingsOB.saveGoal()">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ob-bar">
+      <button class="ob-bar-head" id="setDdayHead" onclick="SettingsOB.toggle('dday')">
+        <span class="lbl">📅 시험일 D-day <span class="val" id="setDdayInlineVal"></span></span>
+        <span class="ob-chev" id="setDdayChev">▾</span>
+      </button>
+      <div class="ob-panel" id="setDdayPanel">
+        <div class="ob-panel-inner">
+          <input type="date" id="setExamDate" class="auth-input" style="margin-bottom:10px;">
+          <button class="btn primary block" onclick="SettingsOB.saveExamDate()">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ob-bar">
+      <button class="ob-bar-head" id="setAiHead" onclick="SettingsOB.toggle('ai')">
+        <span class="lbl">🤖 AI진단</span>
+        <span class="ob-chev" id="setAiChev">▾</span>
+      </button>
+      <div class="ob-panel" id="setAiPanel">
+        <div class="ob-panel-inner">
+          <div id="aiDiagBox" style="font-size:13px;line-height:1.6;">아코디언을 열면 진단이 표시돼요.</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -588,10 +659,17 @@ const OB = {
 /* ---------------- 앱 셸/네비 ---------------- */
 const App = {
   profile:null,
+  streakCount:null,
   boot(){
     document.getElementById('homeSubjTitle').textContent = App.profile.subjectLabel + ' 카드';
+    document.getElementById('homeDday').textContent = App.profile.examDate ? ddayText(App.profile.examDate) : '';
     Home.init();
     Nav.go('home');
+    if(window.socket){
+      socket.emit('profile:get', {}, (res)=>{
+        if(res && res.success){ App.streakCount = res.streakCount || 1; }
+      });
+    }
   }
 };
 
@@ -603,14 +681,14 @@ const Nav = {
     document.getElementById('view-'+v).classList.add('show');
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
     if(v==='exam') Exam.renderList();
-    if(v==='settings') Settings.render();
+    if(v==='settings') SettingsOB.init();
   },
   goHome(){ this.go('home'); }
 };
 
 /* ---------------- 홈: 카드 넘기기 ---------------- */
 const Home = {
-  fullPool:[], pool:[], idx:0, picked:null, filterSubj:'all', filterDiff:'all',
+  fullPool:[], pool:[], idx:0, picked:null, filterSubj:'all', filterDiff:'all', bookmarkedIds:new Set(),
   init(){
     const meta = SUBJECTS_META[App.profile.subject];
     this.fullPool = meta.data().Q;
@@ -630,7 +708,47 @@ const Home = {
           this.render();
         }
       });
+      socket.emit('bookmark:list', { subject: App.profile.subject }, (res)=>{
+        this.bookmarkedIds = new Set((res && res.questionIds) || []);
+        this.updateBookmarkBtn();
+      });
     }
+  },
+  updateBookmarkBtn(){
+    const q = this.pool[this.idx];
+    if(!q) return;
+    const btn = document.getElementById('fcBookmarkBtn');
+    const marked = this.bookmarkedIds.has(q.id);
+    btn.textContent = marked ? '★ 즐겨찾기' : '☆ 즐겨찾기';
+    btn.classList.toggle('active', marked);
+  },
+  toggleBookmark(){
+    if(!window.socket) return;
+    const q = this.pool[this.idx];
+    socket.emit('bookmark:toggle', { subject: App.profile.subject, questionId: q.id }, (res)=>{
+      if(res && res.success){
+        if(res.bookmarked) this.bookmarkedIds.add(q.id); else this.bookmarkedIds.delete(q.id);
+        this.updateBookmarkBtn();
+      }
+    });
+  },
+  reportQuestion(){
+    const q = this.pool[this.idx];
+    const reason = prompt('오류 신고 사유를 간단히 적어주세요 (예: 오탈자, 정답 오류, 해설 오류 등)');
+    if(!reason) return;
+    if(window.socket){
+      socket.emit('questionReport:submit', { subject: App.profile.subject, questionId: q.id, reason, detail:'' }, (res)=>{
+        alert(res && res.success ? '신고가 접수됐어요. 감사합니다!' : '신고 접수에 실패했어요.');
+      });
+    }
+  },
+  _recordStat(q, isCorrect){
+    const key = 'eh_card_stats_'+App.profile.subject;
+    const stats = LS_get(key, {});
+    stats[q.s] = stats[q.s] || {correct:0,total:0};
+    stats[q.s].total++;
+    if(isCorrect) stats[q.s].correct++;
+    LS_set(key, stats);
   },
   buildFilterOptions(){
     const subjs = Array.from(new Set(this.fullPool.map(q=>q.s)));
@@ -673,6 +791,7 @@ const Home = {
     const ansBox = document.getElementById('fcAns');
     ansBox.innerHTML = '';
     ansBox.classList.remove('show');
+    this.updateBookmarkBtn();
   },
   pick(i){
     if(this.picked !== null) return;
@@ -687,6 +806,7 @@ const Home = {
     const ansBox = document.getElementById('fcAns');
     ansBox.innerHTML = `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}`;
     ansBox.classList.add('show');
+    this._recordStat(q, i===q.a);
   },
   next(){ this.idx = (this.idx+1) % this.pool.length; this._save(); this.render(); },
   prev(){ this.idx = (this.idx-1+this.pool.length) % this.pool.length; this._save(); this.render(); },
@@ -1147,35 +1267,128 @@ document.getElementById('qDetail').addEventListener('touchend', e=>{
   QDetail.touchStartX = null;
 });
 
-/* ---------------- 설정 ---------------- */
-const Settings = {
-  render(){
-    document.getElementById('setSubjVal').textContent = App.profile.subjectLabel;
+/* ---------------- 설정(인라인 아코디언) ---------------- */
+const SettingsOB = {
+  panelIds:{subj:'setSubjPanel', goal:'setGoalPanel', dday:'setDdayPanel', ai:'setAiPanel'},
+  headIds:{subj:'setSubjHead', goal:'setGoalHead', dday:'setDdayHead', ai:'setAiHead'},
+  tmpGoalType:null,
+  init(){
+    document.getElementById('setStreakVal').textContent = (App.streakCount ? App.streakCount+'일째' : '-');
+    document.getElementById('setSubjInlineVal').textContent = App.profile.subjectLabel || '';
     const glabel = {daily:'하루',weekly:'일주일',monthly:'한달'}[App.profile.goalType];
-    document.getElementById('setGoalVal').textContent = `${glabel} ${App.profile.goalNum}문제`;
-  },
-  editSubject(){
-    document.getElementById('onboard').classList.add('show');
-    OB.tmpSubject = App.profile.subject;
-    document.querySelectorAll('#obSubjGrid .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.s===App.profile.subject));
-    document.getElementById('obSubjVal').textContent = App.profile.subjectLabel;
-    document.getElementById('obSubjCheck').style.display='flex';
-    document.getElementById('obGoalVal').textContent = '';
-    const glabel = {daily:'하루',weekly:'일주일',monthly:'한달'}[App.profile.goalType];
-    document.getElementById('obGoalVal').textContent = `${glabel||''} ${App.profile.goalNum||''}문제`;
-    if(App.profile.goalType) document.getElementById('obGoalCheck').style.display='flex';
-    OB.checkConfirm();
-    OB.toggle('subj');
-  },
-  editGoal(){
-    document.getElementById('onboard').classList.add('show');
-    document.getElementById('obSubjVal').textContent = App.profile.subjectLabel;
-    document.getElementById('obSubjCheck').style.display='flex';
-    OB.tmpGoalType = App.profile.goalType;
-    document.getElementById('obGoalNum').value = App.profile.goalNum;
+    document.getElementById('setGoalInlineVal').textContent = App.profile.goalType ? `${glabel} ${App.profile.goalNum}문제` : '';
+    document.getElementById('setDdayInlineVal').textContent = App.profile.examDate ? ddayText(App.profile.examDate) : '미설정';
+    document.getElementById('setExamDate').value = App.profile.examDate || '';
+    const grid = document.getElementById('setSubjGrid');
+    grid.innerHTML = Object.keys(SUBJECTS_META).map(k=>
+      `<button class="ob-opt${k===App.profile.subject?' active':''}" data-s="${k}" onclick="SettingsOB.pickSubject('${k}')">${SUBJECTS_META[k].label}</button>`
+    ).join('') + `<button class="ob-opt" data-s="hsk4" onclick="SettingsOB.pickSubject('hsk4')">HSK 4급 (준비중)</button>
+     <button class="ob-opt" data-s="comp2" onclick="SettingsOB.pickSubject('comp2')">컴활 2급 (준비중)</button>`;
     document.querySelectorAll('.ob-goal-row .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.g===App.profile.goalType));
-    OB.checkConfirm();
-    OB.toggle('goal');
+    document.getElementById('setGoalNum').value = App.profile.goalNum || 20;
+    // 모든 패널 닫기
+    Object.values(this.panelIds).forEach(id=>document.getElementById(id).classList.remove('open'));
+    Object.values(this.headIds).forEach(id=>document.getElementById(id).classList.remove('open'));
+  },
+  toggle(which){
+    const head = document.getElementById(this.headIds[which]);
+    const panel = document.getElementById(this.panelIds[which]);
+    const isOpen = panel.classList.contains('open');
+    Object.values(this.panelIds).forEach(id=>document.getElementById(id).classList.remove('open'));
+    Object.values(this.headIds).forEach(id=>document.getElementById(id).classList.remove('open'));
+    if(!isOpen){
+      panel.classList.add('open'); head.classList.add('open');
+      if(which==='ai') AiDiag.render();
+    }
+  },
+  pickSubject(key){
+    if(key==='hsk4' || key==='comp2'){ alert('이 자격증은 아직 준비 중이에요. 곧 연결할게요!'); return; }
+    App.profile.subject = key;
+    App.profile.subjectLabel = SUBJECTS_META[key].label;
+    LS_set('eh_profile', App.profile);
+    if(window.socket) socket.emit('profile:save', { subject: App.profile.subject, goalType: App.profile.goalType, goalNum: App.profile.goalNum, examDate: App.profile.examDate || null });
+    document.getElementById('setSubjInlineVal').textContent = App.profile.subjectLabel;
+    document.querySelectorAll('#setSubjGrid .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.s===key));
+    document.getElementById('homeSubjTitle').textContent = App.profile.subjectLabel + ' 카드';
+    Home.init();
+  },
+  pickGoalType(g){
+    this.tmpGoalType = g;
+    document.querySelectorAll('.ob-goal-row .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.g===g));
+  },
+  saveGoal(){
+    const num = parseInt(document.getElementById('setGoalNum').value, 10) || 20;
+    const type = this.tmpGoalType || App.profile.goalType;
+    if(!type){ alert('하루/일주일/한달 중 하나를 선택해주세요'); return; }
+    App.profile.goalType = type;
+    App.profile.goalNum = num;
+    LS_set('eh_profile', App.profile);
+    if(window.socket) socket.emit('profile:save', { subject: App.profile.subject, goalType: App.profile.goalType, goalNum: App.profile.goalNum, examDate: App.profile.examDate || null });
+    const glabel = {daily:'하루',weekly:'일주일',monthly:'한달'}[type];
+    document.getElementById('setGoalInlineVal').textContent = `${glabel} ${num}문제`;
+    this.toggle('goal');
+  },
+  saveExamDate(){
+    const val = document.getElementById('setExamDate').value || null;
+    App.profile.examDate = val;
+    LS_set('eh_profile', App.profile);
+    if(window.socket) socket.emit('profile:save', { subject: App.profile.subject, goalType: App.profile.goalType, goalNum: App.profile.goalNum, examDate: val });
+    document.getElementById('setDdayInlineVal').textContent = val ? ddayText(val) : '미설정';
+    document.getElementById('homeDday').textContent = val ? ddayText(val) : '';
+    this.toggle('dday');
+  }
+};
+
+// 시험일 examDate('YYYY-MM-DD') 기준 D-day 문자열 계산
+function ddayText(examDate){
+  if(!examDate) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(examDate+'T00:00:00');
+  const diff = Math.round((target-today)/86400000);
+  if(diff>0) return `D-${diff}`;
+  if(diff===0) return 'D-DAY';
+  return `D+${Math.abs(diff)}`;
+}
+
+/* ---------------- AI진단(카드 학습 + 모의고사 정답률 통합) ---------------- */
+const AiDiag = {
+  render(){
+    const box = document.getElementById('aiDiagBox');
+    const subj = App.profile.subject;
+    const examHist = LS_get('eh_exam_history_'+subj, []);
+    const cardStats = LS_get('eh_card_stats_'+subj, {});
+    const examAgg = {};
+    examHist.forEach(h=>{
+      Object.keys(h.subjectBreakdown||{}).forEach(s=>{
+        const sb = h.subjectBreakdown[s];
+        examAgg[s] = examAgg[s] || {correct:0,total:0};
+        examAgg[s].correct += sb.correct;
+        examAgg[s].total += sb.total;
+      });
+    });
+    const subjSet = new Set([...Object.keys(examAgg), ...Object.keys(cardStats)]);
+    if(subjSet.size===0){
+      box.innerHTML = '아직 진단할 데이터가 부족해요. 카드 학습이나 모의고사를 몇 번 더 진행하면 과목별 약점을 분석해드릴게요.';
+      return;
+    }
+    const rows = Array.from(subjSet).map(s=>{
+      const e = examAgg[s] || {correct:0,total:0};
+      const c = cardStats[s] || {correct:0,total:0};
+      const totalCorrect = e.correct + c.correct;
+      const totalCount = e.total + c.total;
+      return {s, rate: totalCount ? totalCorrect/totalCount : 0, totalCount};
+    }).filter(r=>r.totalCount>0).sort((a,b)=>a.rate-b.rate);
+
+    let html = '';
+    rows.forEach(r=>{
+      const color = r.rate<0.6?'var(--red)':(r.rate<0.8?'var(--amber)':'var(--green)');
+      html += `<div class="ai-diag-row"><span>${r.s}</span><span style="color:${color};font-weight:700;">${Math.round(r.rate*100)}% <span class="muted" style="font-weight:400;">(${r.totalCount}문제)</span></span></div>`;
+    });
+    const weakest = rows[0];
+    if(weakest){
+      html += `<div class="ai-diag-note"><b>${weakest.s}</b> 과목이 가장 약해요 (정답률 ${Math.round(weakest.rate*100)}%). 홈 화면에서 소과목 필터를 <b>${weakest.s}</b>로 걸어 집중적으로 반복하고, 모의고사 응시 후엔 "오답만 다시 풀기"로 복습하는 걸 추천해요.</div>`;
+    }
+    box.innerHTML = html;
   }
 };
 
