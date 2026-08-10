@@ -129,6 +129,8 @@ button{font-family:inherit;}
 .fc-icon-btn{background:none;border:1px solid var(--line);border-radius:8px;color:var(--muted);
   font-size:13px;padding:5px 9px;cursor:pointer;}
 .fc-icon-btn.active{color:var(--amber);border-color:var(--amber);}
+.fc-weak-btn{width:100%;margin-bottom:10px;}
+.fc-weak-btn.active{background:var(--amber);color:#1a1200;border-color:var(--amber);font-weight:700;}
 
 /* ===== 설정 화면 인라인 아코디언(온보딩 스타일 재사용) ===== */
 .set-streak{background:var(--surface);border:1px solid var(--line);border-radius:14px;
@@ -221,6 +223,10 @@ button{font-family:inherit;}
 .res-score .num.warn{color:var(--amber);}
 .res-score .num.fail{color:var(--red);}
 .res-score .lbl{color:var(--muted);font-size:13px;margin-top:4px;}
+.trend-box{margin-bottom:16px;}
+.trend-title{font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600;}
+.trend-svg{width:100%;height:110px;display:block;}
+.trend-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px;text-align:center;}
 .res-pass-tag{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;margin-bottom:6px;}
 .res-pass-tag.pass{background:rgba(62,209,126,.15);color:var(--green);}
 .res-pass-tag.warn{background:rgba(244,201,74,.15);color:var(--amber);}
@@ -397,6 +403,7 @@ button{font-family:inherit;}
         <select id="fcFilterSubj" onchange="Home.applyFilter()"></select>
         <select id="fcFilterDiff" onchange="Home.applyFilter()"></select>
       </div>
+      <button class="btn ghost fc-weak-btn" id="fcWeakBtn" onclick="Home.toggleWeakMode()">🎯 약점 우선 학습</button>
       <div class="card flip-card" id="flipCardBox">
         <div class="fc-actions">
           <button class="fc-icon-btn" id="fcBookmarkBtn" onclick="Home.toggleBookmark()">☆ 즐겨찾기</button>
@@ -417,6 +424,7 @@ button{font-family:inherit;}
     <!-- 모의고사 패널 -->
     <div class="home-panel" id="homePanel-exam">
       <button class="btn primary block" style="margin-bottom:16px;" onclick="Exam.startNewClicked()">🚀 새 모의고사 시작하기</button>
+      <div id="examTrendChart" class="trend-box"></div>
       <div id="examHistList"></div>
     </div>
 
@@ -849,12 +857,13 @@ const WrongNote = {
 
 /* ---------------- 홈: 카드 넘기기 ---------------- */
 const Home = {
-  fullPool:[], pool:[], idx:0, picked:null, filterSubj:'all', filterDiff:'all', bookmarkedIds:new Set(),
+  fullPool:[], pool:[], idx:0, picked:null, filterSubj:'all', filterDiff:'all', bookmarkedIds:new Set(), weakMode:false,
   init(){
     const meta = SUBJECTS_META[App.profile.subject];
     this.fullPool = meta.data().Q;
     this.filterSubj = 'all';
     this.filterDiff = 'all';
+    this.weakMode = false;
     this.buildFilterOptions();
     this.pool = this.fullPool.slice();
     for(let i=this.pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [this.pool[i],this.pool[j]]=[this.pool[j],this.pool[i]]; }
@@ -939,6 +948,11 @@ const Home = {
     diffSel.innerHTML = '<option value="all">난이도 전체</option>' + diffs.map(d=>`<option value="${d}">난이도 ${d}</option>`).join('');
   },
   applyFilter(){
+    this.weakMode = false;
+    const wb = document.getElementById('fcWeakBtn');
+    if(wb){ wb.classList.remove('active'); wb.textContent = '🎯 약점 우선 학습'; }
+    document.getElementById('fcFilterSubj').disabled = false;
+    document.getElementById('fcFilterDiff').disabled = false;
     this.filterSubj = document.getElementById('fcFilterSubj').value;
     this.filterDiff = document.getElementById('fcFilterDiff').value;
     this.pool = this.fullPool.filter(q=>
@@ -953,6 +967,43 @@ const Home = {
     this.idx = 0;
     this.render();
     this._save();
+  },
+  toggleWeakMode(){
+    this.weakMode = !this.weakMode;
+    const btn = document.getElementById('fcWeakBtn');
+    btn.classList.toggle('active', this.weakMode);
+    btn.textContent = this.weakMode ? '🎯 약점 우선 학습 (ON)' : '🎯 약점 우선 학습';
+    document.getElementById('fcFilterSubj').disabled = this.weakMode;
+    document.getElementById('fcFilterDiff').disabled = this.weakMode;
+    if(this.weakMode) this.buildWeakPool();
+    else this.applyFilter();
+  },
+  buildWeakPool(){
+    const stats = LS_get('eh_card_stats_'+App.profile.subject, {});
+    const rateOf = (s)=>{
+      const st = stats[s];
+      if(!st || st.total < 3) return 0.5;
+      return st.correct / st.total;
+    };
+    const groups = {};
+    this.fullPool.forEach(q=>{ (groups[q.s] = groups[q.s]||[]).push(q); });
+    const order = Object.keys(groups).sort((a,b)=>rateOf(a)-rateOf(b));
+    let pool = [];
+    order.forEach(s=>{
+      const arr = groups[s].slice();
+      for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+      pool = pool.concat(arr);
+    });
+    this.pool = pool;
+    this.idx = 0;
+    this.render();
+    this._save();
+    if(order.length){
+      const worst = order[0];
+      const st = stats[worst];
+      const label = (!st || st.total<3) ? '데이터가 아직 부족한 소주제부터' : `정답률 ${Math.round((st.correct/st.total)*100)}%인 소주제부터`;
+      alert('🎯 약점 우선 모드: "'+worst+'" '+label+' 보여드릴게요.');
+    }
   },
   render(){
     const q = this.pool[this.idx];
@@ -1009,6 +1060,7 @@ const Exam = {
     const subj = App.profile.subject;
     const hist = LS_get('eh_exam_history_'+subj, []);
     const box = document.getElementById('examHistList');
+    this.renderTrendChart(hist);
     if(hist.length===0){ box.innerHTML = '<div class="empty">아직 응시한 모의고사가 없어요.<br>위 버튼으로 첫 회차를 시작해보세요.</div>'; return; }
     box.innerHTML = hist.slice().reverse().map((h)=>{
       const realIdx = hist.length-1-hist.slice().reverse().indexOf(h); // 원본 인덱스 복원용 아래서 재계산
@@ -1058,6 +1110,36 @@ const Exam = {
         }
       });
     }
+  },
+  renderTrendChart(hist){
+    const box = document.getElementById('examTrendChart');
+    if(!box) return;
+    if(!hist || hist.length < 2){ box.innerHTML=''; return; }
+    const recent = hist.slice(-10);
+    const W = 320, H = 110, PAD = 26;
+    const n = recent.length;
+    const stepX = n>1 ? (W-PAD*2)/(n-1) : 0;
+    const PASS_LINE = 60, WARN_LINE = 50;
+    const yOf = pct => (H-PAD) - (pct/100)*(H-PAD*2);
+    const pts = recent.map((h,i)=>{
+      const pct = Math.round((h.correct/h.total)*100);
+      return { x: PAD+stepX*i, y: yOf(pct), pct, round: h.round };
+    });
+    const pathD = pts.map((p,i)=> (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+    const dots = pts.map(p=>{
+      const color = p.pct>=PASS_LINE ? 'var(--green)' : (p.pct>=WARN_LINE ? 'var(--amber)' : 'var(--red)');
+      return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${color}"/>`;
+    }).join('');
+    const passY = yOf(PASS_LINE).toFixed(1);
+    box.innerHTML = `
+      <div class="trend-title">📈 점수 추이 (최근 ${n}회)</div>
+      <svg viewBox="0 0 ${W} ${H}" class="trend-svg" preserveAspectRatio="none">
+        <line x1="${PAD}" y1="${passY}" x2="${W-PAD}" y2="${passY}" stroke="var(--green)" stroke-dasharray="4,4" stroke-width="1" opacity="0.5"/>
+        <path d="${pathD}" fill="none" stroke="var(--cyan)" stroke-width="2"/>
+        ${dots}
+      </svg>
+      <div class="trend-labels">${pts.map(p=>`<span>${p.round}회<br>${p.pct}점</span>`).join('')}</div>
+    `;
   },
   toggleCard(i){
     const body = document.getElementById('ehBody-'+i);
