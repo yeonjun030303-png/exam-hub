@@ -219,6 +219,26 @@ io.on('connection', (socket) => {
     } catch (e) { console.error(e); cb && cb({ success: false }); }
   });
 
+  /* ---------------- 카드 학습 정답률 통계(소과목별, AI진단용) ---------------- */
+  // data: { subject, subjectKey, isCorrect }  — 문제 하나 풀 때마다 소과목별 정답/전체 카운트를 1씩 누적
+  socket.on('cardStats:save', async (data, cb) => {
+    try {
+      const { subject, subjectKey, isCorrect } = data || {};
+      if (!subject || !subjectKey) return cb && cb({ success: false });
+      const ref = db.ref(`users/${uid}/cardStats/${subject}/${subjectKey}`);
+      const updates = { total: admin.database.ServerValue.increment(1) };
+      if (isCorrect) updates.correct = admin.database.ServerValue.increment(1);
+      await ref.update(updates);
+      cb && cb({ success: true });
+    } catch (e) { console.error(e); cb && cb({ success: false }); }
+  });
+  socket.on('cardStats:get', async (data, cb) => {
+    try {
+      const snap = await db.ref(`users/${uid}/cardStats/${(data && data.subject) || ''}`).once('value');
+      cb && cb({ success: true, stats: snap.val() || {} });
+    } catch (e) { console.error(e); cb && cb({ success: false }); }
+  });
+
   /* ---------------- 모의고사 진행 중 상태(자동저장) ---------------- */
   // state: { round, pool:[questionId...], answers:{questionId:answerIndex}, currentIndex, remainingSeconds }
   socket.on('examProgress:save', async (data, cb) => {

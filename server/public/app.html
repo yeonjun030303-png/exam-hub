@@ -583,6 +583,8 @@ button{font-family:inherit;}
 <script src="/socket.io/socket.io.js"></script>
 <script src="storage-shim.js"></script>
 <script src="emt2-data.js"></script>
+<script src="comp2-data.js"></script>
+<script src="hsk4-data.js"></script>
 <script>
 /* =========================================================
    학습 카드 허브 v2 — 화면 구성 프로토타입
@@ -591,8 +593,9 @@ button{font-family:inherit;}
 ========================================================= */
 
 const SUBJECTS_META = {
-  emt2:  {label:'응급구조사 2급', data:()=>window.EMT2_DATA, subjectCounts:{총론:20,환자관리:20,법령:20,각론:60,장비:20}, timeLimitMin:150}
-  // hsk4, comp2는 추후 동일 구조로 연결
+  emt2:  {label:'응급구조사 2급', data:()=>window.EMT2_DATA, subjectCounts:{총론:20,환자관리:20,법령:20,각론:60,장비:20}, timeLimitMin:150},
+  comp2: {label:'컴활 2급 필기', data:()=>window.COMP2_DATA, subjectCounts:{'1과목':20,'2과목':20}, timeLimitMin:40},
+  hsk4:  {label:'HSK 4급', data:()=>window.HSK4_DATA, subjectCounts:{'인물·직업':13,'일상생활':13,'감정·성격':13,'학교·업무':13,'자연·시간·수량':12,'여행·쇼핑':12,'문법포인트':12,'듣기·독해 표현':12}, timeLimitMin:100}
 };
 
 function LS_get(key, def){ try{ const v = localStorage.getItem(key); return v?JSON.parse(v):def; }catch(e){ return def; } }
@@ -609,8 +612,7 @@ const OB = {
     const grid = document.getElementById('obSubjGrid');
     grid.innerHTML = Object.keys(SUBJECTS_META).map(k=>
       `<button class="ob-opt" data-s="${k}" onclick="OB.pickSubject('${k}')">${SUBJECTS_META[k].label}</button>`
-    ).join('') + `<button class="ob-opt" data-s="hsk4" onclick="OB.pickSubject('hsk4')">HSK 4급 (준비중)</button>
-     <button class="ob-opt" data-s="comp2" onclick="OB.pickSubject('comp2')">컴활 2급 (준비중)</button>`;
+    ).join('');
 
     const profile = LS_get('eh_profile', null);
     if(profile && profile.done){
@@ -649,7 +651,6 @@ const OB = {
     if(!isOpen){ panel.classList.add('open'); head.classList.add('open'); }
   },
   pickSubject(key){
-    if(key==='hsk4' || key==='comp2'){ alert('이 과목은 아직 준비 중이에요. 곧 연결할게요!'); return; }
     this.tmpSubject = key;
     document.querySelectorAll('#obSubjGrid .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.s===key));
   },
@@ -815,6 +816,12 @@ const Home = {
         this.bookmarkedIds = new Set((res && res.questionIds) || []);
         this.updateBookmarkBtn();
       });
+      // 카드 정답률 통계를 서버 기준으로 동기화(기기 변경 시 초기화 방지)
+      socket.emit('cardStats:get', { subject: App.profile.subject }, (res)=>{
+        if(res && res.success && res.stats && Object.keys(res.stats).length){
+          LS_set('eh_card_stats_'+App.profile.subject, res.stats);
+        }
+      });
     }
   },
   updateBookmarkBtn(){
@@ -852,6 +859,9 @@ const Home = {
     stats[q.s].total++;
     if(isCorrect) stats[q.s].correct++;
     LS_set(key, stats);
+    if(window.socket){
+      socket.emit('cardStats:save', { subject: App.profile.subject, subjectKey: q.s, isCorrect: !!isCorrect });
+    }
   },
   buildFilterOptions(){
     const subjs = Array.from(new Set(this.fullPool.map(q=>q.s)));
@@ -1410,8 +1420,7 @@ const SettingsOB = {
     const grid = document.getElementById('setSubjGrid');
     grid.innerHTML = Object.keys(SUBJECTS_META).map(k=>
       `<button class="ob-opt${k===App.profile.subject?' active':''}" data-s="${k}" onclick="SettingsOB.pickSubject('${k}')">${SUBJECTS_META[k].label}</button>`
-    ).join('') + `<button class="ob-opt" data-s="hsk4" onclick="SettingsOB.pickSubject('hsk4')">HSK 4급 (준비중)</button>
-     <button class="ob-opt" data-s="comp2" onclick="SettingsOB.pickSubject('comp2')">컴활 2급 (준비중)</button>`;
+    ).join('');
     document.querySelectorAll('.ob-goal-row .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.g===App.profile.goalType));
     document.getElementById('setGoalNum').value = App.profile.goalNum || 20;
     // 모든 패널 닫기
@@ -1430,7 +1439,6 @@ const SettingsOB = {
     }
   },
   pickSubject(key){
-    if(key==='hsk4' || key==='comp2'){ alert('이 자격증은 아직 준비 중이에요. 곧 연결할게요!'); return; }
     App.profile.subject = key;
     App.profile.subjectLabel = SUBJECTS_META[key].label;
     LS_set('eh_profile', App.profile);

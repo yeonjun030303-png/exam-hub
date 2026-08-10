@@ -1,2 +1,6 @@
 .env
 node_modules/
+public/edit_*.py
+public/patch*.py
+public/insert_patch*.py
+env
