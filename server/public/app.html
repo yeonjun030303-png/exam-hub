@@ -251,6 +251,8 @@ button{font-family:inherit;}
 .qd-explain{margin-top:14px;background:var(--surface);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:13px 14px;font-size:13px;line-height:1.65;}
 .qd-explain .lbl{color:var(--cyan);font-weight:700;font-size:11.5px;display:block;margin-bottom:4px;}
+.qd-killtrend{margin-top:10px;background:rgba(232,184,75,.12);border-left:3px solid var(--amber,#F4C94A);
+  border-radius:0 12px 12px 0;padding:11px 14px;font-size:12.5px;line-height:1.55;color:var(--text);}
 .qd-swipe{position:fixed;top:0;bottom:0;width:15%;z-index:5;background:transparent;}
 .qd-swipe.left{left:0;} .qd-swipe.right{right:0;}
 .qd-hint{position:fixed;bottom:16px;left:0;right:0;text-align:center;color:var(--muted);font-size:11px;}
@@ -547,6 +549,7 @@ button{font-family:inherit;}
       <span class="lbl">해설</span>
       <div id="qdExplain"></div>
     </div>
+    <div class="qd-killtrend" id="qdKillTrend" style="display:none;"></div>
   </div>
   <div class="qd-hint">‹ 왼쪽 = 이전 문제 · 오른쪽 = 다음 문제 ›</div>
 </div>
@@ -1374,6 +1377,23 @@ const QDetail = {
       optsBox.appendChild(div);
     });
     document.getElementById('qdExplain').textContent = q.e + (q.r ? `  [${q.r}]` : '');
+    this._loadKillTrend(q);
+  },
+  _loadKillTrend(q){
+    const box = document.getElementById('qdKillTrend');
+    box.style.display = 'none';
+    box.textContent = '';
+    if(!window.socket || !q.id) return;
+    socket.emit('questionStats:get', { subject: App.profile.subject, questionIds: [q.id] }, (res)=>{
+      if(!res || !res.success) return;
+      const stat = res.stats && res.stats[q.id];
+      if(!stat) return; // 표본(10회) 미만이면 서버가 null 반환 — 표시 안 함
+      const wrongPct = Math.round((1 - stat.correctRate) * 100);
+      if(wrongPct < 30) return; // 다들 잘 맞히는 문제는 코멘트 생략
+      const tag = wrongPct >= 60 ? '🔥 킬포인트 문제예요' : '📊 다들 헷갈려하는 문제예요';
+      box.textContent = `${tag} — 지금까지 이 문제를 푼 학습자 중 ${wrongPct}%가 틀렸어요 (${stat.attempts}명 응시)`;
+      box.style.display = 'block';
+    });
   },
   go(dir){
     if(this.mode==='custom'){
