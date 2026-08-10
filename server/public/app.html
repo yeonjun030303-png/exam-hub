@@ -81,6 +81,27 @@ button{font-family:inherit;}
 .navbtn .ic{font-size:19px;}
 .navbtn.active{color:var(--cyan);}
 
+/* ===== 공통 뒤로가기 상단바 ===== */
+.topbar{position:sticky;top:0;z-index:140;display:none;align-items:center;
+  margin:0 -14px 12px;padding:8px 14px;background:var(--bg);}
+.topbar.show{display:flex;}
+.topbar-back{width:34px;height:34px;border-radius:50%;background:var(--surface);
+  border:1px solid var(--line);color:var(--text);font-size:16px;display:flex;
+  align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;}
+
+/* ===== 이어하기 배너 ===== */
+.resume-banner{background:var(--cyan-dim);border:1px solid var(--cyan);color:var(--cyan);
+  border-radius:12px;padding:12px 14px;font-size:13px;font-weight:700;margin-bottom:14px;
+  cursor:pointer;display:none;}
+
+/* ===== 홈 가로 탭(아코디언) ===== */
+.home-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.home-tab{flex:1;padding:11px 4px;border-radius:12px;border:1px solid var(--line);
+  background:var(--surface);color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;}
+.home-tab.active{border-color:var(--cyan);background:var(--cyan-dim);color:var(--cyan);}
+.home-panel{display:none;}
+.home-panel.show{display:block;}
+
 /* ===== 뷰 공통 ===== */
 .view{display:none;}
 .view.show{display:block;}
@@ -335,38 +356,58 @@ button{font-family:inherit;}
 <!-- ================= 메인 앱 ================= -->
 <div class="wrap">
 
+  <div class="topbar" id="topbar"><button class="topbar-back" onclick="Nav.back()">←</button></div>
+
   <!-- 홈 -->
   <div class="view" id="view-home">
     <div class="pagehead" style="display:flex;justify-content:space-between;align-items:center;">
       <span id="homeSubjTitle">홈</span>
       <span id="homeDday" style="color:var(--cyan);font-size:13px;font-weight:800;"></span>
     </div>
-    <div class="fc-filter">
-      <select id="fcFilterSubj" onchange="Home.applyFilter()"></select>
-      <select id="fcFilterDiff" onchange="Home.applyFilter()"></select>
-    </div>
-    <div class="card flip-card" id="flipCardBox">
-      <div class="fc-actions">
-        <button class="fc-icon-btn" id="fcBookmarkBtn" onclick="Home.toggleBookmark()">☆ 즐겨찾기</button>
-        <button class="fc-icon-btn" onclick="Home.reportQuestion()">🚩 오류신고</button>
-      </div>
-      <div class="subj" id="fcSubj"></div>
-      <div class="qnum" id="fcNum"></div>
-      <div class="qtext" id="fcQ"></div>
-      <div class="opts" id="fcOpts"></div>
-      <div class="ans" id="fcAns"></div>
-    </div>
-    <div class="flip-nav">
-      <button class="btn ghost" onclick="Home.prev()">◀ 이전</button>
-      <button class="btn primary" onclick="Home.next()">다음 ▶</button>
-    </div>
-  </div>
 
-  <!-- 모의고사 -->
-  <div class="view" id="view-exam">
-    <div class="pagehead">모의고사</div>
-    <button class="btn primary block" style="margin-bottom:16px;" onclick="Exam.startNewClicked()">🚀 새 모의고사 시작하기</button>
-    <div id="examHistList"></div>
+    <div class="resume-banner" id="resumeBanner" onclick="Exam.startNewClicked()">
+      ▶ 이어서 풀던 모의고사가 있어요. 탭해서 이어하기
+    </div>
+
+    <div class="home-tabs">
+      <button class="home-tab active" data-t="card" onclick="HomeTabs.switch('card')">📇 카드문제</button>
+      <button class="home-tab" data-t="exam" onclick="HomeTabs.switch('exam')">📝 모의고사</button>
+      <button class="home-tab" data-t="wrong" onclick="HomeTabs.switch('wrong')">📕 오답노트</button>
+    </div>
+
+    <!-- 카드문제 패널 -->
+    <div class="home-panel show" id="homePanel-card">
+      <div class="fc-filter">
+        <select id="fcFilterSubj" onchange="Home.applyFilter()"></select>
+        <select id="fcFilterDiff" onchange="Home.applyFilter()"></select>
+      </div>
+      <div class="card flip-card" id="flipCardBox">
+        <div class="fc-actions">
+          <button class="fc-icon-btn" id="fcBookmarkBtn" onclick="Home.toggleBookmark()">☆ 즐겨찾기</button>
+          <button class="fc-icon-btn" onclick="Home.reportQuestion()">🚩 오류신고</button>
+        </div>
+        <div class="subj" id="fcSubj"></div>
+        <div class="qnum" id="fcNum"></div>
+        <div class="qtext" id="fcQ"></div>
+        <div class="opts" id="fcOpts"></div>
+        <div class="ans" id="fcAns"></div>
+      </div>
+      <div class="flip-nav">
+        <button class="btn ghost" onclick="Home.prev()">◀ 이전</button>
+        <button class="btn primary" onclick="Home.next()">다음 ▶</button>
+      </div>
+    </div>
+
+    <!-- 모의고사 패널 -->
+    <div class="home-panel" id="homePanel-exam">
+      <button class="btn primary block" style="margin-bottom:16px;" onclick="Exam.startNewClicked()">🚀 새 모의고사 시작하기</button>
+      <div id="examHistList"></div>
+    </div>
+
+    <!-- 오답노트 패널 -->
+    <div class="home-panel" id="homePanel-wrong">
+      <div id="wrongNoteList"></div>
+    </div>
   </div>
 
   <!-- 커뮤니티 -->
@@ -513,7 +554,6 @@ button{font-family:inherit;}
 <!-- 하단 네비 -->
 <div id="bottomnav">
   <button class="navbtn" data-v="home" onclick="Nav.go('home')"><span class="ic">🏠</span>홈</button>
-  <button class="navbtn" data-v="exam" onclick="Nav.go('exam')"><span class="ic">📝</span>모의고사</button>
   <button class="navbtn" data-v="community" onclick="Nav.go('community')"><span class="ic">💬</span>커뮤니티</button>
   <button class="navbtn" data-v="settings" onclick="Nav.go('settings')"><span class="ic">⚙️</span>설정</button>
 </div>
@@ -665,6 +705,7 @@ const App = {
     document.getElementById('homeDday').textContent = App.profile.examDate ? ddayText(App.profile.examDate) : '';
     Home.init();
     Nav.go('home');
+    Nav.checkResumeBanner();
     if(window.socket){
       socket.emit('profile:get', {}, (res)=>{
         if(res && res.success){ App.streakCount = res.streakCount || 1; }
@@ -680,10 +721,72 @@ const Nav = {
     document.getElementById('examResult').classList.remove('show');
     document.getElementById('view-'+v).classList.add('show');
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
-    if(v==='exam') Exam.renderList();
     if(v==='settings') SettingsOB.init();
+    if(v==='home') this.checkResumeBanner();
+    document.getElementById('topbar').classList.toggle('show', v==='settings');
   },
-  goHome(){ this.go('home'); }
+  goHome(){ this.go('home'); },
+  back(){
+    if(document.getElementById('examResult').classList.contains('show')){ ResultView.close(); return; }
+    if(document.getElementById('examTaking').classList.contains('show')){
+      this.go('home'); HomeTabs.switch('exam'); return;
+    }
+    this.go('home');
+  },
+  checkResumeBanner(){
+    const subj = App.profile && App.profile.subject;
+    if(!subj) return;
+    const prog = LS_get('eh_exam_progress_'+subj, null);
+    const banner = document.getElementById('resumeBanner');
+    const answered = prog ? Object.keys(prog.answers).length : 0;
+    banner.style.display = (prog && answered < prog.pool.length) ? 'block' : 'none';
+  }
+};
+
+const HomeTabs = {
+  current:'card',
+  switch(t){
+    this.current = t;
+    document.querySelectorAll('.home-tab').forEach(b=>b.classList.toggle('active', b.dataset.t===t));
+    document.querySelectorAll('.home-panel').forEach(p=>p.classList.remove('show'));
+    document.getElementById('homePanel-'+t).classList.add('show');
+    if(t==='exam') Exam.renderList();
+    if(t==='wrong') WrongNote.render();
+  }
+};
+
+const WrongNote = {
+  list:[],
+  render(){
+    const subj = App.profile.subject;
+    const hist = LS_get('eh_exam_history_'+subj, []);
+    const seen = new Set();
+    this.list = [];
+    for(let hi=hist.length-1; hi>=0; hi--){
+      const h = hist[hi];
+      Object.values(h.subjectBreakdown).forEach(sb=>{
+        sb.wrongPoolIdx.forEach(pi=>{
+          const q = h.poolSnapshot[pi];
+          if(!q || (q.id && seen.has(q.id))) return;
+          if(q.id) seen.add(q.id);
+          this.list.push({ q, myAns: h.answers[pi] });
+        });
+      });
+    }
+    const box = document.getElementById('wrongNoteList');
+    if(this.list.length===0){
+      box.innerHTML = '<div class="empty">아직 틀린 문제가 없어요.<br>모의고사를 풀면 오답이 여기 모여요.</div>';
+      return;
+    }
+    box.innerHTML = '';
+    this.list.forEach((item,i)=>{
+      const div = document.createElement('div');
+      div.className = 'eh-wrong-item';
+      div.innerHTML = `<span class="n">${item.q.s}</span>${item.q.q}`;
+      div.onclick = ()=>QDetail.openCustom(WrongNote.list, i);
+      box.appendChild(div);
+    });
+  }
 };
 
 /* ---------------- 홈: 카드 넘기기 ---------------- */
@@ -958,6 +1061,7 @@ const ExamTake = {
     document.getElementById('examResult').classList.remove('show');
     document.getElementById('examTaking').classList.add('show');
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('topbar').classList.add('show');
     document.getElementById('etSubj').textContent = App.profile.subjectLabel + ' 모의고사 ' + prog.round + '회차';
     this.renderJumpGrid();
     this.renderQuestion();
@@ -1108,6 +1212,7 @@ const ResultView = {
     document.getElementById('examTaking').classList.remove('show');
     document.getElementById('examResult').classList.add('show');
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('topbar').classList.add('show');
 
     document.getElementById('resScoreNum').textContent = `${h.correct}/${h.total}`;
     document.getElementById('resScoreLbl').textContent = `${h.isRetry ? '오답재도전('+h.retryOf+'회차) · ' : ''}${h.round}회차 · ${new Date(h.submittedAt).toLocaleDateString('ko-KR')}`;
@@ -1212,25 +1317,40 @@ const ResultView = {
   },
   close(){
     document.getElementById('examResult').classList.remove('show');
-    Nav.go('exam');
+    Nav.go('home');
+    HomeTabs.switch('exam');
   }
 };
 
 /* ---------------- 문제 상세 (오답노트 스타일, 좌우 스와이프) ---------------- */
 const QDetail = {
-  entryIdx:null, poolIdx:null, touchStartX:null,
+  entryIdx:null, poolIdx:null, touchStartX:null, mode:'round', customList:null, customIdx:0,
   open(entryIdx, poolIdx){
+    this.mode = 'round';
     this.entryIdx = entryIdx; this.poolIdx = poolIdx;
     document.getElementById('qDetail').classList.add('show');
     this.render();
   },
-  render(){
+  openCustom(list, idx){
+    this.mode = 'custom';
+    this.customList = list; this.customIdx = idx;
+    document.getElementById('qDetail').classList.add('show');
+    this.render();
+  },
+  _current(){
+    if(this.mode==='custom'){
+      const item = this.customList[this.customIdx];
+      return { q:item.q, myAns:item.myAns, label:`${item.q.s} · ${this.customIdx+1}/${this.customList.length}` };
+    }
     const subj = App.profile.subject;
     const hist = LS_get('eh_exam_history_'+subj, []);
     const h = hist[this.entryIdx];
     const q = h.poolSnapshot[this.poolIdx];
-    const myAns = h.answers[this.poolIdx];
-    document.getElementById('qdNum').textContent = `${q.s} · ${this.poolIdx+1}번`;
+    return { q, myAns: h.answers[this.poolIdx], label:`${q.s} · ${this.poolIdx+1}번` };
+  },
+  render(){
+    const {q, myAns, label} = this._current();
+    document.getElementById('qdNum').textContent = label;
     document.getElementById('qdQtext').textContent = q.q;
     const optsBox = document.getElementById('qdOpts');
     optsBox.innerHTML = '';
@@ -1246,6 +1366,14 @@ const QDetail = {
     document.getElementById('qdExplain').textContent = q.e + (q.r ? `  [${q.r}]` : '');
   },
   go(dir){
+    if(this.mode==='custom'){
+      let ni = this.customIdx + dir;
+      if(ni<0) ni = this.customList.length-1;
+      if(ni>=this.customList.length) ni = 0;
+      this.customIdx = ni;
+      this.render();
+      return;
+    }
     const subj = App.profile.subject;
     const hist = LS_get('eh_exam_history_'+subj, []);
     const h = hist[this.entryIdx];
