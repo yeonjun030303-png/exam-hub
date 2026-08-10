@@ -15,7 +15,7 @@ html,body{height:100%;}
 body{
   margin:0;background:radial-gradient(ellipse at top,#0F1B33 0%,var(--bg) 55%);
   color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
-  min-height:100vh;padding-bottom:calc(100px + env(safe-area-inset-bottom));
+  min-height:100vh;min-height:100dvh;padding-bottom:calc(100px + env(safe-area-inset-bottom));
 }
 .wrap{max-width:480px;margin:0 auto;padding:18px 14px 24px;}
 button{font-family:inherit;}
@@ -102,6 +102,12 @@ button{font-family:inherit;}
 .home-panel{display:none;}
 .home-panel.show{display:block;}
 
+/* ===== 오답노트 서브탭 ===== */
+.wn-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.wn-tab{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--line);
+  background:var(--surface);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;}
+.wn-tab.active{border-color:var(--cyan);background:var(--cyan-dim);color:var(--cyan);}
+
 /* ===== 뷰 공통 ===== */
 .view{display:none;}
 .view.show{display:block;}
@@ -134,10 +140,11 @@ button{font-family:inherit;}
 .ai-diag-row:last-child{border-bottom:none;}
 .ai-diag-note{margin-top:12px;padding:12px;background:var(--bg2);border-left:3px solid var(--cyan);
   border-radius:0 12px 12px 0;font-size:13px;line-height:1.6;}
+.qd-ref{margin-top:8px;color:var(--muted);font-size:12px;font-weight:600;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;}
 .flip-card .ans.show{display:block;}
-.flip-nav{display:flex;gap:8px;margin-top:14px;}
+.flip-nav{display:flex;gap:8px;margin-top:14px;position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));z-index:120;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
 .flip-nav .btn{flex:1;}
 
 /* ===== 모의고사 목록 ===== */
@@ -182,7 +189,7 @@ button{font-family:inherit;}
 .et-opt.picked{border-color:var(--cyan);background:rgba(57,216,200,.12);}
 .et-opt .num{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface2);
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);}
-.et-navrow{display:flex;gap:8px;margin:14px 0;}
+.et-navrow{display:flex;gap:8px;margin:14px 0;position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));z-index:120;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
 .et-navrow .btn{flex:1;}
 .et-jump-toggle{width:100%;text-align:center;color:var(--muted);font-size:12px;background:none;border:none;
   cursor:pointer;padding:8px;}
@@ -210,7 +217,14 @@ button{font-family:inherit;}
 #examResult.show{display:block;}
 .res-score{text-align:center;padding:20px 0 10px;}
 .res-score .num{font-size:42px;font-weight:900;color:var(--cyan);}
+.res-score .num.pass{color:var(--green);}
+.res-score .num.warn{color:var(--amber);}
+.res-score .num.fail{color:var(--red);}
 .res-score .lbl{color:var(--muted);font-size:13px;margin-top:4px;}
+.res-pass-tag{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;margin-bottom:6px;}
+.res-pass-tag.pass{background:rgba(62,209,126,.15);color:var(--green);}
+.res-pass-tag.warn{background:rgba(244,201,74,.15);color:var(--amber);}
+.res-pass-tag.fail{background:rgba(255,76,94,.15);color:var(--red);}
 .res-section{margin-bottom:16px;}
 .res-section h3{font-size:14px;margin:0 0 8px;color:var(--cyan);}
 .weak-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
@@ -408,7 +422,12 @@ button{font-family:inherit;}
 
     <!-- 오답노트 패널 -->
     <div class="home-panel" id="homePanel-wrong">
-      <div id="wrongNoteList"></div>
+      <div class="wn-tabs">
+        <button class="wn-tab active" data-wt="card" onclick="WrongNote.switchTab('card')">📇 카드문제 오답</button>
+        <button class="wn-tab" data-wt="exam" onclick="WrongNote.switchTab('exam')">📝 모의고사 오답</button>
+      </div>
+      <div id="wrongNoteList-card"></div>
+      <div id="wrongNoteList-exam" style="display:none;"></div>
     </div>
   </div>
 
@@ -760,8 +779,43 @@ const HomeTabs = {
 };
 
 const WrongNote = {
-  list:[],
+  list:[],       // 모의고사 오답
+  cardList:[],   // 카드문제 오답
+  mode:'card',
+  switchTab(t){
+    this.mode = t;
+    document.querySelectorAll('.wn-tab').forEach(b=>b.classList.toggle('active', b.dataset.wt===t));
+    document.getElementById('wrongNoteList-card').style.display = t==='card' ? 'block' : 'none';
+    document.getElementById('wrongNoteList-exam').style.display = t==='exam' ? 'block' : 'none';
+  },
   render(){
+    this.renderCard();
+    this.renderExam();
+    this.switchTab(this.mode);
+  },
+  renderCard(){
+    const subj = App.profile.subject;
+    const raw = LS_get('eh_card_wrong_'+subj, []);
+    const pool = (Home.fullPool && Home.fullPool.length) ? Home.fullPool : SUBJECTS_META[subj].data().Q;
+    this.cardList = raw.map(item=>{
+      const q = pool.find(x=>x.id===item.qid);
+      return q ? { q, myAns: item.myAns } : null;
+    }).filter(Boolean);
+    const box = document.getElementById('wrongNoteList-card');
+    if(this.cardList.length===0){
+      box.innerHTML = '<div class="empty">아직 카드문제에서 틀린 게 없어요.<br>카드학습 중 틀리면 여기 모여요.</div>';
+      return;
+    }
+    box.innerHTML = '';
+    this.cardList.forEach((item,i)=>{
+      const div = document.createElement('div');
+      div.className = 'eh-wrong-item';
+      div.innerHTML = `<span class="n">${item.q.s}</span>${item.q.q}`;
+      div.onclick = ()=>QDetail.openCustom(WrongNote.cardList, i);
+      box.appendChild(div);
+    });
+  },
+  renderExam(){
     const subj = App.profile.subject;
     const hist = LS_get('eh_exam_history_'+subj, []);
     const seen = new Set();
@@ -777,7 +831,7 @@ const WrongNote = {
         });
       });
     }
-    const box = document.getElementById('wrongNoteList');
+    const box = document.getElementById('wrongNoteList-exam');
     if(this.list.length===0){
       box.innerHTML = '<div class="empty">아직 틀린 문제가 없어요.<br>모의고사를 풀면 오답이 여기 모여요.</div>';
       return;
@@ -802,7 +856,8 @@ const Home = {
     this.filterSubj = 'all';
     this.filterDiff = 'all';
     this.buildFilterOptions();
-    this.pool = this.fullPool;
+    this.pool = this.fullPool.slice();
+    for(let i=this.pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [this.pool[i],this.pool[j]]=[this.pool[j],this.pool[i]]; }
     this.idx = LS_get('eh_home_idx_'+App.profile.subject, 0);
     if(this.idx >= this.pool.length) this.idx = 0;
     this.render();
@@ -866,6 +921,15 @@ const Home = {
       socket.emit('cardStats:save', { subject: App.profile.subject, subjectKey: q.s, isCorrect: !!isCorrect });
     }
   },
+  _recordWrong(q, myAns){
+    if(!q.id) return;
+    const key = 'eh_card_wrong_'+App.profile.subject;
+    let list = LS_get(key, []);
+    list = list.filter(item=>item.qid !== q.id);
+    list.unshift({ qid:q.id, myAns, wrongAt:Date.now() });
+    if(list.length>200) list = list.slice(0,200);
+    LS_set(key, list);
+  },
   buildFilterOptions(){
     const subjs = Array.from(new Set(this.fullPool.map(q=>q.s)));
     const diffs = Array.from(new Set(this.fullPool.map(q=>q.d))).sort((a,b)=>a-b);
@@ -882,9 +946,10 @@ const Home = {
       (this.filterDiff==='all' || String(q.d)===this.filterDiff)
     );
     if(this.pool.length===0){
-      this.pool = this.fullPool;
+      this.pool = this.fullPool.slice();
       alert('해당 조건의 문제가 없어 전체로 표시할게요.');
     }
+    for(let i=this.pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [this.pool[i],this.pool[j]]=[this.pool[j],this.pool[i]]; }
     this.idx = 0;
     this.render();
     this._save();
@@ -897,11 +962,14 @@ const Home = {
     this.picked = null;
     const optsBox = document.getElementById('fcOpts');
     optsBox.innerHTML = '';
-    q.o.forEach((opt,i)=>{
+    const order = q.o.map((_,idx)=>idx);
+    for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+    this.currentOrder = order;
+    order.forEach((oi,j)=>{
       const div = document.createElement('div');
       div.className = 'qd-opt';
-      div.innerHTML = `<b>${i+1}.</b> ${opt}`;
-      div.onclick = ()=>this.pick(i);
+      div.innerHTML = `<b>${j+1}.</b> ${q.o[oi]}`;
+      div.onclick = ()=>this.pick(oi);
       optsBox.appendChild(div);
     });
     const ansBox = document.getElementById('fcAns');
@@ -914,15 +982,18 @@ const Home = {
     this.picked = i;
     const q = this.pool[this.idx];
     const optsBox = document.getElementById('fcOpts');
-    Array.from(optsBox.children).forEach((div,idx)=>{
+    const order = this.currentOrder || q.o.map((_,idx)=>idx);
+    Array.from(optsBox.children).forEach((div,j)=>{
+      const oi = order[j];
       div.onclick = null;
-      if(idx === q.a) div.classList.add('correct-ans');
-      else if(idx === i) div.classList.add('mine-wrong');
+      if(oi === q.a) div.classList.add('correct-ans');
+      else if(oi === i) div.classList.add('mine-wrong');
     });
     const ansBox = document.getElementById('fcAns');
-    ansBox.innerHTML = `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}`;
+    ansBox.innerHTML = `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}` + (q.r ? `<div class="qd-ref">[${q.r}]</div>` : '');
     ansBox.classList.add('show');
     this._recordStat(q, i===q.a);
+    if(i!==q.a) this._recordWrong(q, i);
   },
   next(){ this.idx = (this.idx+1) % this.pool.length; this._save(); this.render(); },
   prev(){ this.idx = (this.idx-1+this.pool.length) % this.pool.length; this._save(); this.render(); },
@@ -1049,11 +1120,17 @@ const Exam = {
       for(let i=cands.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cands[i],cands[j]]=[cands[j],cands[i]]; }
       pool.push(...cands.slice(0,cnt));
     });
+    const optOrders = pool.map(q=>{
+      const ord = q.o.map((_,idx)=>idx);
+      for(let i=ord.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ord[i],ord[j]]=[ord[j],ord[i]]; }
+      return ord;
+    });
     const hist = LS_get('eh_exam_history_'+subj, []);
     const prog = {
       round: hist.length+1,
       pool: pool, // 문제 원본 객체 스냅샷(고정)
-      answers: {}, // {poolIdx: optionIdx}
+      optOrders: optOrders, // 문제별 보기 표시 순서(문제당 1회 랜덤 고정)
+      answers: {}, // {poolIdx: optionIdx(원본 인덱스)}
       current: 0,
       startedAt: Date.now(),
       timeLimitSec: meta.timeLimitMin*60,
@@ -1084,11 +1161,12 @@ const ExamTake = {
       if(e.key==='Enter'){ e.preventDefault(); this.next(); }
       if(e.key==='Backspace'){ e.preventDefault(); this.prev(); }
       if(e.key>='1' && e.key<='9'){
-        const idx = parseInt(e.key,10)-1;
+        const j = parseInt(e.key,10)-1;
         const q = this.prog.pool[this.prog.current];
-        if(idx < q.o.length){
+        const order = (this.prog.optOrders && this.prog.optOrders[this.prog.current]) || q.o.map((_,idx)=>idx);
+        if(j < order.length){
           e.preventDefault();
-          this.prog.answers[this.prog.current] = idx;
+          this.prog.answers[this.prog.current] = order[j];
           this.save();
           this.renderQuestion();
           this.renderJumpGrid();
@@ -1123,12 +1201,14 @@ const ExamTake = {
     document.getElementById('etQtext').textContent = q.q;
     const optsBox = document.getElementById('etOpts');
     optsBox.innerHTML = '';
-    q.o.forEach((opt,i)=>{
-      const picked = p.answers[p.current]===i;
+    const order = (p.optOrders && p.optOrders[p.current]) || q.o.map((_,idx)=>idx);
+    order.forEach((oi,j)=>{
+      const opt = q.o[oi];
+      const picked = p.answers[p.current]===oi;
       const div = document.createElement('div');
       div.className = 'et-opt' + (picked?' picked':'');
-      div.innerHTML = `<span class="num">${i+1}</span><span>${opt}</span>`;
-      div.onclick = ()=>{ p.answers[p.current]=i; this.save(); this.renderQuestion(); this.renderJumpGrid(); };
+      div.innerHTML = `<span class="num">${j+1}</span><span>${opt}</span>`;
+      div.onclick = ()=>{ p.answers[p.current]=oi; this.save(); this.renderQuestion(); this.renderJumpGrid(); };
       optsBox.appendChild(div);
     });
     const answeredCount = Object.keys(p.answers).length;
@@ -1227,8 +1307,19 @@ const ResultView = {
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
     document.getElementById('topbar').classList.add('show');
 
-    document.getElementById('resScoreNum').textContent = `${h.correct}/${h.total}`;
-    document.getElementById('resScoreLbl').textContent = `${h.isRetry ? '오답재도전('+h.retryOf+'회차) · ' : ''}${h.round}회차 · ${new Date(h.submittedAt).toLocaleDateString('ko-KR')}`;
+    // 100점 만점 환산. 합격 기준: 60점 이상 합격 / 50~59점 간당간당 / 50점 미만 불합격
+    // (과목별 실제 합격 기준이 다르면 이 두 숫자만 바꾸면 됨)
+    const PASS_LINE = 60, WARN_LINE = 50;
+    const pct = Math.round((h.correct / h.total) * 100);
+    const grade = pct >= PASS_LINE ? 'pass' : (pct >= WARN_LINE ? 'warn' : 'fail');
+    const gradeTag = { pass:'✅ 합격 기준 통과', warn:'⚠️ 간당간당해요', fail:'❌ 합격 기준 미달' }[grade];
+    const scoreNumEl = document.getElementById('resScoreNum');
+    scoreNumEl.textContent = `${pct}점`;
+    scoreNumEl.classList.remove('pass','warn','fail');
+    scoreNumEl.classList.add(grade);
+    document.getElementById('resScoreLbl').innerHTML =
+      `<span class="res-pass-tag ${grade}">${gradeTag}</span><br>`+
+      `${h.isRetry ? '오답재도전('+h.retryOf+'회차) · ' : ''}${h.round}회차 · ${new Date(h.submittedAt).toLocaleDateString('ko-KR')} (${h.correct}/${h.total}문제 정답)`;
 
     // 약점 분석: 과목별 정답률이 가장 낮은 곳 + 그 과목 내 오답이 몰린 출처(r) 태그
     const weakBox = document.getElementById('resWeak');
