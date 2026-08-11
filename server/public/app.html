@@ -1209,7 +1209,7 @@ const Home = {
     const subjSel = document.getElementById('fcFilterSubj');
     subjSel.innerHTML = '<option value="all">소과목 전체</option>' + subjs.map(s=>`<option value="${s}">${s}</option>`).join('');
     const diffSel = document.getElementById('fcFilterDiff');
-    diffSel.innerHTML = '<option value="all">난이도 전체</option>' + diffs.map(d=>`<option value="${d}">난이도 ${d}</option>`).join('');
+    diffSel.innerHTML = '<option value="all">난이도 전체</option>' + diffs.map(d=>`<option value="${d}">난이도 ${d}</option>`).join('') + '<option value="past">📌 기출문제만</option>';
   },
   applyFilter(){
     this.weakMode = false;
@@ -1221,7 +1221,7 @@ const Home = {
     this.filterDiff = document.getElementById('fcFilterDiff').value;
     this.pool = this.fullPool.filter(q=>
       (this.filterSubj==='all' || q.s===this.filterSubj) &&
-      (this.filterDiff==='all' || String(q.d)===this.filterDiff)
+      (this.filterDiff==='all' || (this.filterDiff==='past' ? (q.r && q.r.indexOf('기출문제')>=0) : String(q.d)===this.filterDiff))
     );
     if(this.pool.length===0){
       this.pool = this.fullPool.slice();
