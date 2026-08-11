@@ -110,6 +110,16 @@ button{font-family:inherit;}
   border:1px solid var(--line);color:var(--text);font-size:16px;display:flex;
   align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;}
 
+/* ===== v28: 전역 뒤로가기 안전망 버튼(어느 화면이든 항상 뒤로갈 길 보장) ===== */
+#globalBackBtn{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom));
+  z-index:200;width:46px;height:46px;border-radius:50%;background:var(--surface);
+  border:1px solid var(--line);color:var(--text);font-size:19px;display:none;
+  align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4);}
+#globalBackBtn.show{display:flex;}
+
+/* ===== v28: 오답노트 주제(소주제) 아코디언 ===== */
+.wn-subj-total{font-size:12px;color:var(--muted);font-weight:600;}
+
 /* ===== 이어하기 배너 ===== */
 .resume-banner{background:var(--cyan-dim);border:1px solid var(--cyan);color:var(--cyan);
   border-radius:12px;padding:12px 14px;font-size:13px;font-weight:700;margin-bottom:14px;
@@ -426,6 +436,7 @@ button{font-family:inherit;}
 <div class="wrap">
 
   <div class="topbar" id="topbar"><button class="topbar-back" onclick="Nav.back()">←</button></div>
+  <button id="globalBackBtn" onclick="GlobalBack.go()" aria-label="뒤로가기">←</button>
 
   <!-- 홈 -->
   <div class="view" id="view-home">
@@ -676,6 +687,25 @@ button{font-family:inherit;}
   </div>
 </div>
 
+<!-- v28: 모의고사 응시 방식 선택 모달 -->
+<div class="modal" id="examModeModal">
+  <div class="modal-box">
+    <div class="modal-msg">어떤 방식으로 풀어볼까요?</div>
+    <button class="btn primary block" style="margin-bottom:8px;" onclick="Exam.pickRandomMode()">🎲 랜덤으로 풀기</button>
+    <button class="btn ghost block" onclick="Exam.pickRoundMode()">📚 회차별로 풀기</button>
+    <button class="btn ghost block" style="margin-top:10px;" onclick="Exam.closeModePicker()">취소</button>
+  </div>
+</div>
+
+<!-- v28: 회차 선택 모달 -->
+<div class="modal" id="roundPickerModal">
+  <div class="modal-box">
+    <div class="modal-msg">몇 회차를 풀어볼까요?</div>
+    <div id="roundPickerList" style="max-height:300px;overflow-y:auto;"></div>
+    <button class="btn ghost block" style="margin-top:10px;" onclick="Exam.closeRoundPicker()">취소</button>
+  </div>
+</div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="storage-shim.js"></script>
 <script src="emt2-data.js"></script>
@@ -893,6 +923,7 @@ const Nav = {
     if(v==='settings') SettingsOB.init();
     if(v==='home') this.checkResumeBanner();
     document.getElementById('topbar').classList.toggle('show', v==='settings');
+    if(window.GlobalBack) GlobalBack.refresh();
   },
   goHome(){ this.go('home'); },
   back(){
@@ -921,12 +952,13 @@ const HomeTabs = {
     document.getElementById('homePanel-'+t).classList.add('show');
     if(t==='exam') Exam.renderList();
     if(t==='wrong') WrongNote.render();
+    if(window.GlobalBack) GlobalBack.refresh();
   }
 };
 
 const WrongNote = {
-  list:[],       // 모의고사 오답
-  cardList:[],   // 카드문제 오답
+  list:[],       // 모의고사 오답(원본 순서 고정 — QDetail 좌우 넘기기 기준)
+  cardList:[],   // 카드문제 오답(원본 순서 고정)
   mode:'card',
   switchTab(t){
     this.mode = t;
@@ -938,6 +970,76 @@ const WrongNote = {
     this.renderCard();
     this.renderExam();
     this.switchTab(this.mode);
+  },
+  // items/flatList: [{q, myAns}] — 과목(s) → 주제(r) 순으로 묶어서 2단 아코디언으로 렌더링.
+  // flatList 안의 원본 인덱스(flatIdx)를 그대로 유지해서 QDetail 좌우 넘기기가 전체 오답 범위를 유지하게 함.
+  _renderGrouped(box, items, flatList){
+    if(items.length===0){
+      box.innerHTML = '<div class="empty">아직 틀린 문제가 없어요.</div>';
+      return;
+    }
+    const bySubj = {};
+    items.forEach((item, flatIdx)=>{
+      const s = item.q.s || '기타';
+      const r = item.q.r || '기타';
+      bySubj[s] = bySubj[s] || {};
+      bySubj[s][r] = bySubj[s][r] || [];
+      bySubj[s][r].push({ q: item.q, myAns: item.myAns, flatIdx });
+    });
+    box.innerHTML = '';
+    Object.keys(bySubj).forEach((sname, si)=>{
+      const topics = bySubj[sname];
+      const subjTotal = Object.values(topics).reduce((n,arr)=>n+arr.length,0);
+      const card = document.createElement('div');
+      card.className = 'exam-hist-card';
+
+      const top = document.createElement('div');
+      top.className = 'eh-top';
+      const subjChevId = `wnSubjChev-${box.id}-${si}`;
+      top.innerHTML = `<div><div class="eh-round">과목</div><div class="eh-score" style="font-size:15px;">${sname}</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="wn-subj-total">${subjTotal}문제</span>
+          <span class="eh-chev" id="${subjChevId}">▾</span>
+        </div>`;
+
+      const body = document.createElement('div');
+      body.className = 'eh-body';
+      top.onclick = ()=>{
+        body.classList.toggle('open');
+        document.getElementById(subjChevId).classList.toggle('open');
+      };
+
+      Object.keys(topics).forEach((tname, ti)=>{
+        const qs = topics[tname];
+        const row = document.createElement('div');
+        row.className = 'eh-subj-row';
+        const topicChevId = `wnTopicChev-${box.id}-${si}-${ti}`;
+        row.innerHTML = `<div class="eh-subj-name">${tname}</div>
+          <div class="eh-subj-score">${qs.length}문제 <span class="eh-chev" id="${topicChevId}">▾</span></div>`;
+
+        const list = document.createElement('div');
+        list.className = 'eh-wrong-list';
+        row.onclick = ()=>{
+          list.classList.toggle('open');
+          document.getElementById(topicChevId).classList.toggle('open');
+        };
+
+        qs.forEach(item=>{
+          const div = document.createElement('div');
+          div.className = 'eh-wrong-item';
+          div.textContent = item.q.q;
+          div.onclick = (e)=>{ e.stopPropagation(); QDetail.openCustom(flatList, item.flatIdx); };
+          list.appendChild(div);
+        });
+
+        body.appendChild(row);
+        body.appendChild(list);
+      });
+
+      card.appendChild(top);
+      card.appendChild(body);
+      box.appendChild(card);
+    });
   },
   renderCard(){
     const subj = App.profile.subject;
@@ -952,14 +1054,7 @@ const WrongNote = {
       box.innerHTML = '<div class="empty">아직 카드문제에서 틀린 게 없어요.<br>카드학습 중 틀리면 여기 모여요.</div>';
       return;
     }
-    box.innerHTML = '';
-    this.cardList.forEach((item,i)=>{
-      const div = document.createElement('div');
-      div.className = 'eh-wrong-item';
-      div.innerHTML = `<span class="n">${item.q.s}</span>${item.q.q}`;
-      div.onclick = ()=>QDetail.openCustom(WrongNote.cardList, i);
-      box.appendChild(div);
-    });
+    this._renderGrouped(box, this.cardList, this.cardList);
   },
   renderExam(){
     const subj = App.profile.subject;
@@ -982,14 +1077,33 @@ const WrongNote = {
       box.innerHTML = '<div class="empty">아직 틀린 문제가 없어요.<br>모의고사를 풀면 오답이 여기 모여요.</div>';
       return;
     }
-    box.innerHTML = '';
-    this.list.forEach((item,i)=>{
-      const div = document.createElement('div');
-      div.className = 'eh-wrong-item';
-      div.innerHTML = `<span class="n">${item.q.s}</span>${item.q.q}`;
-      div.onclick = ()=>QDetail.openCustom(WrongNote.list, i);
-      box.appendChild(div);
-    });
+    this._renderGrouped(box, this.list, this.list);
+  }
+};
+
+/* ---------------- v28: 전역 뒤로가기 안전망 ---------------- */
+const GlobalBack = {
+  go(){
+    if(document.getElementById('qDetail').classList.contains('show')){ QDetail.close(); return; }
+    if(document.getElementById('aiDiagChat').classList.contains('show')){ AiDiagChat.close(); return; }
+    if(document.getElementById('examResult').classList.contains('show')){ ResultView.close(); return; }
+    if(document.getElementById('examTaking').classList.contains('show')){ Nav.back(); return; }
+    if(document.getElementById('view-home').classList.contains('show') && HomeTabs.current==='wrong'){
+      HomeTabs.switch('card'); return;
+    }
+    Nav.goHome();
+  },
+  refresh(){
+    const btn = document.getElementById('globalBackBtn');
+    if(!btn) return;
+    const overlayOpen =
+      document.getElementById('qDetail').classList.contains('show') ||
+      document.getElementById('aiDiagChat').classList.contains('show') ||
+      document.getElementById('examResult').classList.contains('show') ||
+      document.getElementById('examTaking').classList.contains('show');
+    const viewHome = document.getElementById('view-home').classList.contains('show');
+    const show = overlayOpen || !viewHome || (viewHome && HomeTabs.current==='wrong');
+    btn.classList.toggle('show', show);
   }
 };
 
@@ -1312,12 +1426,93 @@ const Exam = {
           LS_set('eh_exam_progress_'+subj, res.state);
           this._showResumePrompt(res.state);
         }else{
-          this.beginNewExam();
+          this.showModePicker();
         }
       });
     }else{
-      this.beginNewExam();
+      this.showModePicker();
     }
+  },
+  showModePicker(){
+    document.getElementById('examModeModal').classList.add('open');
+  },
+  closeModePicker(){
+    document.getElementById('examModeModal').classList.remove('open');
+  },
+  pickRandomMode(){
+    this.closeModePicker();
+    this.beginNewExam();
+  },
+  pickRoundMode(){
+    this.closeModePicker();
+    this.showRoundPicker();
+  },
+  showRoundPicker(){
+    const subj = App.profile.subject;
+    const meta = SUBJECTS_META[subj];
+    const allQ = meta.data().Q;
+    // 과목별 subjectCounts 크기만큼씩 원본 데이터 순서대로 끊어서 "N회차"를 구성.
+    // 가장 문제 수가 적은 과목이 만들 수 있는 회차 수가 전체 회차 수를 결정함.
+    let maxRounds = Infinity;
+    Object.keys(meta.subjectCounts).forEach(sname=>{
+      const cnt = meta.subjectCounts[sname];
+      const total = allQ.filter(q=>q.s===sname).length;
+      maxRounds = Math.min(maxRounds, Math.floor(total / cnt));
+    });
+    if(!isFinite(maxRounds)) maxRounds = 0;
+    const box = document.getElementById('roundPickerList');
+    box.innerHTML = '';
+    if(maxRounds===0){
+      box.innerHTML = '<div class="empty">아직 회차를 구성할 만큼 문제가 충분하지 않아요.</div>';
+    }else{
+      for(let r=1; r<=maxRounds; r++){
+        const btn = document.createElement('button');
+        btn.className = 'btn ghost block';
+        btn.style.marginBottom = '8px';
+        btn.textContent = `${r}회차 풀기`;
+        btn.onclick = ()=>{
+          document.getElementById('roundPickerModal').classList.remove('open');
+          Exam.beginFixedRoundExam(r);
+        };
+        box.appendChild(btn);
+      }
+    }
+    document.getElementById('roundPickerModal').classList.add('open');
+  },
+  closeRoundPicker(){
+    document.getElementById('roundPickerModal').classList.remove('open');
+  },
+  beginFixedRoundExam(round){
+    const subj = App.profile.subject;
+    const meta = SUBJECTS_META[subj];
+    const allQ = meta.data().Q;
+    const pool = [];
+    Object.keys(meta.subjectCounts).forEach(sname=>{
+      const cnt = meta.subjectCounts[sname];
+      const cands = allQ.filter(q=>q.s===sname);
+      const start = (round-1)*cnt;
+      pool.push(...cands.slice(start, start+cnt));
+    });
+    const optOrders = pool.map(q=>{
+      const ord = q.o.map((_,idx)=>idx);
+      for(let i=ord.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ord[i],ord[j]]=[ord[j],ord[i]]; }
+      return ord;
+    });
+    const hist = LS_get('eh_exam_history_'+subj, []);
+    const prog = {
+      round: hist.length+1,
+      fixedRound: round,
+      pool: pool,
+      optOrders: optOrders,
+      answers: {},
+      current: 0,
+      startedAt: Date.now(),
+      timeLimitSec: meta.timeLimitMin*60,
+      timeLeftSec: meta.timeLimitMin*60
+    };
+    LS_set('eh_exam_progress_'+subj, prog);
+    if(window.socket) socket.emit('examProgress:save', { subject: subj, state: prog });
+    ExamTake.start(prog);
   },
   _showResumePrompt(prog){
     const answeredCount = Object.keys(prog.answers).length;
@@ -1379,6 +1574,7 @@ const ExamTake = {
     document.getElementById('examTaking').classList.add('show');
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
     document.getElementById('topbar').classList.add('show');
+    if(window.GlobalBack) GlobalBack.refresh();
     document.getElementById('etSubj').textContent = App.profile.subjectLabel + ' 모의고사 ' + prog.round + '회차';
     this.renderJumpGrid();
     this.renderQuestion();
@@ -1534,6 +1730,7 @@ const ResultView = {
     document.getElementById('examResult').classList.add('show');
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
     document.getElementById('topbar').classList.add('show');
+    if(window.GlobalBack) GlobalBack.refresh();
 
     // 100점 만점 환산. 합격 기준: 60점 이상 합격 / 50~59점 간당간당 / 50점 미만 불합격
     // (과목별 실제 합격 기준이 다르면 이 두 숫자만 바꾸면 됨)
@@ -1662,12 +1859,14 @@ const QDetail = {
     this.entryIdx = entryIdx; this.poolIdx = poolIdx;
     document.getElementById('qDetail').classList.add('show');
     this.render();
+    if(window.GlobalBack) GlobalBack.refresh();
   },
   openCustom(list, idx){
     this.mode = 'custom';
     this.customList = list; this.customIdx = idx;
     document.getElementById('qDetail').classList.add('show');
     this.render();
+    if(window.GlobalBack) GlobalBack.refresh();
   },
   _current(){
     if(this.mode==='custom'){
@@ -1734,6 +1933,7 @@ const QDetail = {
   },
   close(){
     document.getElementById('qDetail').classList.remove('show');
+    if(window.GlobalBack) GlobalBack.refresh();
   }
 };
 document.getElementById('qDetail').addEventListener('touchstart', e=>{ QDetail.touchStartX = e.touches[0].clientX; });
@@ -2005,9 +2205,11 @@ const AiDiagChat = {
     document.getElementById('aiDiagChat').classList.add('show');
     this.subj = null; this.ref = null;
     this.renderStep0();
+    if(window.GlobalBack) GlobalBack.refresh();
   },
   close(){
     document.getElementById('aiDiagChat').classList.remove('show');
+    if(window.GlobalBack) GlobalBack.refresh();
   },
   _pool(){ return SUBJECTS_META[App.profile.subject].data().Q; },
   _bubble(container, text, who){
