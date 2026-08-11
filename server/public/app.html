@@ -234,6 +234,8 @@ button{font-family:inherit;}
 .et-barbg{flex:1;height:8px;background:var(--surface2);border-radius:5px;overflow:hidden;}
 .et-barfg{height:100%;background:linear-gradient(90deg,var(--cyan),#7CF0DE);width:0%;transition:width .25s;}
 .et-pct{font-size:12px;font-weight:700;color:var(--cyan);width:38px;text-align:right;}
+.q-img-box{margin:10px 0 4px;border-radius:12px;overflow:hidden;border:1px solid var(--line,#e5e7eb);background:#fff;}
+.q-img-box svg{display:block;width:100%;height:auto;}
 .et-qcard{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);
   border-radius:18px;padding:18px 16px;margin:14px 0;}
 .et-qnum{color:var(--muted);font-size:11.5px;margin-bottom:4px;}
@@ -470,6 +472,7 @@ button{font-family:inherit;}
         <div class="subj" id="fcSubj"></div>
         <div class="qnum" id="fcNum"></div>
         <div class="qtext" id="fcQ"></div>
+<div class="q-img-box" id="fcImgBox" style="display:none"></div>
         <div class="opts" id="fcOpts"></div>
         <div class="ans" id="fcAns"></div>
       </div>
@@ -595,6 +598,7 @@ button{font-family:inherit;}
     <div class="et-qcard">
       <div class="et-qnum" id="etQnum"></div>
       <div class="et-qtext" id="etQtext"></div>
+<div class="q-img-box" id="etImgBox" style="display:none"></div>
       <div id="etOpts"></div>
     </div>
     <div class="et-navrow">
@@ -639,6 +643,7 @@ button{font-family:inherit;}
     <div class="qd-top"><button class="qd-up" onclick="QDetail.close()">▲ 목록으로</button></div>
     <div class="qd-num" id="qdNum"></div>
     <div class="qd-qtext" id="qdQtext"></div>
+<div class="q-img-box" id="qdImgBox" style="display:none"></div>
     <div id="qdOpts"></div>
     <div class="qd-explain">
       <span class="lbl">해설</span>
@@ -1269,6 +1274,7 @@ const Home = {
     document.getElementById('fcSubj').textContent = q.s;
     document.getElementById('fcNum').textContent = `${this.idx+1} / ${this.pool.length}`;
     document.getElementById('fcQ').textContent = q.q;
+    const fcImgBox=document.getElementById('fcImgBox'); if(q.img){ fcImgBox.innerHTML=q.img; fcImgBox.style.display='block'; } else { fcImgBox.style.display='none'; fcImgBox.innerHTML=''; }
     this.picked = null;
     const optsBox = document.getElementById('fcOpts');
     optsBox.innerHTML = '';
@@ -1622,6 +1628,7 @@ const ExamTake = {
     const q = p.pool[p.current];
     document.getElementById('etQnum').textContent = `${q.s} · ${p.current+1}번`;
     document.getElementById('etQtext').textContent = q.q;
+    const etImgBox=document.getElementById('etImgBox'); if(q.img){ etImgBox.innerHTML=q.img; etImgBox.style.display='block'; } else { etImgBox.style.display='none'; etImgBox.innerHTML=''; }
     const optsBox = document.getElementById('etOpts');
     optsBox.innerHTML = '';
     const order = (p.optOrders && p.optOrders[p.current]) || q.o.map((_,idx)=>idx);
@@ -1883,6 +1890,7 @@ const QDetail = {
     const {q, myAns, label} = this._current();
     document.getElementById('qdNum').textContent = label;
     document.getElementById('qdQtext').textContent = q.q;
+    const qdImgBox=document.getElementById('qdImgBox'); if(q.img){ qdImgBox.innerHTML=q.img; qdImgBox.style.display='block'; } else { qdImgBox.style.display='none'; qdImgBox.innerHTML=''; }
     const optsBox = document.getElementById('qdOpts');
     optsBox.innerHTML = '';
     q.o.forEach((opt,i)=>{
