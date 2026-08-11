@@ -14,7 +14,7 @@
 :root{
   --bg:#0A1220; --bg2:#0E1830; --surface:#131E33; --surface2:#1A2740;
   --line:#26365A; --text:#E9EEF7; --muted:#8FA0C2; --cyan:#39D8C8; --cyan-dim:#1E5A56;
-  --red:#FF4C5E; --green:#3ED17E; --amber:#F4C94A;
+  --red:#FF4C5E; --green:#3ED17E; --amber:#F4C94A; --navh:64px;
 }
 *{box-sizing:border-box;}
 html,body{height:100%;}
@@ -79,9 +79,11 @@ button{font-family:inherit;}
 .ob-confirm{margin-top:20px;}
 
 /* ===== 하단 네비 ===== */
-#bottomnav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:150;background:var(--bg2);
-  border-top:1px solid var(--line);border-left:1px solid var(--line);border-right:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+#bottomnav{position:fixed;left:50%;transform:translateX(-50%) translateY(0);bottom:0;width:100%;max-width:480px;z-index:150;background:var(--bg2);
+  border-top:1px solid var(--line);border-left:1px solid var(--line);border-right:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  transition:transform 0.25s ease;}
 #bottomnav.hide{display:none;}
+#bottomnav.navhide{transform:translateX(-50%) translateY(130%);}
 .navbtn{flex:1;background:none;border:none;color:var(--muted);display:flex;flex-direction:column;
   align-items:center;gap:2px;padding:6px 2px;cursor:pointer;font-size:10.5px;font-weight:700;}
 .navbtn .ic{font-size:19px;}
@@ -169,7 +171,7 @@ button{font-family:inherit;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;}
 .flip-card .ans.show{display:block;}
-.flip-nav{display:flex;gap:8px;margin-top:14px;position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));z-index:120;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
+.flip-nav{display:flex;gap:8px;margin-top:14px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
 .flip-nav .btn{flex:1;}
 
 /* ===== 모의고사 목록 ===== */
@@ -214,7 +216,7 @@ button{font-family:inherit;}
 .et-opt.picked{border-color:var(--cyan);background:rgba(57,216,200,.12);}
 .et-opt .num{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface2);
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);}
-.et-navrow{display:flex;gap:8px;margin:14px 0;position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));z-index:120;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
+.et-navrow{display:flex;gap:8px;margin:14px 0;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
 .et-navrow .btn{flex:1;}
 .et-jump-toggle{width:100%;text-align:center;color:var(--muted);font-size:12px;background:none;border:none;
   cursor:pointer;padding:8px;}
@@ -649,6 +651,46 @@ button{font-family:inherit;}
 <script src="comp2-data.js"></script>
 <script src="hsk4-data.js"></script>
 <script>
+function syncNavHeight(){
+  const nav = document.getElementById('bottomnav');
+  if(nav) document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');
+}
+syncNavHeight();
+window.addEventListener('load', syncNavHeight);
+window.addEventListener('resize', syncNavHeight);
+window.addEventListener('orientationchange', syncNavHeight);
+setTimeout(syncNavHeight, 300);
+
+// 스레드 스타일: 아래로 스크롤하면 하단 네비 숨기고, 위로 스크롤/스크롤 멈춤/맨 위 근처에서는 다시 보여줌
+(function(){
+  let lastY = window.scrollY || 0;
+  let stopTimer = null;
+  const THRESHOLD = 6;
+  function showNav(){
+    const nav = document.getElementById('bottomnav');
+    if(nav) nav.classList.remove('navhide');
+  }
+  function hideNav(){
+    const nav = document.getElementById('bottomnav');
+    if(nav) nav.classList.add('navhide');
+  }
+  function onScroll(){
+    const y = window.scrollY || 0;
+    const dy = y - lastY;
+    if(y <= 10){
+      showNav();
+    } else if(dy > THRESHOLD){
+      hideNav();
+    } else if(dy < -THRESHOLD){
+      showNav();
+    }
+    lastY = y;
+    clearTimeout(stopTimer);
+    stopTimer = setTimeout(showNav, 500);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+})();
+
 /* =========================================================
    학습 카드 허브 v2 — 화면 구성 프로토타입
    현재는 응급구조사 2급(emt2) 데이터로만 완전히 동작합니다.
