@@ -63,7 +63,7 @@ button{font-family:inherit;}
 .ob-chev{color:var(--cyan);font-size:12px;transition:transform .2s;}
 .ob-bar-head.open .ob-chev{transform:rotate(180deg);}
 .ob-panel{max-height:0;overflow:hidden;transition:max-height .28s ease;background:#000;}
-.ob-panel.open{max-height:600px;}
+.ob-panel.open{max-height:900px;}
 .ob-panel-inner{padding:6px 16px 18px;}
 .ob-opt-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
 .ob-opt{padding:13px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);
@@ -74,6 +74,19 @@ button{font-family:inherit;}
 .ob-num-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .ob-num-row input{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--text);
   border-radius:10px;padding:10px 12px;font-size:14px;}
+.ob-goal-multi{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.ob-goal-item{display:flex;align-items:center;gap:8px;}
+.ob-goal-item .ob-opt{flex:0 0 76px;text-align:center;padding:11px 6px;font-size:13px;}
+.ob-goal-item input{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:10px 12px;font-size:14px;}
+.ob-progress-head{margin-top:14px;padding:10px 2px;font-size:13.5px;font-weight:700;color:var(--cyan);
+  cursor:pointer;border-top:1px solid var(--line);}
+.ob-progress-body{padding:4px 2px 6px;}
+.ob-progress-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;}
+.ob-progress-row .opr-label{flex:0 0 52px;color:var(--text);font-weight:600;}
+.ob-progress-row .opr-bar{flex:1;height:8px;border-radius:5px;background:var(--bg2);overflow:hidden;}
+.ob-progress-row .opr-bar-fill{height:100%;background:var(--cyan);border-radius:5px;}
+.ob-progress-row .opr-pct{flex:0 0 74px;text-align:right;color:var(--muted);font-size:12px;}
 .ob-actions{display:flex;gap:8px;}
 .ob-actions .btn{flex:1;}
 .ob-confirm{margin-top:20px;}
@@ -148,6 +161,10 @@ button{font-family:inherit;}
 #view-settings .ob-panel.open{max-height:900px;}
 .ai-diag-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;}
 .ai-diag-row:last-child{border-bottom:none;}
+.ai-diag-row{cursor:pointer;}
+.ai-diag-detail{padding:4px 0 8px 8px;}
+.ai-diag-sub{padding:8px 4px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;}
+.ai-diag-sub-list{max-height:260px;overflow-y:auto;}
 .ai-diag-note{margin-top:12px;padding:12px;background:var(--bg2);border-left:3px solid var(--cyan);
   border-radius:0 12px 12px 0;font-size:13px;line-height:1.6;}
 #aiDiagChat{display:none;position:fixed;inset:0;background:var(--bg);z-index:260;flex-direction:column;}
@@ -377,14 +394,19 @@ button{font-family:inherit;}
       </button>
       <div class="ob-panel" id="obGoalPanel">
         <div class="ob-panel-inner">
-          <div class="ob-goal-row">
-            <button class="ob-opt" data-g="daily" onclick="OB.pickGoalType('daily')">하루</button>
-            <button class="ob-opt" data-g="weekly" onclick="OB.pickGoalType('weekly')">일주일</button>
-            <button class="ob-opt" data-g="monthly" onclick="OB.pickGoalType('monthly')">한달</button>
-          </div>
-          <div class="ob-num-row">
-            <input type="number" id="obGoalNum" value="20" min="1" placeholder="문제 수">
-            <span class="muted" style="font-size:13px;">문제</span>
+          <div class="ob-goal-multi">
+            <div class="ob-goal-item">
+              <button class="ob-opt" data-g="daily" onclick="OB.toggleGoalType('daily')">하루</button>
+              <input type="number" id="obGoalNum-daily" value="20" min="1" placeholder="문제 수">
+            </div>
+            <div class="ob-goal-item">
+              <button class="ob-opt" data-g="weekly" onclick="OB.toggleGoalType('weekly')">일주일</button>
+              <input type="number" id="obGoalNum-weekly" value="100" min="1" placeholder="문제 수">
+            </div>
+            <div class="ob-goal-item">
+              <button class="ob-opt" data-g="monthly" onclick="OB.toggleGoalType('monthly')">한달</button>
+              <input type="number" id="obGoalNum-monthly" value="300" min="1" placeholder="문제 수">
+            </div>
           </div>
           <div class="ob-actions">
             <button class="btn ghost" onclick="OB.toggle('goal')">닫기</button>
@@ -498,16 +520,25 @@ button{font-family:inherit;}
       </button>
       <div class="ob-panel" id="setGoalPanel">
         <div class="ob-panel-inner">
-          <div class="ob-goal-row">
-            <button class="ob-opt" data-g="daily" onclick="SettingsOB.pickGoalType('daily')">하루</button>
-            <button class="ob-opt" data-g="weekly" onclick="SettingsOB.pickGoalType('weekly')">일주일</button>
-            <button class="ob-opt" data-g="monthly" onclick="SettingsOB.pickGoalType('monthly')">한달</button>
-          </div>
-          <div class="ob-num-row">
-            <input type="number" id="setGoalNum" value="20" min="1" placeholder="문제 수">
-            <span class="muted" style="font-size:13px;">문제</span>
+          <div class="ob-goal-multi">
+            <div class="ob-goal-item">
+              <button class="ob-opt" data-g="daily" onclick="SettingsOB.toggleGoalType('daily')">하루</button>
+              <input type="number" id="setGoalNum-daily" value="20" min="1" placeholder="문제 수">
+            </div>
+            <div class="ob-goal-item">
+              <button class="ob-opt" data-g="weekly" onclick="SettingsOB.toggleGoalType('weekly')">일주일</button>
+              <input type="number" id="setGoalNum-weekly" value="100" min="1" placeholder="문제 수">
+            </div>
+            <div class="ob-goal-item">
+              <button class="ob-opt" data-g="monthly" onclick="SettingsOB.toggleGoalType('monthly')">한달</button>
+              <input type="number" id="setGoalNum-monthly" value="300" min="1" placeholder="문제 수">
+            </div>
           </div>
           <button class="btn primary block" onclick="SettingsOB.saveGoal()">저장</button>
+          <div class="ob-progress-head" onclick="SettingsOB.toggleProgress()">
+            📊 목표 진척율 <span id="setProgressChev">▾</span>
+          </div>
+          <div class="ob-progress-body" id="setProgressBody" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -706,12 +737,36 @@ const SUBJECTS_META = {
 function LS_get(key, def){ try{ const v = localStorage.getItem(key); return v?JSON.parse(v):def; }catch(e){ return def; } }
 function LS_set(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
+/* ---------------- 목표 진척율용 활동 로그 ---------------- */
+const Activity = {
+  log(subj, count, ts){
+    const key = 'eh_activity_log_'+subj;
+    const cutoff = Date.now() - 40*24*60*60*1000; // 최근 40일만 보관
+    const log = LS_get(key, []).filter(e=>e.ts>=cutoff);
+    log.push({ ts: ts||Date.now(), count: count||1 });
+    LS_set(key, log);
+  },
+  countSince(subj, sinceTs){
+    const log = LS_get('eh_activity_log_'+subj, []);
+    return log.filter(e=>e.ts>=sinceTs).reduce((s,e)=>s+e.count,0);
+  },
+  rangeStart(type){
+    const now = new Date();
+    if(type==='daily') return new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+    if(type==='weekly'){
+      const day = now.getDay()===0 ? 7 : now.getDay(); // 월요일 시작
+      return new Date(now.getFullYear(),now.getMonth(),now.getDate()-day+1).getTime();
+    }
+    if(type==='monthly') return new Date(now.getFullYear(),now.getMonth(),1).getTime();
+    return 0;
+  }
+};
+
 /* ---------------- 프로필/온보딩 ---------------- */
 const OB = {
   openPanel:null,
   tmpSubject:null,
-  tmpGoalType:null,
-  tmpGoalNum:20,
+  tmpGoalTypes:[],
 
   init(){
     const grid = document.getElementById('obSubjGrid');
@@ -770,25 +825,33 @@ const OB = {
     this.toggle('subj');
     this.checkConfirm();
   },
-  pickGoalType(g){
-    this.tmpGoalType = g;
-    document.querySelectorAll('.ob-goal-row .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.g===g));
+  toggleGoalType(g){
+    const btn = document.querySelector(`#obGoalPanel .ob-opt[data-g="${g}"]`);
+    const idx = this.tmpGoalTypes.indexOf(g);
+    if(idx>=0){ this.tmpGoalTypes.splice(idx,1); btn.classList.remove('active'); }
+    else{ this.tmpGoalTypes.push(g); btn.classList.add('active'); }
   },
   saveGoal(){
-    const num = parseInt(document.getElementById('obGoalNum').value, 10) || 20;
-    if(!this.tmpGoalType){ alert('하루/일주일/한달 중 하나를 선택해주세요'); return; }
+    if(!this.tmpGoalTypes.length){ alert('하루/일주일/한달 중 최소 하나를 선택해주세요'); return; }
+    const glabelMap = {daily:'하루',weekly:'일주일',monthly:'한달'};
+    const goalNums = {};
+    ['daily','weekly','monthly'].forEach(t=>{
+      goalNums[t] = parseInt(document.getElementById('obGoalNum-'+t).value, 10) || (t==='daily'?20:t==='weekly'?100:300);
+    });
     App.profile = App.profile || {};
-    App.profile.goalType = this.tmpGoalType;
-    App.profile.goalNum = num;
+    App.profile.goalTypes = this.tmpGoalTypes.slice();
+    App.profile.goalNums = goalNums;
+    // 서버 프로필 스키마(단일 goalType/goalNum) 하위호환용 — 선택한 것 중 첫 번째로 채움
+    App.profile.goalType = this.tmpGoalTypes[0];
+    App.profile.goalNum = goalNums[this.tmpGoalTypes[0]];
     LS_set('eh_profile', App.profile);
-    const glabel = {daily:'하루',weekly:'일주일',monthly:'한달'}[this.tmpGoalType];
-    document.getElementById('obGoalVal').textContent = `${glabel} ${num}문제`;
+    document.getElementById('obGoalVal').textContent = this.tmpGoalTypes.map(t=>`${glabelMap[t]} ${goalNums[t]}`).join(' / ');
     document.getElementById('obGoalCheck').style.display = 'flex';
     this.toggle('goal');
     this.checkConfirm();
   },
   checkConfirm(){
-    const ok = App.profile && App.profile.subject && App.profile.goalType;
+    const ok = App.profile && App.profile.subject && App.profile.goalTypes && App.profile.goalTypes.length;
     document.getElementById('obConfirmBtn').disabled = !ok;
   },
   confirm(){
@@ -1001,6 +1064,13 @@ const Home = {
     stats[q.s].total++;
     if(isCorrect) stats[q.s].correct++;
     LS_set(key, stats);
+    if(isCorrect && q.id){
+      const ckey = 'eh_card_correct_'+App.profile.subject;
+      const correctMap = LS_get(ckey, {});
+      correctMap[q.id] = true;
+      LS_set(ckey, correctMap);
+    }
+    Activity.log(App.profile.subject, 1);
     if(window.socket){
       socket.emit('cardStats:save', { subject: App.profile.subject, subjectKey: q.s, isCorrect: !!isCorrect });
     }
@@ -1433,6 +1503,7 @@ const ExamTake = {
     const hist = LS_get('eh_exam_history_'+subj, []);
     hist.push(entry);
     LS_set('eh_exam_history_'+subj, hist);
+    Activity.log(subj, entry.total, entry.submittedAt);
     localStorage.removeItem('eh_exam_progress_'+subj);
     if(window.socket){
       socket.emit('examHistory:save', { subject: subj, record: entry });
@@ -1677,20 +1748,34 @@ document.getElementById('qDetail').addEventListener('touchend', e=>{
 const SettingsOB = {
   panelIds:{subj:'setSubjPanel', goal:'setGoalPanel', dday:'setDdayPanel', ai:'setAiPanel'},
   headIds:{subj:'setSubjHead', goal:'setGoalHead', dday:'setDdayHead', ai:'setAiHead'},
-  tmpGoalType:null,
+  tmpGoalTypes:[],
   init(){
     document.getElementById('setStreakVal').textContent = (App.streakCount ? App.streakCount+'일째' : '-');
     document.getElementById('setSubjInlineVal').textContent = App.profile.subjectLabel || '';
-    const glabel = {daily:'하루',weekly:'일주일',monthly:'한달'}[App.profile.goalType];
-    document.getElementById('setGoalInlineVal').textContent = App.profile.goalType ? `${glabel} ${App.profile.goalNum}문제` : '';
+    // goalTypes/goalNums 없는 예전 프로필(단일 goalType/goalNum)이면 마이그레이션
+    if(!App.profile.goalTypes){
+      App.profile.goalTypes = App.profile.goalType ? [App.profile.goalType] : [];
+      App.profile.goalNums = {daily:20, weekly:100, monthly:300};
+      if(App.profile.goalType) App.profile.goalNums[App.profile.goalType] = App.profile.goalNum || 20;
+      LS_set('eh_profile', App.profile);
+    }
+    this.tmpGoalTypes = App.profile.goalTypes.slice();
+    const glabelMap = {daily:'하루',weekly:'일주일',monthly:'한달'};
+    document.getElementById('setGoalInlineVal').textContent = App.profile.goalTypes.length
+      ? App.profile.goalTypes.map(t=>`${glabelMap[t]} ${App.profile.goalNums[t]}`).join(' / ') : '';
     document.getElementById('setDdayInlineVal').textContent = App.profile.examDate ? ddayText(App.profile.examDate) : '미설정';
     document.getElementById('setExamDate').value = App.profile.examDate || '';
     const grid = document.getElementById('setSubjGrid');
     grid.innerHTML = Object.keys(SUBJECTS_META).map(k=>
       `<button class="ob-opt${k===App.profile.subject?' active':''}" data-s="${k}" onclick="SettingsOB.pickSubject('${k}')">${SUBJECTS_META[k].label}</button>`
     ).join('');
-    document.querySelectorAll('.ob-goal-row .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.g===App.profile.goalType));
-    document.getElementById('setGoalNum').value = App.profile.goalNum || 20;
+    document.querySelectorAll('#setGoalPanel .ob-goal-item .ob-opt').forEach(b=>b.classList.toggle('active', this.tmpGoalTypes.includes(b.dataset.g)));
+    ['daily','weekly','monthly'].forEach(t=>{
+      document.getElementById('setGoalNum-'+t).value = App.profile.goalNums[t] || (t==='daily'?20:t==='weekly'?100:300);
+    });
+    document.getElementById('setProgressBody').style.display = 'none';
+    document.getElementById('setProgressBody').dataset.filled = '';
+    document.getElementById('setProgressChev').textContent = '▾';
     // 모든 패널 닫기
     Object.values(this.panelIds).forEach(id=>document.getElementById(id).classList.remove('open'));
     Object.values(this.headIds).forEach(id=>document.getElementById(id).classList.remove('open'));
@@ -1716,21 +1801,56 @@ const SettingsOB = {
     document.getElementById('homeSubjTitle').textContent = App.profile.subjectLabel + ' 카드';
     Home.init();
   },
-  pickGoalType(g){
-    this.tmpGoalType = g;
-    document.querySelectorAll('.ob-goal-row .ob-opt').forEach(b=>b.classList.toggle('active', b.dataset.g===g));
+  toggleGoalType(g){
+    const btn = document.querySelector(`#setGoalPanel .ob-goal-item .ob-opt[data-g="${g}"]`);
+    const idx = this.tmpGoalTypes.indexOf(g);
+    if(idx>=0){ this.tmpGoalTypes.splice(idx,1); btn.classList.remove('active'); }
+    else{ this.tmpGoalTypes.push(g); btn.classList.add('active'); }
   },
   saveGoal(){
-    const num = parseInt(document.getElementById('setGoalNum').value, 10) || 20;
-    const type = this.tmpGoalType || App.profile.goalType;
-    if(!type){ alert('하루/일주일/한달 중 하나를 선택해주세요'); return; }
-    App.profile.goalType = type;
-    App.profile.goalNum = num;
+    if(!this.tmpGoalTypes.length){ alert('하루/일주일/한달 중 최소 하나를 선택해주세요'); return; }
+    const glabelMap = {daily:'하루',weekly:'일주일',monthly:'한달'};
+    const goalNums = {};
+    ['daily','weekly','monthly'].forEach(t=>{
+      goalNums[t] = parseInt(document.getElementById('setGoalNum-'+t).value, 10) || (t==='daily'?20:t==='weekly'?100:300);
+    });
+    App.profile.goalTypes = this.tmpGoalTypes.slice();
+    App.profile.goalNums = goalNums;
+    App.profile.goalType = this.tmpGoalTypes[0];
+    App.profile.goalNum = goalNums[this.tmpGoalTypes[0]];
     LS_set('eh_profile', App.profile);
     if(window.socket) socket.emit('profile:save', { subject: App.profile.subject, goalType: App.profile.goalType, goalNum: App.profile.goalNum, examDate: App.profile.examDate || null });
-    const glabel = {daily:'하루',weekly:'일주일',monthly:'한달'}[type];
-    document.getElementById('setGoalInlineVal').textContent = `${glabel} ${num}문제`;
+    document.getElementById('setGoalInlineVal').textContent = this.tmpGoalTypes.map(t=>`${glabelMap[t]} ${goalNums[t]}`).join(' / ');
     this.toggle('goal');
+  },
+  toggleProgress(){
+    const body = document.getElementById('setProgressBody');
+    const chev = document.getElementById('setProgressChev');
+    const willOpen = body.style.display === 'none';
+    body.style.display = willOpen ? 'block' : 'none';
+    chev.textContent = willOpen ? '▴' : '▾';
+    if(willOpen && !body.dataset.filled){
+      this.renderProgress();
+      body.dataset.filled = '1';
+    }
+  },
+  renderProgress(){
+    const body = document.getElementById('setProgressBody');
+    const subj = App.profile.subject;
+    const glabelMap = {daily:'오늘',weekly:'이번주',monthly:'이번달'};
+    const goalNums = App.profile.goalNums || {daily:20, weekly:100, monthly:300};
+    let html = '';
+    ['daily','weekly','monthly'].forEach(t=>{
+      const since = Activity.rangeStart(t);
+      const count = Activity.countSince(subj, since);
+      const goal = goalNums[t] || (t==='daily'?20:t==='weekly'?100:300);
+      const pct = goal>0 ? Math.min(100, Math.round(count/goal*100)) : 0;
+      html += `<div class="ob-progress-row"><span class="opr-label">${glabelMap[t]}</span>
+        <span class="opr-bar"><span class="opr-bar-fill" style="width:${pct}%;"></span></span>
+        <span class="opr-pct">${count}/${goal} (${pct}%)</span></div>`;
+    });
+    html += `<div class="muted" style="font-size:11.5px;margin-top:4px;">※ 진척율은 이 기기에서 푼 기록 기준이에요(최근 40일 보관)</div>`;
+    body.innerHTML = html;
   },
   saveExamDate(){
     const val = document.getElementById('setExamDate').value || null;
@@ -1756,6 +1876,7 @@ function ddayText(examDate){
 
 /* ---------------- AI진단(카드 학습 + 모의고사 정답률 통합) ---------------- */
 const AiDiag = {
+  rows:[],
   render(){
     const box = document.getElementById('aiDiagBox');
     const subj = App.profile.subject;
@@ -1770,9 +1891,11 @@ const AiDiag = {
         examAgg[s].total += sb.total;
       });
     });
+    // 응시 0문제인 과목은 진단 대상에서 제외(0/0을 100%나 0%로 잘못 보여주지 않기 위함)
     const subjSet = new Set([...Object.keys(examAgg), ...Object.keys(cardStats)]);
     if(subjSet.size===0){
       box.innerHTML = '아직 진단할 데이터가 부족해요. 카드 학습이나 모의고사를 몇 번 더 진행하면 과목별 약점을 분석해드릴게요.';
+      this.rows = [];
       return;
     }
     const rows = Array.from(subjSet).map(s=>{
@@ -1782,17 +1905,91 @@ const AiDiag = {
       const totalCount = e.total + c.total;
       return {s, rate: totalCount ? totalCorrect/totalCount : 0, totalCount};
     }).filter(r=>r.totalCount>0).sort((a,b)=>a.rate-b.rate);
+    this.rows = rows;
 
     let html = '';
-    rows.forEach(r=>{
+    rows.forEach((r,i)=>{
       const color = r.rate<0.6?'var(--red)':(r.rate<0.8?'var(--amber)':'var(--green)');
-      html += `<div class="ai-diag-row"><span>${r.s}</span><span style="color:${color};font-weight:700;">${Math.round(r.rate*100)}% <span class="muted" style="font-weight:400;">(${r.totalCount}문제)</span></span></div>`;
+      html += `<div class="ai-diag-row" onclick="AiDiag.toggleRow(${i})"><span>${r.s}</span><span style="color:${color};font-weight:700;">${Math.round(r.rate*100)}% <span class="muted" style="font-weight:400;">(${r.totalCount}문제)</span></span></div>`;
+      html += `<div class="ai-diag-detail" id="aiDiagDetail-${i}" style="display:none;"></div>`;
     });
     const weakest = rows[0];
     if(weakest){
       html += `<div class="ai-diag-note"><b>${weakest.s}</b> 과목이 가장 약해요 (정답률 ${Math.round(weakest.rate*100)}%). 홈 화면에서 소과목 필터를 <b>${weakest.s}</b>로 걸어 집중적으로 반복하고, 모의고사 응시 후엔 "오답만 다시 풀기"로 복습하는 걸 추천해요.</div>`;
     }
     box.innerHTML = html;
+  },
+  // 카드학습 + 모의고사 기록에서 이 소주제(targetSubj)의 맞은/틀린 문제를 모아 반환
+  _collect(targetSubj){
+    const subj = App.profile.subject;
+    const meta = SUBJECTS_META[subj];
+    const pool = meta.data().Q;
+    const correctMap = {}, wrongMap = {};
+    // 카드 오답(기존에 기록되던 데이터)
+    const cardWrong = LS_get('eh_card_wrong_'+subj, []);
+    cardWrong.forEach(item=>{
+      const q = pool.find(x=>x.id===item.qid);
+      if(q && q.s===targetSubj) wrongMap[q.id] = {q, myAns:item.myAns};
+    });
+    // 카드 정답(이 패치 이후부터 새로 기록됨 — 과거 기록은 없을 수 있음)
+    const cardCorrect = LS_get('eh_card_correct_'+subj, {});
+    Object.keys(cardCorrect).forEach(qid=>{
+      const q = pool.find(x=>x.id===qid);
+      if(q && q.s===targetSubj && !wrongMap[qid]) correctMap[qid] = {q, myAns:q.a};
+    });
+    // 모의고사 기록(맞은/틀린 문제 전부 poolSnapshot에서 복원 가능)
+    const hist = LS_get('eh_exam_history_'+subj, []);
+    hist.forEach(h=>{
+      const sb = h.subjectBreakdown[targetSubj];
+      if(!sb) return;
+      const wrongSet = new Set(sb.wrongPoolIdx);
+      h.poolSnapshot.forEach((q,pi)=>{
+        if(q.s!==targetSubj) return;
+        const key = q.id || ('exam-'+h.submittedAt+'-'+pi);
+        if(wrongSet.has(pi)) wrongMap[key] = {q, myAns:h.answers[pi]};
+        else if(!wrongMap[key]) correctMap[key] = {q, myAns:h.answers[pi]};
+      });
+    });
+    return { correctList: Object.values(correctMap), wrongList: Object.values(wrongMap) };
+  },
+  toggleRow(i){
+    const detail = document.getElementById('aiDiagDetail-'+i);
+    const willOpen = detail.style.display === 'none';
+    // 한 번에 하나만 열리는 아코디언
+    this.rows.forEach((r,j)=>{
+      const d = document.getElementById('aiDiagDetail-'+j);
+      if(d) d.style.display = 'none';
+    });
+    if(!willOpen) return;
+    const targetSubj = this.rows[i].s;
+    const {correctList, wrongList} = this._collect(targetSubj);
+    this.rows[i]._correctList = correctList;
+    this.rows[i]._wrongList = wrongList;
+    detail.innerHTML =
+      `<div class="ai-diag-sub" onclick="AiDiag.toggleSub(${i},'wrong')">❌ 틀린 문제 (${wrongList.length})</div>
+       <div class="ai-diag-sub-list" id="aiDiagSub-${i}-wrong" style="display:none;"></div>
+       <div class="ai-diag-sub" onclick="AiDiag.toggleSub(${i},'correct')">✅ 맞은 문제 (${correctList.length})</div>
+       <div class="ai-diag-sub-list" id="aiDiagSub-${i}-correct" style="display:none;"></div>`;
+    detail.style.display = 'block';
+  },
+  toggleSub(i, kind){
+    const listBox = document.getElementById(`aiDiagSub-${i}-${kind}`);
+    const willOpen = listBox.style.display === 'none';
+    listBox.style.display = willOpen ? 'block' : 'none';
+    if(!willOpen || listBox.dataset.filled) return;
+    const list = kind==='wrong' ? this.rows[i]._wrongList : this.rows[i]._correctList;
+    if(!list.length){
+      listBox.innerHTML = `<div class="empty" style="padding:8px 4px;font-size:12px;">${kind==='wrong'?'틀린':'맞은'} 문제 기록이 아직 없어요.</div>`;
+    }else{
+      listBox.innerHTML = list.map((item,idx)=>
+        `<div class="eh-wrong-item" onclick="AiDiag.openDetail(${i},'${kind}',${idx})">${item.q.q}</div>`
+      ).join('');
+    }
+    listBox.dataset.filled = '1';
+  },
+  openDetail(i, kind, idx){
+    const list = kind==='wrong' ? this.rows[i]._wrongList : this.rows[i]._correctList;
+    QDetail.openCustom(list, idx);
   }
 };
 
