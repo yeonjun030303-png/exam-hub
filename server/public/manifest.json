@@ -1,0 +1,16 @@
+{
+  "name": "학습 카드 허브",
+  "short_name": "학습카드허브",
+  "description": "응급구조사2급·HSK4급·컴활2급 시험 준비 카드학습 앱",
+  "start_url": "/app.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A1220",
+  "theme_color": "#0A1220",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
