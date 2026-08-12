@@ -235,9 +235,6 @@ button{font-family:inherit;}
 .et-barbg{flex:1;height:8px;background:var(--surface2);border-radius:5px;overflow:hidden;}
 .et-barfg{height:100%;background:linear-gradient(90deg,var(--cyan),#7CF0DE);width:0%;transition:width .25s;}
 .et-pct{font-size:12px;font-weight:700;color:var(--cyan);width:38px;text-align:right;}
-.fc-confidence-bar{display:flex;gap:6px;margin:10px 0;}
-.fc-conf-btn{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--line,#e5e7eb);background:var(--surface2,#f3f4f6);color:var(--text,#111);font-size:13px;cursor:pointer;text-align:center;}
-.fc-conf-btn.active{border-color:#22c55e;background:rgba(34,197,94,.15);font-weight:600;}
 #fcOpts.locked{opacity:.4;pointer-events:none;}
 .cutline-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--line,#e5e7eb);}
 .cutline-row:last-child{border-bottom:none;}
@@ -606,18 +603,6 @@ button{font-family:inherit;}
       <div class="ob-panel" id="setHeatmapPanel">
         <div class="ob-panel-inner">
           <div id="heatmapBox"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="ob-bar">
-      <button class="ob-bar-head" id="setConfHead" onclick="SettingsOB.toggle('conf')">
-        <span class="lbl">🧠 자가진단 통계</span>
-        <span class="ob-chev" id="setConfChev">▾</span>
-      </button>
-      <div class="ob-panel" id="setConfPanel">
-        <div class="ob-panel-inner">
-          <div id="confStatsBox" style="font-size:13px;line-height:1.6;"></div>
         </div>
       </div>
     </div>
@@ -1346,16 +1331,6 @@ const Home = {
     ansBox.classList.remove('show');
     this.updateBookmarkBtn();
   },
-  _recordConfidence(q, conf, isCorrect){
-    if(!conf) return;
-    const subj = App.profile.subject;
-    const key = 'eh_card_conf_stats_'+subj;
-    const stats = LS_get(key, {});
-    stats[conf] = stats[conf] || {correct:0,total:0};
-    stats[conf].total++;
-    if(isCorrect) stats[conf].correct++;
-    LS_set(key, stats);
-  },
   pick(i){
     if(this.picked !== null) return;
     this.picked = i;
@@ -2017,8 +1992,8 @@ document.getElementById('qDetail').addEventListener('touchend', e=>{
 
 /* ---------------- 설정(인라인 아코디언) ---------------- */
 const SettingsOB = {
-  panelIds:{subj:'setSubjPanel', goal:'setGoalPanel', dday:'setDdayPanel', ai:'setAiPanel', cutline:'setCutlinePanel', heatmap:'setHeatmapPanel', conf:'setConfPanel'},
-  headIds:{subj:'setSubjHead', goal:'setGoalHead', dday:'setDdayHead', ai:'setAiHead', cutline:'setCutlineHead', heatmap:'setHeatmapHead', conf:'setConfHead'},
+  panelIds:{subj:'setSubjPanel', goal:'setGoalPanel', dday:'setDdayPanel', ai:'setAiPanel', cutline:'setCutlinePanel', heatmap:'setHeatmapPanel'},
+  headIds:{subj:'setSubjHead', goal:'setGoalHead', dday:'setDdayHead', ai:'setAiHead', cutline:'setCutlineHead', heatmap:'setHeatmapHead'},
   tmpGoalTypes:[],
   init(){
     document.getElementById('setStreakVal').textContent = (App.streakCount ? App.streakCount+'일째' : '-');
@@ -2063,7 +2038,6 @@ const SettingsOB = {
       if(which==='dday') this.renderDdayPlan();
       if(which==='cutline') this.renderCutline();
       if(which==='heatmap') this.renderHeatmap();
-      if(which==='conf') this.renderConfStats();
     }
   },
   pickSubject(key){
@@ -2225,28 +2199,6 @@ const SettingsOB = {
     }
     box.innerHTML = '<div class="heatmap-grid">'+cells.join('')+'</div>'
       + '<div class="muted" style="font-size:11.5px;margin-top:8px;">※ 최근 40일 학습 기록이에요(이 기기 기준). 진할수록 그날 많이 풀었다는 뜻이에요.</div>';
-  },
-  renderConfStats(){
-    const box = document.getElementById('confStatsBox');
-    if(!box) return;
-    const subj = App.profile.subject;
-    const stats = LS_get('eh_card_conf_stats_'+subj, {});
-    const labelMap = {know:'👍 안다', maybe:'🤔 애매', dontknow:'❓ 모른다'};
-    let html = '';
-    ['know','maybe','dontknow'].forEach(k=>{
-      const st = stats[k];
-      if(!st || st.total===0){
-        html += `<div class="cutline-row"><span class="cutline-subj">${labelMap[k]}</span><span class="muted">데이터 없음</span></div>`;
-      }else{
-        const pct = Math.round(st.correct/st.total*100);
-        html += `<div class="cutline-row"><span class="cutline-subj">${labelMap[k]}</span><span>${st.correct}/${st.total}개 정답 (${pct}%)</span></div>`;
-      }
-    });
-    const guess = stats.dontknow && stats.dontknow.total ? stats.dontknow : null;
-    if(guess && guess.correct>0){
-      html += `<div class="muted" style="font-size:11.5px;margin-top:8px;">※ '모른다'라고 했는데 맞춘 ${guess.correct}문제는 찍어서 맞았을 가능성이 높아요 — 오답노트처럼 한 번 더 복습해보면 좋아요.</div>`;
-    }
-    box.innerHTML = html || '<span class="muted">카드학습에서 확신도를 선택하면 여기 통계가 쌓여요.</span>';
   },
   saveExamDate(){
     const val = document.getElementById('setExamDate').value || null;
