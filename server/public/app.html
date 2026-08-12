@@ -488,12 +488,7 @@ button{font-family:inherit;}
         <div class="qnum" id="fcNum"></div>
         <div class="qtext" id="fcQ"></div>
 <div class="q-img-box" id="fcImgBox" style="display:none"></div>
-<div class="fc-confidence-bar" id="fcConfidenceBar">
-  <button class="fc-conf-btn" data-c="know" onclick="Home.pickConfidence('know')">👍 안다</button>
-  <button class="fc-conf-btn" data-c="maybe" onclick="Home.pickConfidence('maybe')">🤔 애매</button>
-  <button class="fc-conf-btn" data-c="dontknow" onclick="Home.pickConfidence('dontknow')">❓ 모른다</button>
-</div>
-        <div class="opts" id="fcOpts"></div>
+<div class="opts" id="fcOpts"></div>
         <div class="ans" id="fcAns"></div>
       </div>
       <div class="flip-nav">
@@ -1333,10 +1328,8 @@ const Home = {
     document.getElementById('fcQ').textContent = q.q;
     const fcImgBox=document.getElementById('fcImgBox'); if(q.img){ fcImgBox.innerHTML=q.img; fcImgBox.style.display='block'; } else { fcImgBox.style.display='none'; fcImgBox.innerHTML=''; }
     this.picked = null;
-    this.confidence = null;
-    document.querySelectorAll('#fcConfidenceBar .fc-conf-btn').forEach(b=>b.classList.remove('active'));
     const optsBox = document.getElementById('fcOpts');
-    optsBox.classList.add('locked');
+    optsBox.classList.remove('locked');
     optsBox.innerHTML = '';
     const order = q.o.map((_,idx)=>idx);
     for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
@@ -1353,12 +1346,6 @@ const Home = {
     ansBox.classList.remove('show');
     this.updateBookmarkBtn();
   },
-  pickConfidence(level){
-    if(this.picked !== null) return;
-    this.confidence = level;
-    document.querySelectorAll('#fcConfidenceBar .fc-conf-btn').forEach(b=>b.classList.toggle('active', b.dataset.c===level));
-    document.getElementById('fcOpts').classList.remove('locked');
-  },
   _recordConfidence(q, conf, isCorrect){
     if(!conf) return;
     const subj = App.profile.subject;
@@ -1371,7 +1358,6 @@ const Home = {
   },
   pick(i){
     if(this.picked !== null) return;
-    if(this.confidence === null) return;
     this.picked = i;
     const q = this.pool[this.idx];
     const optsBox = document.getElementById('fcOpts');
@@ -1386,7 +1372,6 @@ const Home = {
     ansBox.innerHTML = `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}` + (q.r ? `<div class="qd-ref">[${q.r}]</div>` : '');
     ansBox.classList.add('show');
     this._recordStat(q, i===q.a);
-    this._recordConfidence(q, this.confidence, i===q.a);
     if(i!==q.a) this._recordWrong(q, i);
   },
   next(){ this.idx = (this.idx+1) % this.pool.length; this._save(); this.render(); },
