@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v32: 신규 기능 4종(합격선 시뮬레이터/D-day 학습플랜/학습 히트맵/자가진단 확신도) -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -234,6 +235,20 @@ button{font-family:inherit;}
 .et-barbg{flex:1;height:8px;background:var(--surface2);border-radius:5px;overflow:hidden;}
 .et-barfg{height:100%;background:linear-gradient(90deg,var(--cyan),#7CF0DE);width:0%;transition:width .25s;}
 .et-pct{font-size:12px;font-weight:700;color:var(--cyan);width:38px;text-align:right;}
+.fc-confidence-bar{display:flex;gap:6px;margin:10px 0;}
+.fc-conf-btn{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--line,#e5e7eb);background:var(--surface2,#f3f4f6);color:var(--text,#111);font-size:13px;cursor:pointer;text-align:center;}
+.fc-conf-btn.active{border-color:#22c55e;background:rgba(34,197,94,.15);font-weight:600;}
+#fcOpts.locked{opacity:.4;pointer-events:none;}
+.cutline-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--line,#e5e7eb);}
+.cutline-row:last-child{border-bottom:none;}
+.cutline-subj{flex:1;}
+.cutline-badge{padding:2px 8px;border-radius:8px;font-size:11.5px;font-weight:600;}
+.cutline-badge.pass{background:rgba(34,197,94,.15);color:#16a34a;}
+.cutline-badge.warn{background:rgba(234,179,8,.15);color:#ca8a04;}
+.cutline-badge.fail{background:rgba(239,68,68,.15);color:#dc2626;}
+.cutline-badge.nodata{background:rgba(156,163,175,.15);color:#6b7280;}
+.heatmap-grid{display:flex;flex-wrap:wrap;gap:3px;}
+.heatmap-cell{width:14px;height:14px;border-radius:3px;background:var(--surface2,#e5e7eb);}
 .q-img-box{margin:10px 0 4px;border-radius:12px;overflow:hidden;border:1px solid var(--line,#e5e7eb);background:#fff;}
 .q-img-box svg{display:block;width:100%;height:auto;}
 .et-qcard{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);
@@ -473,6 +488,11 @@ button{font-family:inherit;}
         <div class="qnum" id="fcNum"></div>
         <div class="qtext" id="fcQ"></div>
 <div class="q-img-box" id="fcImgBox" style="display:none"></div>
+<div class="fc-confidence-bar" id="fcConfidenceBar">
+  <button class="fc-conf-btn" data-c="know" onclick="Home.pickConfidence('know')">👍 안다</button>
+  <button class="fc-conf-btn" data-c="maybe" onclick="Home.pickConfidence('maybe')">🤔 애매</button>
+  <button class="fc-conf-btn" data-c="dontknow" onclick="Home.pickConfidence('dontknow')">❓ 모른다</button>
+</div>
         <div class="opts" id="fcOpts"></div>
         <div class="ans" id="fcAns"></div>
       </div>
@@ -566,6 +586,43 @@ button{font-family:inherit;}
         <div class="ob-panel-inner">
           <input type="date" id="setExamDate" class="auth-input" style="margin-bottom:10px;">
           <button class="btn primary block" onclick="SettingsOB.saveExamDate()">저장</button>
+          <div id="setDdayPlan" style="margin-top:12px;font-size:13px;line-height:1.7;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ob-bar">
+      <button class="ob-bar-head" id="setCutlineHead" onclick="SettingsOB.toggle('cutline')">
+        <span class="lbl">🎯 합격선 시뮬레이터</span>
+        <span class="ob-chev" id="setCutlineChev">▾</span>
+      </button>
+      <div class="ob-panel" id="setCutlinePanel">
+        <div class="ob-panel-inner">
+          <div id="cutlineBox" style="font-size:13px;line-height:1.6;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ob-bar">
+      <button class="ob-bar-head" id="setHeatmapHead" onclick="SettingsOB.toggle('heatmap')">
+        <span class="lbl">🔥 학습 히트맵</span>
+        <span class="ob-chev" id="setHeatmapChev">▾</span>
+      </button>
+      <div class="ob-panel" id="setHeatmapPanel">
+        <div class="ob-panel-inner">
+          <div id="heatmapBox"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ob-bar">
+      <button class="ob-bar-head" id="setConfHead" onclick="SettingsOB.toggle('conf')">
+        <span class="lbl">🧠 자가진단 통계</span>
+        <span class="ob-chev" id="setConfChev">▾</span>
+      </button>
+      <div class="ob-panel" id="setConfPanel">
+        <div class="ob-panel-inner">
+          <div id="confStatsBox" style="font-size:13px;line-height:1.6;"></div>
         </div>
       </div>
     </div>
@@ -1276,7 +1333,10 @@ const Home = {
     document.getElementById('fcQ').textContent = q.q;
     const fcImgBox=document.getElementById('fcImgBox'); if(q.img){ fcImgBox.innerHTML=q.img; fcImgBox.style.display='block'; } else { fcImgBox.style.display='none'; fcImgBox.innerHTML=''; }
     this.picked = null;
+    this.confidence = null;
+    document.querySelectorAll('#fcConfidenceBar .fc-conf-btn').forEach(b=>b.classList.remove('active'));
     const optsBox = document.getElementById('fcOpts');
+    optsBox.classList.add('locked');
     optsBox.innerHTML = '';
     const order = q.o.map((_,idx)=>idx);
     for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
@@ -1293,8 +1353,25 @@ const Home = {
     ansBox.classList.remove('show');
     this.updateBookmarkBtn();
   },
+  pickConfidence(level){
+    if(this.picked !== null) return;
+    this.confidence = level;
+    document.querySelectorAll('#fcConfidenceBar .fc-conf-btn').forEach(b=>b.classList.toggle('active', b.dataset.c===level));
+    document.getElementById('fcOpts').classList.remove('locked');
+  },
+  _recordConfidence(q, conf, isCorrect){
+    if(!conf) return;
+    const subj = App.profile.subject;
+    const key = 'eh_card_conf_stats_'+subj;
+    const stats = LS_get(key, {});
+    stats[conf] = stats[conf] || {correct:0,total:0};
+    stats[conf].total++;
+    if(isCorrect) stats[conf].correct++;
+    LS_set(key, stats);
+  },
   pick(i){
     if(this.picked !== null) return;
+    if(this.confidence === null) return;
     this.picked = i;
     const q = this.pool[this.idx];
     const optsBox = document.getElementById('fcOpts');
@@ -1309,6 +1386,7 @@ const Home = {
     ansBox.innerHTML = `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}` + (q.r ? `<div class="qd-ref">[${q.r}]</div>` : '');
     ansBox.classList.add('show');
     this._recordStat(q, i===q.a);
+    this._recordConfidence(q, this.confidence, i===q.a);
     if(i!==q.a) this._recordWrong(q, i);
   },
   next(){ this.idx = (this.idx+1) % this.pool.length; this._save(); this.render(); },
@@ -1954,8 +2032,8 @@ document.getElementById('qDetail').addEventListener('touchend', e=>{
 
 /* ---------------- 설정(인라인 아코디언) ---------------- */
 const SettingsOB = {
-  panelIds:{subj:'setSubjPanel', goal:'setGoalPanel', dday:'setDdayPanel', ai:'setAiPanel'},
-  headIds:{subj:'setSubjHead', goal:'setGoalHead', dday:'setDdayHead', ai:'setAiHead'},
+  panelIds:{subj:'setSubjPanel', goal:'setGoalPanel', dday:'setDdayPanel', ai:'setAiPanel', cutline:'setCutlinePanel', heatmap:'setHeatmapPanel', conf:'setConfPanel'},
+  headIds:{subj:'setSubjHead', goal:'setGoalHead', dday:'setDdayHead', ai:'setAiHead', cutline:'setCutlineHead', heatmap:'setHeatmapHead', conf:'setConfHead'},
   tmpGoalTypes:[],
   init(){
     document.getElementById('setStreakVal').textContent = (App.streakCount ? App.streakCount+'일째' : '-');
@@ -1997,6 +2075,10 @@ const SettingsOB = {
     if(!isOpen){
       panel.classList.add('open'); head.classList.add('open');
       if(which==='ai') AiDiag.render();
+      if(which==='dday') this.renderDdayPlan();
+      if(which==='cutline') this.renderCutline();
+      if(which==='heatmap') this.renderHeatmap();
+      if(which==='conf') this.renderConfStats();
     }
   },
   pickSubject(key){
@@ -2060,6 +2142,127 @@ const SettingsOB = {
     html += `<div class="muted" style="font-size:11.5px;margin-top:4px;">※ 진척율은 이 기기에서 푼 기록 기준이에요(최근 40일 보관)</div>`;
     body.innerHTML = html;
   },
+  renderDdayPlan(){
+    const box = document.getElementById('setDdayPlan');
+    if(!box) return;
+    const examDate = App.profile.examDate;
+    if(!examDate){ box.innerHTML = '<span class="muted">시험일을 설정하면 하루 학습량을 계산해드려요.</span>'; return; }
+    const subj = App.profile.subject;
+    const meta = SUBJECTS_META[subj];
+    const totalQ = (meta && meta.data() && meta.data().Q) ? meta.data().Q.length : 0;
+    const doneUnique = Object.keys(LS_get('eh_card_correct_'+subj, {})).length;
+    const remaining = Math.max(0, totalQ - doneUnique);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const target = new Date(examDate+'T00:00:00');
+    const daysLeft = Math.max(0, Math.round((target-today)/86400000));
+    let html = '';
+    if(daysLeft<=0){
+      html = '<b>시험일이 오늘이거나 지났어요.</b> 남은 문제 약 '+remaining+'개는 오답노트 위주로 빠르게 훑어보세요.';
+    }else{
+      const perDay = remaining>0 ? Math.ceil(remaining/daysLeft) : 0;
+      html = `시험까지 <b>D-${daysLeft}</b>일 남았어요. 아직 안 익힌 문제가 약 <b>${remaining}개</b>예요.<br>`
+           + (perDay>0 ? `하루에 약 <b>${perDay}문제</b>씩 풀면 시험 전에 전체 1바퀴를 마칠 수 있어요.` : '전체 문제를 이미 한 바퀴 다 푸셨어요! 오답노트 위주로 복습해보세요.');
+      const stats = LS_get('eh_card_stats_'+subj, {});
+      let weakest = null, weakestPct = 101;
+      Object.keys(stats).forEach(s=>{
+        const st = stats[s];
+        if(st.total>=3){
+          const pct = Math.round(st.correct/st.total*100);
+          if(pct < weakestPct){ weakestPct = pct; weakest = s; }
+        }
+      });
+      if(weakest){
+        html += `<br>특히 '<b>${weakest}</b>' 과목 정답률이 <b>${weakestPct}%</b>로 가장 낮으니 이 과목은 2바퀴 더 복습해보세요.`;
+      }
+    }
+    html += '<div class="muted" style="font-size:11.5px;margin-top:6px;">※ 이 기기에서 카드학습으로 정답 맞춘 고유 문제 수 기준 추정치예요.</div>';
+    box.innerHTML = html;
+  },
+  renderCutline(){
+    const box = document.getElementById('cutlineBox');
+    if(!box) return;
+    const subj = App.profile.subject;
+    const meta = SUBJECTS_META[subj];
+    const counts = (meta && meta.subjectCounts) || {};
+    const stats = LS_get('eh_card_stats_'+subj, {});
+    let html = '';
+    let weightedSum = 0, weightedTotal = 0, anyFail = false, anyData = false;
+    Object.keys(counts).forEach(s=>{
+      const weight = counts[s];
+      const st = stats[s];
+      let badge, pctText;
+      if(!st || st.total<3){
+        badge = '<span class="cutline-badge nodata">데이터 부족</span>';
+        pctText = '-';
+      }else{
+        const pct = Math.round(st.correct/st.total*100);
+        pctText = pct+'%';
+        anyData = true;
+        weightedSum += pct*weight; weightedTotal += weight;
+        if(pct<40){ badge = '<span class="cutline-badge fail">과락 위험</span>'; anyFail = true; }
+        else if(pct<60){ badge = '<span class="cutline-badge warn">주의</span>'; }
+        else{ badge = '<span class="cutline-badge pass">안정</span>'; }
+      }
+      html += `<div class="cutline-row"><span class="cutline-subj">${s}</span><span style="width:44px;text-align:right;">${pctText}</span>${badge}</div>`;
+    });
+    if(anyData){
+      const overallPct = Math.round(weightedSum/weightedTotal);
+      const overallBadge = anyFail ? '<span class="cutline-badge fail">불합격 위험</span>'
+        : (overallPct>=60 ? '<span class="cutline-badge pass">합격권 근접</span>' : '<span class="cutline-badge warn">주의</span>');
+      html = `<div class="cutline-row" style="font-weight:700;"><span class="cutline-subj">전체 가중평균</span><span style="width:44px;text-align:right;">${overallPct}%</span>${overallBadge}</div>` + html;
+    }
+    html += '<div class="muted" style="font-size:11.5px;margin-top:8px;">※ 일반적인 기준(과목별 40% 미만=과락, 전체 평균 60% 미만=불합격 위험)으로 추정한 값이에요. 실제 합격 기준은 자격증마다 다를 수 있어요. 카드학습 기록(이 기기, 과목당 3문제 이상) 기준입니다.</div>';
+    box.innerHTML = html || '<span class="muted">아직 데이터가 없어요. 카드학습을 조금 더 해보세요.</span>';
+  },
+  renderHeatmap(){
+    const box = document.getElementById('heatmapBox');
+    if(!box) return;
+    const subj = App.profile.subject;
+    const log = LS_get('eh_activity_log_'+subj, []);
+    const dayCounts = {};
+    log.forEach(e=>{
+      const d = new Date(e.ts);
+      const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      dayCounts[key] = (dayCounts[key]||0) + e.count;
+    });
+    const cells = [];
+    const today = new Date(); today.setHours(0,0,0,0);
+    for(let i=39;i>=0;i--){
+      const d = new Date(today.getTime() - i*86400000);
+      const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const count = dayCounts[key] || 0;
+      let bg;
+      if(count===0) bg = 'var(--surface2,#e5e7eb)';
+      else if(count<5) bg = 'rgba(34,197,94,.35)';
+      else if(count<15) bg = 'rgba(34,197,94,.65)';
+      else bg = 'rgba(22,163,74,1)';
+      cells.push(`<div class="heatmap-cell" style="background:${bg}" title="${key}: ${count}문제"></div>`);
+    }
+    box.innerHTML = '<div class="heatmap-grid">'+cells.join('')+'</div>'
+      + '<div class="muted" style="font-size:11.5px;margin-top:8px;">※ 최근 40일 학습 기록이에요(이 기기 기준). 진할수록 그날 많이 풀었다는 뜻이에요.</div>';
+  },
+  renderConfStats(){
+    const box = document.getElementById('confStatsBox');
+    if(!box) return;
+    const subj = App.profile.subject;
+    const stats = LS_get('eh_card_conf_stats_'+subj, {});
+    const labelMap = {know:'👍 안다', maybe:'🤔 애매', dontknow:'❓ 모른다'};
+    let html = '';
+    ['know','maybe','dontknow'].forEach(k=>{
+      const st = stats[k];
+      if(!st || st.total===0){
+        html += `<div class="cutline-row"><span class="cutline-subj">${labelMap[k]}</span><span class="muted">데이터 없음</span></div>`;
+      }else{
+        const pct = Math.round(st.correct/st.total*100);
+        html += `<div class="cutline-row"><span class="cutline-subj">${labelMap[k]}</span><span>${st.correct}/${st.total}개 정답 (${pct}%)</span></div>`;
+      }
+    });
+    const guess = stats.dontknow && stats.dontknow.total ? stats.dontknow : null;
+    if(guess && guess.correct>0){
+      html += `<div class="muted" style="font-size:11.5px;margin-top:8px;">※ '모른다'라고 했는데 맞춘 ${guess.correct}문제는 찍어서 맞았을 가능성이 높아요 — 오답노트처럼 한 번 더 복습해보면 좋아요.</div>`;
+    }
+    box.innerHTML = html || '<span class="muted">카드학습에서 확신도를 선택하면 여기 통계가 쌓여요.</span>';
+  },
   saveExamDate(){
     const val = document.getElementById('setExamDate').value || null;
     App.profile.examDate = val;
@@ -2067,6 +2270,7 @@ const SettingsOB = {
     if(window.socket) socket.emit('profile:save', { subject: App.profile.subject, goalType: App.profile.goalType, goalNum: App.profile.goalNum, examDate: val });
     document.getElementById('setDdayInlineVal').textContent = val ? ddayText(val) : '미설정';
     document.getElementById('homeDday').textContent = val ? ddayText(val) : '';
+    this.renderDdayPlan();
     this.toggle('dday');
   }
 };
