@@ -151,6 +151,12 @@ button{font-family:inherit;}
 .flip-card{min-height:220px;display:flex;flex-direction:column;justify-content:flex-start;}
 .flip-card .qnum{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
 .flip-card .subj{color:var(--cyan);font-size:11.5px;font-weight:700;margin-bottom:6px;}
+.flip-card .wtag{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;margin-bottom:6px;flex-wrap:wrap;}
+.flip-card .wtag .wt-base{padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.08);}
+.flip-card .wtag .wt-base.new{color:var(--green);}
+.flip-card .wtag .wt-base.old{color:var(--muted);}
+.flip-card .wtag .wt-star{color:#f5c518;letter-spacing:1px;}
+.flip-card .wtag .wt-newword{padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--cyan);}
 .flip-card .qtext{font-size:16px;font-weight:600;line-height:1.55;margin-bottom:14px;}
 .flip-card .opts .qd-opt{cursor:pointer;}
 .flip-card .opts .qd-opt.correct-ans,.flip-card .opts .qd-opt.mine-wrong{cursor:default;}
@@ -482,6 +488,7 @@ button{font-family:inherit;}
           <button class="fc-icon-btn" onclick="Home.reportQuestion()">🚩 오류신고</button>
         </div>
         <div class="subj" id="fcSubj"></div>
+        <div class="wtag" id="fcTag" style="display:none"></div>
         <div class="qnum" id="fcNum"></div>
         <div class="qtext" id="fcQ"></div>
 <div class="q-img-box" id="fcImgBox" style="display:none"></div>
@@ -803,7 +810,7 @@ setTimeout(syncNavHeight, 300);
 const SUBJECTS_META = {
   emt2:  {label:'응급구조사 2급', data:()=>window.EMT2_DATA, subjectCounts:{총론:20,환자관리:20,법령:20,각론:60,장비:20}, timeLimitMin:150},
   comp2: {label:'컴활 2급 필기', data:()=>window.COMP2_DATA, subjectCounts:{'1과목':20,'2과목':20}, timeLimitMin:40},
-  hsk4:  {label:'HSK 4급', data:()=>window.HSK4_DATA, subjectCounts:{'인물·직업':13,'일상생활':13,'감정·성격':13,'학교·업무':13,'자연·시간·수량':12,'여행·쇼핑':12,'문법포인트':12,'듣기·독해 표현':12}, timeLimitMin:100}
+  hsk4:  {label:'HSK 4급', data:()=>window.HSK4_DATA, subjectCounts:{'가족·호칭':2,'위치·방향':2,'시간표현':2,'형용사(반의어)':6,'동사(반의어)':4,'HSK3.0 핵심표현':3,'고빈출 일반어휘':59,'기초한자·기본어휘':22}, timeLimitMin:100}
 };
 
 function LS_get(key, def){ try{ const v = localStorage.getItem(key); return v?JSON.parse(v):def; }catch(e){ return def; } }
@@ -1152,6 +1159,26 @@ const GlobalBack = {
 /* ---------------- 홈: 카드 넘기기 ---------------- */
 const Home = {
   fullPool:[], pool:[], idx:0, picked:null, filterSubj:'all', filterDiff:'all', bookmarkedIds:new Set(), weakMode:false,
+  // 문제에 q.pair(짝 문제의 id)가 있으면 랜덤 순서에서도 서로 바로 뒤에 이어 붙여서 섞는다.
+  // (예: "엄마" 문제가 나오면 바로 다음에 "아빠" 문제가 나오도록)
+  _pairShuffle(arr){
+    const idSet = new Set(arr.map(q=>q.id));
+    const byId = new Map(arr.map(q=>[q.id, q]));
+    const used = new Set();
+    const blocks = [];
+    arr.forEach(q=>{
+      if(used.has(q.id)) return;
+      if(q.pair && idSet.has(q.pair) && !used.has(q.pair)){
+        blocks.push([q, byId.get(q.pair)]);
+        used.add(q.id); used.add(q.pair);
+      } else {
+        blocks.push([q]);
+        used.add(q.id);
+      }
+    });
+    for(let i=blocks.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [blocks[i],blocks[j]]=[blocks[j],blocks[i]]; }
+    return blocks.flat();
+  },
   init(){
     const meta = SUBJECTS_META[App.profile.subject];
     this.fullPool = meta.data().Q;
@@ -1160,7 +1187,7 @@ const Home = {
     this.weakMode = false;
     this.buildFilterOptions();
     this.pool = this.fullPool.slice();
-    for(let i=this.pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [this.pool[i],this.pool[j]]=[this.pool[j],this.pool[i]]; }
+    this.pool = this._pairShuffle(this.pool);
     this.idx = LS_get('eh_home_idx_'+App.profile.subject, 0);
     if(this.idx >= this.pool.length) this.idx = 0;
     this.render();
@@ -1264,7 +1291,7 @@ const Home = {
       this.pool = this.fullPool.slice();
       alert('해당 조건의 문제가 없어 전체로 표시할게요.');
     }
-    for(let i=this.pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [this.pool[i],this.pool[j]]=[this.pool[j],this.pool[i]]; }
+    this.pool = this._pairShuffle(this.pool);
     this.idx = 0;
     this.render();
     this._save();
@@ -1291,8 +1318,7 @@ const Home = {
     const order = Object.keys(groups).sort((a,b)=>rateOf(a)-rateOf(b));
     let pool = [];
     order.forEach(s=>{
-      const arr = groups[s].slice();
-      for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+      const arr = this._pairShuffle(groups[s].slice());
       pool = pool.concat(arr);
     });
     this.pool = pool;
@@ -1309,6 +1335,18 @@ const Home = {
   render(){
     const q = this.pool[this.idx];
     document.getElementById('fcSubj').textContent = q.s;
+    const tagBox = document.getElementById('fcTag');
+    if(q.tag){
+      const cls = q.tag==='신규' ? 'new' : 'old';
+      const stars = '★'.repeat(q.star||0) + '☆'.repeat(Math.max(0,3-(q.star||0)));
+      let html = `<span class="wt-base ${cls}">${q.tag}</span><span class="wt-star">${stars}</span>`;
+      if(q.newWord) html += `<span class="wt-newword">신어휘</span>`;
+      tagBox.innerHTML = html;
+      tagBox.style.display = 'flex';
+    } else {
+      tagBox.style.display = 'none';
+      tagBox.innerHTML = '';
+    }
     document.getElementById('fcNum').textContent = `${this.idx+1} / ${this.pool.length}`;
     document.getElementById('fcQ').textContent = q.q;
     const fcImgBox=document.getElementById('fcImgBox'); if(q.img){ fcImgBox.innerHTML=q.img; fcImgBox.style.display='block'; } else { fcImgBox.style.display='none'; fcImgBox.innerHTML=''; }
