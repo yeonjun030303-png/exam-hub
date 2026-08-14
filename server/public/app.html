@@ -1215,6 +1215,7 @@ const Home = {
     this.sessionKey = 'sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
     this.sessionTotalIds = this.pool.map(q=>q.id).filter(Boolean);
     this.answeredInRun = new Set();
+    this.skipSolvedIds = null;
   },
   // 문제에 q.pair(짝 문제의 id)가 있으면 랜덤 순서에서도 서로 바로 뒤에 이어 붙여서 섞는다.
   // (예: "엄마" 문제가 나오면 바로 다음에 "아빠" 문제가 나오도록)
@@ -1248,6 +1249,8 @@ const Home = {
     this._newSession();
     this.idx = LS_get('eh_home_idx_'+App.profile.subject, 0);
     if(this.idx >= this.pool.length) this.idx = 0;
+    // 저장 불러오기로 진행 중이던 학습이 있으면(새로고침/재접속 후에도) 그대로 이어서 복원
+    this._restoreActiveSessionIfAny();
     this.render();
     // 서버에 저장된 마지막 카드 위치가 있으면(다른 기기 등) 그걸로 이어서 보기
     if(window.socket){
@@ -1372,6 +1375,7 @@ const Home = {
     }
     this.pool = this._pairShuffle(this.pool);
     this._newSession();
+    LS_set('eh_active_session_'+App.profile.subject, null);
     this.idx = 0;
     this.render();
     this._save();
@@ -1429,6 +1433,7 @@ const Home = {
     });
     this.pool = pool;
     this._newSession();
+    LS_set('eh_active_session_'+App.profile.subject, null);
     this.idx = 0;
     this.render();
     this._save();
@@ -1498,10 +1503,39 @@ const Home = {
     if(i!==q.a) this._recordWrong(q, i);
     this._recordSRS(q, i===q.a);
     if(q.id) this.answeredInRun.add(q.id);
+    if(q.id && this.skipSolvedIds) this.skipSolvedIds.add(q.id);
     this._clearTimer();
   },
-  next(){ this.idx = (this.idx+1) % this.pool.length; this._save(); this.render(); },
-  prev(){ this.idx = (this.idx-1+this.pool.length) % this.pool.length; this._save(); this.render(); },
+  // 진행 중인 저장 세션을 불러온 상태(skipSolvedIds)에서는 next/prev가 이미 푼 문제를 건너뛰고,
+  // 그렇지 않은 일반 학습에서는 기존처럼 모든 문제를 순서대로 넘긴다.
+  next(){
+    if(this.skipSolvedIds && this.skipSolvedIds.size){
+      let n = this.idx;
+      for(let k=0;k<this.pool.length;k++){
+        n = (n+1) % this.pool.length;
+        const q = this.pool[n];
+        if(!q || !this.skipSolvedIds.has(q.id)) break;
+      }
+      this.idx = n;
+    } else {
+      this.idx = (this.idx+1) % this.pool.length;
+    }
+    this._save(); this.render();
+  },
+  prev(){
+    if(this.skipSolvedIds && this.skipSolvedIds.size){
+      let n = this.idx;
+      for(let k=0;k<this.pool.length;k++){
+        n = (n-1+this.pool.length) % this.pool.length;
+        const q = this.pool[n];
+        if(!q || !this.skipSolvedIds.has(q.id)) break;
+      }
+      this.idx = n;
+    } else {
+      this.idx = (this.idx-1+this.pool.length) % this.pool.length;
+    }
+    this._save(); this.render();
+  },
   _save(){
     LS_set('eh_home_idx_'+App.profile.subject, this.idx);
     if(window.socket) socket.emit('cardProgress:save', { subject: App.profile.subject, index: this.idx });
@@ -1526,7 +1560,10 @@ const Home = {
     if(existingIdx>=0) list[existingIdx] = entry; else list.unshift(entry);
     if(list.length>20) list = list.slice(0,20);
     LS_set(key, list);
-    alert(`💾 저장했어요! (${solvedIds.length}/${this.sessionTotalIds.length}문제)`);
+    // 지금 이 학습을 "활성 저장 세션"으로 표시 → 새로고침/재접속해도 이어서 복원됨
+    LS_set('eh_active_session_'+App.profile.subject, this.sessionKey);
+    this.skipSolvedIds = new Set(solvedIds);
+    alert(`💾 저장했어요! (${solvedIds.length}/${this.sessionTotalIds.length}문제, 다음부터는 자동으로 이어서 진행돼요)`);
     const panel = document.getElementById('savedSessionsPanel');
     if(panel && panel.style.display!=='none') this.renderSavedPanel();
   },
@@ -1562,43 +1599,73 @@ const Home = {
       </div>`;
     }).join('');
   },
-  // 저장된 학습을 불러온다: 원래 문제 묶음(poolIds) 중 이미 푼 문제(solvedIds)는 제외하고,
-  // 안 푼 문제들만 원래 순서 그대로 이어서 출제한다.
+  // 저장된 학습을 원래 문항 순서 그대로 복원한다(전체 poolIds 순서 유지 → 상단 "n/총문항수" 번호가
+  // 저장 당시 그대로 이어짐). 이미 푼 문제(solvedIds)는 skipSolvedIds에 담아 next/prev에서 자동으로
+  // 건너뛰도록 하고, idx는 "다음에 풀어야 할 첫 번째 미해결 문제" 위치로 바로 이동시킨다.
+  // silent=true면(새로고침 후 자동 복원 시) 확인창/필터UI 갱신 없이 조용히 상태만 맞춘다.
+  _applySavedSession(s, silent){
+    const byId = new Map(this.fullPool.map(q=>[q.id, q]));
+    const solvedSet = new Set(s.solvedIds||[]);
+    const ordered = (s.poolIds||[]).map(id=>byId.get(id)).filter(Boolean);
+    if(!ordered.length) return 'empty';
+    const firstUnsolvedIdx = ordered.findIndex(q=>!solvedSet.has(q.id));
+    if(firstUnsolvedIdx===-1) return 'done';
+    if(!silent){
+      this.weakMode = false;
+      const wb = document.getElementById('fcWeakBtn');
+      if(wb){ wb.classList.remove('active'); wb.textContent = '🎯 약점 우선 학습'; }
+    }
+    this.filterSubj = s.filterSubj || 'all';
+    this.filterDiff = s.filterDiff || 'all';
+    const subjSel = document.getElementById('fcFilterSubj'); if(subjSel){ subjSel.value = this.filterSubj; subjSel.disabled = false; }
+    const diffSel = document.getElementById('fcFilterDiff'); if(diffSel){ diffSel.value = this.filterDiff; diffSel.disabled = false; }
+    this.pool = ordered;
+    this.idx = firstUnsolvedIdx;
+    this.sessionKey = s.sessionKey;
+    this.sessionTotalIds = (s.poolIds||[]).slice();
+    this.answeredInRun = new Set(s.solvedIds||[]);
+    this.skipSolvedIds = solvedSet;
+    LS_set('eh_active_session_'+App.profile.subject, s.sessionKey);
+    return 'ok';
+  },
+  // 앱을 새로고침/재접속했을 때, 마지막으로 저장·불러오기했던 학습이 있으면 자동으로 그 이어서
+  // 진행 상태를 복원한다(더 이상 "1부터 다시 시작"하지 않음).
+  _restoreActiveSessionIfAny(){
+    const activeKey = LS_get('eh_active_session_'+App.profile.subject, null);
+    if(!activeKey) return;
+    const list = LS_get('eh_saved_sessions_'+App.profile.subject, []);
+    const s = list.find(x=>x.sessionKey===activeKey);
+    if(!s){ LS_set('eh_active_session_'+App.profile.subject, null); return; }
+    const result = this._applySavedSession(s, true);
+    if(result!=='ok') LS_set('eh_active_session_'+App.profile.subject, null);
+  },
   loadSession(i){
     const key = 'eh_saved_sessions_'+App.profile.subject;
     const list = LS_get(key, []);
     const s = list[i];
     if(!s) return;
-    const byId = new Map(this.fullPool.map(q=>[q.id, q]));
-    const solvedSet = new Set(s.solvedIds||[]);
-    const remaining = (s.poolIds||[]).map(id=>byId.get(id)).filter(q=>q && !solvedSet.has(q.id));
-    if(!remaining.length){
+    const result = this._applySavedSession(s, false);
+    if(result==='empty' || result==='done'){
       alert('이 저장 학습은 이미 다 풀었어요! 저장 목록에서 지울게요.');
       this.deleteSession(i);
       return;
     }
-    this.weakMode = false;
-    const wb = document.getElementById('fcWeakBtn');
-    if(wb){ wb.classList.remove('active'); wb.textContent = '🎯 약점 우선 학습'; }
-    this.filterSubj = s.filterSubj || 'all';
-    this.filterDiff = s.filterDiff || 'all';
-    const subjSel = document.getElementById('fcFilterSubj'); if(subjSel){ subjSel.value = this.filterSubj; subjSel.disabled = false; }
-    const diffSel = document.getElementById('fcFilterDiff'); if(diffSel){ diffSel.value = this.filterDiff; diffSel.disabled = false; }
-    this.pool = remaining;
-    this.idx = 0;
-    this.sessionKey = s.sessionKey;
-    this.sessionTotalIds = (s.poolIds||[]).slice();
-    this.answeredInRun = new Set(s.solvedIds||[]);
     this.render();
     this._save();
     this.toggleSavedPanel();
-    alert(`이어서 시작해요! (${solvedSet.size}/${this.sessionTotalIds.length}문제 완료, 남은 ${remaining.length}문제)`);
+    const solvedCount = (s.solvedIds||[]).length;
+    const total = (s.poolIds||[]).length;
+    alert(`이어서 시작해요! (${solvedCount}/${total}문제 완료, ${this.idx+1}번째 문제부터 진행)`);
   },
   deleteSession(i){
     const key = 'eh_saved_sessions_'+App.profile.subject;
     let list = LS_get(key, []);
+    const removed = list[i];
     list.splice(i,1);
     LS_set(key, list);
+    if(removed && LS_get('eh_active_session_'+App.profile.subject, null)===removed.sessionKey){
+      LS_set('eh_active_session_'+App.profile.subject, null);
+    }
     this.renderSavedPanel();
   }
 };
