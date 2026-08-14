@@ -205,10 +205,12 @@ button{font-family:inherit;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;}
 .flip-card .ans.show{display:block;}
-.flip-nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
-.flip-nav .btn{flex:1 1 auto;min-width:110px;}
-.flip-nav .btn.active{background:var(--cyan-dim);color:var(--cyan);border-color:var(--cyan);font-weight:700;}
-.saved-sessions-panel{margin-top:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);}
+.flip-nav-stack{display:flex;flex-direction:column-reverse;gap:8px;margin-top:14px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
+.flip-nav{display:flex;flex-direction:column;gap:8px;}
+.flip-nav-row{display:flex;gap:8px;}
+.flip-nav-row .btn{flex:1 1 auto;min-width:110px;}
+.flip-nav-row .btn.active{background:var(--cyan-dim);color:var(--cyan);border-color:var(--cyan);font-weight:700;}
+.saved-sessions-panel{border:1px solid var(--line);border-radius:12px;overflow-y:auto;max-height:45vh;background:var(--surface);}
 .saved-session-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px dashed var(--line);}
 .saved-session-item:last-child{border-bottom:none;}
 .ssi-main{flex:1;display:flex;justify-content:space-between;align-items:center;padding:13px 14px;cursor:pointer;}
@@ -505,13 +507,19 @@ button{font-family:inherit;}
 <div class="opts" id="fcOpts"></div>
         <div class="ans" id="fcAns"></div>
       </div>
-      <div class="flip-nav">
-        <button class="btn ghost" onclick="Home.prev()">◀ 이전</button>
-        <button class="btn primary" onclick="Home.next()">다음 ▶</button>
-        <button class="btn ghost" onclick="Home.saveSession()">💾 저장</button>
-        <button class="btn ghost" id="fcLoadBtn" onclick="Home.toggleSavedPanel()">📂 저장 불러오기</button>
+      <div class="flip-nav-stack">
+        <div class="flip-nav">
+          <div class="flip-nav-row">
+            <button class="btn ghost" onclick="Home.prev()">◀ 이전</button>
+            <button class="btn primary" onclick="Home.next()">다음 ▶</button>
+          </div>
+          <div class="flip-nav-row">
+            <button class="btn ghost" onclick="Home.saveSession()">💾 저장하기</button>
+            <button class="btn ghost" id="fcLoadBtn" onclick="Home.toggleSavedPanel()">📂 저장 불러오기</button>
+          </div>
+        </div>
+        <div class="saved-sessions-panel" id="savedSessionsPanel" style="display:none;"></div>
       </div>
-      <div class="saved-sessions-panel" id="savedSessionsPanel" style="display:none;"></div>
     </div>
 
     <!-- 모의고사 패널 -->
