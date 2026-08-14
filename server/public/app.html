@@ -2353,6 +2353,32 @@ const SettingsOB = {
     const now = Date.now();
     const staleItems = wrongList.filter(item=>now-item.wrongAt > staleDays*86400000);
 
+    // 오답패턴 클러스터링 — 소과목별 집중도 + 특정 보기 번호 선택 편향
+    const subjWrongCount = {};
+    let posCount = [0,0,0,0];
+    let posTotal = 0;
+    wrongList.forEach(item=>{
+      const q = pool.find(x=>x.id===item.qid);
+      if(q) subjWrongCount[q.s] = (subjWrongCount[q.s]||0) + (item.cnt||1);
+      if(typeof item.myAns==='number' && item.myAns>=0 && item.myAns<4){
+        posCount[item.myAns] += (item.cnt||1);
+        posTotal += (item.cnt||1);
+      }
+    });
+    const topSubjWrong = Object.entries(subjWrongCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    let posBiasHtml = '';
+    if(posTotal>=5){
+      const maxPos = posCount.indexOf(Math.max(...posCount));
+      const maxRatio = posCount[maxPos]/posTotal;
+      if(maxRatio>=0.45){
+        posBiasHtml = `<div style="margin-top:6px;">오답 중 <b>${Math.round(maxRatio*100)}%</b>가 ${maxPos+1}번 보기를 골랐을 때였어요. 헷갈릴 때 특정 번호를 습관적으로 고르는 경향이 있는지 점검해보세요.</div>`;
+      }
+    }
+    const patternHtml = topSubjWrong.length ? `
+      <div style="margin-bottom:6px;">가장 많이 틀리는 소과목: ${topSubjWrong.map(([s,c],i)=>`<b>${s}</b>(${c}회)`).join(' · ')}</div>
+      ${posBiasHtml}
+    ` : '<div class="muted">아직 분석할 만한 오답 데이터가 부족해요.</div>';
+
     // 시험직전 요약 — D-day, 목표, 최근 활동
     const dday = App.profile.examDate ? ddayText(App.profile.examDate) : '시험일 미설정';
     const glabelMap = {daily:'하루',weekly:'일주일',monthly:'한달'};
@@ -2371,6 +2397,10 @@ const SettingsOB = {
         <div style="margin-top:6px;font-size:13px;">
           ${staleItems.length ? `최근 ${staleDays}일 넘게 다시 안 본 오답이 <b style="color:var(--red);">${staleItems.length}개</b> 있어요. 오답노트에서 확인해보세요.` : `${staleDays}일 이상 방치된 오답이 없어요. 잘 관리되고 있어요!`}
         </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <b>🔍 오답 패턴 분석</b>
+        <div style="margin-top:6px;font-size:13px;">${patternHtml}</div>
       </div>
       <div>
         <b>🔥 빈출 오답 TOP20</b> <span class="muted" style="font-size:12px;">(같은 문제를 여러 번 틀린 순)</span>
