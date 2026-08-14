@@ -205,8 +205,16 @@ button{font-family:inherit;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;}
 .flip-card .ans.show{display:block;}
-.flip-nav{display:flex;gap:8px;margin-top:14px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
-.flip-nav .btn{flex:1;}
+.flip-nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
+.flip-nav .btn{flex:1 1 auto;min-width:110px;}
+.flip-nav .btn.active{background:var(--cyan-dim);color:var(--cyan);border-color:var(--cyan);font-weight:700;}
+.saved-sessions-panel{margin-top:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);}
+.saved-session-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px dashed var(--line);}
+.saved-session-item:last-child{border-bottom:none;}
+.ssi-main{flex:1;display:flex;justify-content:space-between;align-items:center;padding:13px 14px;cursor:pointer;}
+.ssi-date{font-size:12px;color:var(--muted);}
+.ssi-progress{font-size:13.5px;font-weight:800;color:var(--cyan);}
+.ssi-del{background:none;border:none;color:var(--muted);font-size:15px;padding:10px 14px;cursor:pointer;}
 
 /* ===== 모의고사 목록 ===== */
 .exam-hist-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden;}
@@ -500,7 +508,10 @@ button{font-family:inherit;}
       <div class="flip-nav">
         <button class="btn ghost" onclick="Home.prev()">◀ 이전</button>
         <button class="btn primary" onclick="Home.next()">다음 ▶</button>
+        <button class="btn ghost" onclick="Home.saveSession()">💾 저장</button>
+        <button class="btn ghost" id="fcLoadBtn" onclick="Home.toggleSavedPanel()">📂 저장 불러오기</button>
       </div>
+      <div class="saved-sessions-panel" id="savedSessionsPanel" style="display:none;"></div>
     </div>
 
     <!-- 모의고사 패널 -->
@@ -1189,6 +1200,14 @@ const GlobalBack = {
 /* ---------------- 홈: 카드 넘기기 ---------------- */
 const Home = {
   fullPool:[], pool:[], idx:0, picked:null, filterSubj:'all', filterDiff:'all', bookmarkedIds:new Set(), weakMode:false,
+  answeredInRun:new Set(), sessionKey:null, sessionTotalIds:[],
+  // 지금 진행 중인 카드 묶음(pool)을 새로운 "학습 세션"으로 표시한다.
+  // (필터 변경/약점모드 진입 등 pool이 새로 만들어질 때마다 호출 — 저장 시 문제수 분모 계산에 사용)
+  _newSession(){
+    this.sessionKey = 'sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    this.sessionTotalIds = this.pool.map(q=>q.id).filter(Boolean);
+    this.answeredInRun = new Set();
+  },
   // 문제에 q.pair(짝 문제의 id)가 있으면 랜덤 순서에서도 서로 바로 뒤에 이어 붙여서 섞는다.
   // (예: "엄마" 문제가 나오면 바로 다음에 "아빠" 문제가 나오도록)
   _pairShuffle(arr){
@@ -1218,6 +1237,7 @@ const Home = {
     this.buildFilterOptions();
     this.pool = this.fullPool.slice();
     this.pool = this._pairShuffle(this.pool);
+    this._newSession();
     this.idx = LS_get('eh_home_idx_'+App.profile.subject, 0);
     if(this.idx >= this.pool.length) this.idx = 0;
     this.render();
@@ -1343,6 +1363,7 @@ const Home = {
       alert(this.filterDiff==='srs' ? '오늘 복습할 문제가 없어요! 전체로 표시할게요.' : '해당 조건의 문제가 없어 전체로 표시할게요.');
     }
     this.pool = this._pairShuffle(this.pool);
+    this._newSession();
     this.idx = 0;
     this.render();
     this._save();
@@ -1399,6 +1420,7 @@ const Home = {
       pool = pool.concat(arr);
     });
     this.pool = pool;
+    this._newSession();
     this.idx = 0;
     this.render();
     this._save();
@@ -1467,6 +1489,7 @@ const Home = {
     this._recordStat(q, i===q.a);
     if(i!==q.a) this._recordWrong(q, i);
     this._recordSRS(q, i===q.a);
+    if(q.id) this.answeredInRun.add(q.id);
     this._clearTimer();
   },
   next(){ this.idx = (this.idx+1) % this.pool.length; this._save(); this.render(); },
@@ -1474,6 +1497,101 @@ const Home = {
   _save(){
     LS_set('eh_home_idx_'+App.profile.subject, this.idx);
     if(window.socket) socket.emit('cardProgress:save', { subject: App.profile.subject, index: this.idx });
+  },
+  // ===== 학습 저장 / 불러오기 =====
+  // "저장" 버튼: 지금 진행 중인 학습 세션(pool 전체 + 지금까지 푼 문제)을 기기에 저장한다.
+  // 저장하지 않으면 기존과 동일하게(앱을 나갔다 오면 새로 랜덤 섞여서) 처음부터 진행된다.
+  saveSession(){
+    if(!this.sessionTotalIds || !this.sessionTotalIds.length){ alert('저장할 학습이 없어요.'); return; }
+    const key = 'eh_saved_sessions_'+App.profile.subject;
+    let list = LS_get(key, []);
+    const solvedIds = Array.from(this.answeredInRun).filter(id=>this.sessionTotalIds.includes(id));
+    const entry = {
+      sessionKey: this.sessionKey,
+      savedAt: Date.now(),
+      filterSubj: this.filterSubj,
+      filterDiff: this.filterDiff,
+      poolIds: this.sessionTotalIds.slice(),
+      solvedIds
+    };
+    const existingIdx = list.findIndex(s=>s.sessionKey===this.sessionKey);
+    if(existingIdx>=0) list[existingIdx] = entry; else list.unshift(entry);
+    if(list.length>20) list = list.slice(0,20);
+    LS_set(key, list);
+    alert(`💾 저장했어요! (${solvedIds.length}/${this.sessionTotalIds.length}문제)`);
+    const panel = document.getElementById('savedSessionsPanel');
+    if(panel && panel.style.display!=='none') this.renderSavedPanel();
+  },
+  toggleSavedPanel(){
+    const panel = document.getElementById('savedSessionsPanel');
+    const btn = document.getElementById('fcLoadBtn');
+    const opening = !panel.style.display || panel.style.display==='none';
+    if(opening){
+      panel.style.display = 'block';
+      if(btn) btn.classList.add('active');
+      this.renderSavedPanel();
+    } else {
+      panel.style.display = 'none';
+      if(btn) btn.classList.remove('active');
+    }
+  },
+  renderSavedPanel(){
+    const key = 'eh_saved_sessions_'+App.profile.subject;
+    const list = LS_get(key, []);
+    const panel = document.getElementById('savedSessionsPanel');
+    if(!panel) return;
+    if(!list.length){ panel.innerHTML = '<div class="empty">저장된 학습이 없어요. "💾 저장" 버튼을 눌러 지금 진행 상황을 저장해보세요.</div>'; return; }
+    panel.innerHTML = list.map((s,i)=>{
+      const date = new Date(s.savedAt).toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const solved = (s.solvedIds||[]).length;
+      const total = (s.poolIds||[]).length;
+      return `<div class="saved-session-item">
+        <div class="ssi-main" onclick="Home.loadSession(${i})">
+          <span class="ssi-date">${date}</span>
+          <span class="ssi-progress">${solved}/${total}문제</span>
+        </div>
+        <button class="ssi-del" onclick="event.stopPropagation();Home.deleteSession(${i})">✕</button>
+      </div>`;
+    }).join('');
+  },
+  // 저장된 학습을 불러온다: 원래 문제 묶음(poolIds) 중 이미 푼 문제(solvedIds)는 제외하고,
+  // 안 푼 문제들만 원래 순서 그대로 이어서 출제한다.
+  loadSession(i){
+    const key = 'eh_saved_sessions_'+App.profile.subject;
+    const list = LS_get(key, []);
+    const s = list[i];
+    if(!s) return;
+    const byId = new Map(this.fullPool.map(q=>[q.id, q]));
+    const solvedSet = new Set(s.solvedIds||[]);
+    const remaining = (s.poolIds||[]).map(id=>byId.get(id)).filter(q=>q && !solvedSet.has(q.id));
+    if(!remaining.length){
+      alert('이 저장 학습은 이미 다 풀었어요! 저장 목록에서 지울게요.');
+      this.deleteSession(i);
+      return;
+    }
+    this.weakMode = false;
+    const wb = document.getElementById('fcWeakBtn');
+    if(wb){ wb.classList.remove('active'); wb.textContent = '🎯 약점 우선 학습'; }
+    this.filterSubj = s.filterSubj || 'all';
+    this.filterDiff = s.filterDiff || 'all';
+    const subjSel = document.getElementById('fcFilterSubj'); if(subjSel){ subjSel.value = this.filterSubj; subjSel.disabled = false; }
+    const diffSel = document.getElementById('fcFilterDiff'); if(diffSel){ diffSel.value = this.filterDiff; diffSel.disabled = false; }
+    this.pool = remaining;
+    this.idx = 0;
+    this.sessionKey = s.sessionKey;
+    this.sessionTotalIds = (s.poolIds||[]).slice();
+    this.answeredInRun = new Set(s.solvedIds||[]);
+    this.render();
+    this._save();
+    this.toggleSavedPanel();
+    alert(`이어서 시작해요! (${solvedSet.size}/${this.sessionTotalIds.length}문제 완료, 남은 ${remaining.length}문제)`);
+  },
+  deleteSession(i){
+    const key = 'eh_saved_sessions_'+App.profile.subject;
+    let list = LS_get(key, []);
+    list.splice(i,1);
+    LS_set(key, list);
+    this.renderSavedPanel();
   }
 };
 
