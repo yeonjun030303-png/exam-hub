@@ -555,6 +555,17 @@ button{font-family:inherit;}
       <span class="val" id="setStreakVal">-</span>
     </div>
 
+    <div class="ob-bar" style="padding:14px;">
+      <div class="lbl" style="margin-bottom:10px;">🌐 연결 모드</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button class="btn ghost" id="connModeBtn-auto" onclick="ConnMode.set('auto')" style="flex:1;">자동</button>
+        <button class="btn ghost" id="connModeBtn-online" onclick="ConnMode.set('online')" style="flex:1;">온라인</button>
+        <button class="btn ghost" id="connModeBtn-offline" onclick="ConnMode.set('offline')" style="flex:1;">오프라인</button>
+      </div>
+      <div id="connModeStatus" style="font-size:12px;color:var(--muted,#9ca3af);">연결 상태 확인 중...</div>
+      <div style="font-size:11px;color:var(--muted,#9ca3af);margin-top:6px;">비행기 모드 등으로 인터넷이 없을 땐 '오프라인'을 눌러두면 서버 연결을 아예 시도하지 않고 저장된 데이터로만 학습해요. 나중에 다시 연결되면 '자동'으로 돌리세요.</div>
+    </div>
+
     <div class="ob-bar">
       <button class="ob-bar-head" id="setSubjHead" onclick="SettingsOB.toggle('subj')">
         <span class="lbl">📘 자격증 선택 <span class="val" id="setSubjInlineVal"></span></span>
@@ -2927,10 +2938,20 @@ const AiDiagChat = {
 
 const Auth = {
   phoneCheckTimer:null,
+  connTimeout:null,
   init(){
     const token = LS_get('eh_token', null);
     if(!token){ this.showLogin(); return; }
+    if(ConnMode.get() === 'offline'){
+      this.enterOfflineShell();
+      return;
+    }
     this.connectAfterAuth();
+  },
+  enterOfflineShell(){
+    document.getElementById('authScreen').classList.remove('show');
+    OB.init();
+    ConnMode.setStatus('offline');
   },
   showLogin(){
     document.getElementById('authScreen').classList.add('show');
@@ -2996,19 +3017,70 @@ const Auth = {
   },
   connectAfterAuth(){
     const token = LS_get('eh_token', null);
-    window.socket = io({ auth: { token } });
+    ConnMode.setStatus('connecting');
+    window.socket = io({ auth: { token }, reconnection: true, reconnectionDelay: 2000, reconnectionDelayMax: 10000 });
+    let entered = false;
+    clearTimeout(this.connTimeout);
+    this.connTimeout = setTimeout(()=>{
+      if(!entered){ entered = true; this.enterOfflineShell(); }
+    }, 3000);
     socket.on('connect', ()=>{
-      document.getElementById('authScreen').classList.remove('show');
-      OB.init();
+      clearTimeout(this.connTimeout);
+      if(!entered){
+        entered = true;
+        document.getElementById('authScreen').classList.remove('show');
+        OB.init();
+      }
+      ConnMode.setStatus('online');
     });
     socket.on('connect_error', ()=>{
-      LS_set('eh_token', null);
-      document.getElementById('authLoginError').textContent = '';
-      this.showLogin();
+      // 네트워크가 안 될 뿐인데 토큰을 지우고 로그인화면으로 쫓아내던 버그 수정.
+      // 로그인 자체가 실패한 게 아니라면(=이미 로그인된 상태였다면) 토큰은 그대로 두고 오프라인으로 계속 진행.
+      ConnMode.setStatus('offline');
+      if(!entered){ clearTimeout(this.connTimeout); entered = true; this.enterOfflineShell(); }
     });
+    socket.on('disconnect', ()=>{ ConnMode.setStatus('offline'); });
   }
 };
 
+const ConnMode = {
+  get(){ return LS_get('eh_conn_mode', 'auto'); },
+  set(mode){
+    LS_set('eh_conn_mode', mode);
+    this.renderButtons();
+    if(mode === 'offline'){
+      clearTimeout(Auth.connTimeout);
+      if(window.socket){ socket.disconnect(); }
+      this.setStatus('offline');
+    } else {
+      if(!window.socket || !socket.connected){ Auth.connectAfterAuth(); }
+    }
+  },
+  setStatus(state){
+    const el = document.getElementById('connModeStatus');
+    if(!el) return;
+    if(state === 'online') el.textContent = '🟢 연결됨 (온라인)';
+    else if(state === 'connecting') el.textContent = '🔄 연결 시도 중...';
+    else el.textContent = '⚪ 오프라인 모드 — 저장된 데이터로 학습 중, 재연결되면 자동 반영돼요';
+  },
+  renderButtons(){
+    const mode = this.get();
+    ['auto','online','offline'].forEach(function(m){
+      const b = document.getElementById('connModeBtn-'+m);
+      if(!b) return;
+      if(m===mode){ b.style.background='var(--accent,#3b82f6)'; b.style.color='#fff'; b.style.borderColor='var(--accent,#3b82f6)'; }
+      else { b.style.background=''; b.style.color=''; b.style.borderColor=''; }
+    });
+  },
+  init(){
+    this.renderButtons();
+    const self = this;
+    window.addEventListener('online', function(){ if(self.get() !== 'offline') Auth.connectAfterAuth(); });
+    window.addEventListener('offline', function(){ self.setStatus('offline'); });
+  }
+};
+
+ConnMode.init();
 Auth.init();
 
 if ('serviceWorker' in navigator) {
