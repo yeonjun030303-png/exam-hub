@@ -1573,6 +1573,7 @@ const Home = {
     LS_set(key, list);
     // 지금 이 학습을 "활성 저장 세션"으로 표시 → 새로고침/재접속해도 이어서 복원됨
     LS_set('eh_active_session_'+App.profile.subject, this.sessionKey);
+    if(window.socket) socket.emit('savedSession:save', { subject: App.profile.subject, entry });
     this.skipSolvedIds = new Set(solvedIds);
     alert(`💾 저장했어요! (${solvedIds.length}/${this.sessionTotalIds.length}문제, 다음부터는 자동으로 이어서 진행돼요)`);
     const panel = document.getElementById('savedSessionsPanel');
@@ -1642,6 +1643,7 @@ const Home = {
   // 앱을 새로고침/재접속했을 때, 마지막으로 저장·불러오기했던 학습이 있으면 자동으로 그 이어서
   // 진행 상태를 복원한다(더 이상 "1부터 다시 시작"하지 않음).
   _restoreActiveSessionIfAny(){
+    this.syncSavedSessionsFromServer();
     const activeKey = LS_get('eh_active_session_'+App.profile.subject, null);
     if(!activeKey) return;
     const list = LS_get('eh_saved_sessions_'+App.profile.subject, []);
@@ -1677,7 +1679,23 @@ const Home = {
     if(removed && LS_get('eh_active_session_'+App.profile.subject, null)===removed.sessionKey){
       LS_set('eh_active_session_'+App.profile.subject, null);
     }
+    if(window.socket && removed) socket.emit('savedSession:delete', { subject: App.profile.subject, sessionKey: removed.sessionKey });
     this.renderSavedPanel();
+  },
+  // 서버에 저장된 세션 목록을 받아와 로컬에 없는 것만 채워넣는다(로그인/기기·브라우저가 달라도 이어서 진행 가능)
+  syncSavedSessionsFromServer(){
+    if(!window.socket) return;
+    socket.emit('savedSession:list', { subject: App.profile.subject }, (res)=>{
+      if(!res || !res.success || !Array.isArray(res.list)) return;
+      const key = 'eh_saved_sessions_'+App.profile.subject;
+      const local = LS_get(key, []);
+      const localKeys = new Set(local.map(s=>s.sessionKey));
+      const merged = local.concat(res.list.filter(s=>!localKeys.has(s.sessionKey)));
+      merged.sort((a,b)=>b.savedAt-a.savedAt);
+      LS_set(key, merged.slice(0,20));
+      const panel = document.getElementById('savedSessionsPanel');
+      if(panel && panel.style.display!=='none') this.renderSavedPanel();
+    });
   }
 };
 

@@ -212,6 +212,34 @@ io.on('connection', (socket) => {
       cb && cb({ success: true });
     } catch (e) { console.error(e); cb && cb({ success: false }); }
   });
+
+    socket.on('savedSession:save', async (data, cb) => {
+      try {
+        const { subject, entry } = data || {};
+        if (!subject || !entry || !entry.sessionKey) return cb && cb({ success: false });
+        await db.ref(`users/${uid}/savedSessions/${subject}/${entry.sessionKey}`).set(entry);
+        cb && cb({ success: true });
+      } catch (e) { console.error(e); cb && cb({ success: false }); }
+    });
+
+    socket.on('savedSession:delete', async (data, cb) => {
+      try {
+        const { subject, sessionKey } = data || {};
+        if (!subject || !sessionKey) return cb && cb({ success: false });
+        await db.ref(`users/${uid}/savedSessions/${subject}/${sessionKey}`).remove();
+        cb && cb({ success: true });
+      } catch (e) { console.error(e); cb && cb({ success: false }); }
+    });
+
+    socket.on('savedSession:list', async (data, cb) => {
+      try {
+        const { subject } = data || {};
+        if (!subject) return cb && cb({ success: false, list: [] });
+        const snap = await db.ref(`users/${uid}/savedSessions/${subject}`).once('value');
+        const val = snap.val() || {};
+        cb && cb({ success: true, list: Object.values(val) });
+      } catch (e) { console.error(e); cb && cb({ success: false, list: [] }); }
+    });
   socket.on('cardProgress:get', async (data, cb) => {
     try {
       const snap = await db.ref(`users/${uid}/cardProgress/${(data && data.subject) || ''}`).once('value');
