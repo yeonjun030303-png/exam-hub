@@ -98,6 +98,8 @@ button{font-family:inherit;}
   transition:transform 0.25s ease;}
 #bottomnav.hide{display:none;}
 #bottomnav.navhide{transform:translateX(-50%) translateY(130%);}
+#scrollTopBtn{position:fixed;left:50%;transform:translateX(155px) translateY(10px);bottom:calc(var(--navh) + 16px);width:44px;height:44px;border-radius:50%;background:var(--cyan);color:#04202a;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.4);z-index:170;opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;border:none;cursor:pointer;}
+#scrollTopBtn.show{opacity:1;pointer-events:auto;transform:translateX(155px) translateY(0);}
 .navbtn{flex:1;background:none;border:none;color:var(--muted);display:flex;flex-direction:column;
   align-items:center;gap:2px;padding:6px 2px;cursor:pointer;font-size:10.5px;font-weight:700;}
 .navbtn .ic{font-size:19px;}
@@ -205,7 +207,8 @@ button{font-family:inherit;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;margin-bottom:14px;}
 .flip-card .ans.show{display:block;}
-.flip-nav-stack{display:flex;flex-direction:column-reverse;gap:8px;margin-top:20px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);}
+.flip-nav-stack{display:flex;flex-direction:column-reverse;gap:8px;margin-top:20px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);transition:transform .25s ease,opacity .25s ease;}
+.flip-nav-stack.nav-collapsed{transform:translateY(140%);opacity:0;pointer-events:none;}
 .flip-nav{display:flex;flex-direction:column;gap:8px;}
 .flip-nav-row{display:flex;gap:8px;}
 .flip-nav-row .btn{flex:1 1 auto;min-width:110px;}
@@ -767,6 +770,9 @@ button{font-family:inherit;}
   <div class="aidc-body" id="aiDiagChatBody"></div>
 </div>
 
+<!-- 맨 위로 이동 버튼 -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">⬆</button>
+
 <!-- 하단 네비 -->
 <div id="bottomnav">
   <button class="navbtn" data-v="home" onclick="Nav.go('home')"><span class="ic">🏠</span>홈</button>
@@ -859,6 +865,35 @@ setTimeout(syncNavHeight, 300);
     stopTimer = setTimeout(showNav, 500);
   }
   window.addEventListener('scroll', onScroll, {passive:true});
+})();
+
+// 카드학습 하단 버튼 묶음(이전/다음+저장하기/저장불러오기) 아코디언:
+// 아래로 스크롤하면 숨기고, 위로 살짝 당기면(스크롤업) 나타남
+(function(){
+  let lastY2 = window.scrollY || 0;
+  const THRESHOLD2 = 6;
+  function getStack(){ return document.querySelector('.flip-nav-stack'); }
+  function showStack(){ const el = getStack(); if(el) el.classList.remove('nav-collapsed'); }
+  function hideStack(){ const el = getStack(); if(el) el.classList.add('nav-collapsed'); }
+  function onScroll2(){
+    const y = window.scrollY || 0;
+    const dy = y - lastY2;
+    if(dy > THRESHOLD2){ hideStack(); }
+    else if(dy < -THRESHOLD2){ showStack(); }
+    lastY2 = y;
+  }
+  window.addEventListener('scroll', onScroll2, {passive:true});
+})();
+
+// 맨 위로 이동 버튼: 일정 이상 스크롤됐을 때만 노출
+(function(){
+  const btn = document.getElementById('scrollTopBtn');
+  if(!btn) return;
+  function onScroll3(){
+    if((window.scrollY||0) > 300) btn.classList.add('show');
+    else btn.classList.remove('show');
+  }
+  window.addEventListener('scroll', onScroll3, {passive:true});
 })();
 
 /* =========================================================
