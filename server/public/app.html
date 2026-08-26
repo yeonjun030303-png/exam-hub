@@ -1621,7 +1621,10 @@ const Home = {
     if(opening){
       panel.style.display = 'block';
       if(btn) btn.classList.add('active');
-      this.renderSavedPanel();
+      panel.innerHTML = '<div class="empty">불러오는 중...</div>';
+      // 열 때마다 서버(계정 기준)에서 최신 저장 목록을 다시 받아와 합쳐서 보여줌
+      // -> 다른 브라우저/기기에서 로그인해도 저장했던 학습이 그대로 보임
+      this.syncSavedSessionsFromServer(()=>{ this.renderSavedPanel(); });
     } else {
       panel.style.display = 'none';
       if(btn) btn.classList.remove('active');
@@ -1718,18 +1721,20 @@ const Home = {
     this.renderSavedPanel();
   },
   // 서버에 저장된 세션 목록을 받아와 로컬에 없는 것만 채워넣는다(로그인/기기·브라우저가 달라도 이어서 진행 가능)
-  syncSavedSessionsFromServer(){
-    if(!window.socket) return;
+  syncSavedSessionsFromServer(cb){
+    if(!window.socket){ if(cb) cb(); return; }
     socket.emit('savedSession:list', { subject: App.profile.subject }, (res)=>{
-      if(!res || !res.success || !Array.isArray(res.list)) return;
-      const key = 'eh_saved_sessions_'+App.profile.subject;
-      const local = LS_get(key, []);
-      const localKeys = new Set(local.map(s=>s.sessionKey));
-      const merged = local.concat(res.list.filter(s=>!localKeys.has(s.sessionKey)));
-      merged.sort((a,b)=>b.savedAt-a.savedAt);
-      LS_set(key, merged.slice(0,20));
+      if(res && res.success && Array.isArray(res.list)){
+        const key = 'eh_saved_sessions_'+App.profile.subject;
+        const local = LS_get(key, []);
+        const localKeys = new Set(local.map(s=>s.sessionKey));
+        const merged = local.concat(res.list.filter(s=>!localKeys.has(s.sessionKey)));
+        merged.sort((a,b)=>b.savedAt-a.savedAt);
+        LS_set(key, merged.slice(0,20));
+      }
       const panel = document.getElementById('savedSessionsPanel');
       if(panel && panel.style.display!=='none') this.renderSavedPanel();
+      if(cb) cb();
     });
   }
 };
