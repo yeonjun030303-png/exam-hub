@@ -1608,8 +1608,27 @@ const Home = {
     LS_set(key, list);
     // 지금 이 학습을 "활성 저장 세션"으로 표시 → 새로고침/재접속해도 이어서 복원됨
     LS_set('eh_active_session_'+App.profile.subject, this.sessionKey);
-    if(window.socket) socket.emit('savedSession:save', { subject: App.profile.subject, entry });
     this.skipSolvedIds = new Set(solvedIds);
+    // 서버(계정) 동기화: 연결이 아직 안 돼있거나(재접속 중 등) 실패하면 잠깐씩 텀을 두고 재시도함
+    // (콘솔에 성공/실패 로그를 남겨 다른 기기에서 안 보일 때 원인 확인 가능)
+    const subjectForSync = App.profile.subject;
+    const trySyncSave = (attempt)=>{
+      if(!window.socket || !socket.connected){
+        if(attempt < 6){ setTimeout(()=>trySyncSave(attempt+1), 1500); }
+        else console.error('[저장하기] 서버 연결 실패로 동기화 못함(로컬에는 저장됨):', entry.sessionKey);
+        return;
+      }
+      socket.emit('savedSession:save', { subject: subjectForSync, entry }, (res)=>{
+        if(res && res.success){
+          console.log('[저장하기] 서버 동기화 성공:', entry.sessionKey);
+        } else if(attempt < 6){
+          setTimeout(()=>trySyncSave(attempt+1), 1500);
+        } else {
+          console.error('[저장하기] 서버 동기화 실패(로컬에는 저장됨):', entry.sessionKey, res);
+        }
+      });
+    };
+    trySyncSave(1);
     alert(`💾 저장했어요! (${solvedIds.length}/${this.sessionTotalIds.length}문제, 다음부터는 자동으로 이어서 진행돼요)`);
     const panel = document.getElementById('savedSessionsPanel');
     if(panel && panel.style.display!=='none') this.renderSavedPanel();
