@@ -1557,11 +1557,13 @@ const Home = {
   next(){
     if(this.skipSolvedIds && this.skipSolvedIds.size){
       let n = this.idx;
+      let found = false;
       for(let k=0;k<this.pool.length;k++){
         n = (n+1) % this.pool.length;
         const q = this.pool[n];
-        if(!q || !this.skipSolvedIds.has(q.id)) break;
+        if(!q || !this.skipSolvedIds.has(q.id)){ found = true; break; }
       }
+      if(!found){ alert('이 저장 학습의 모든 문제를 다 풀었어요! \ud83c\udf89'); return; }
       this.idx = n;
     } else {
       this.idx = (this.idx+1) % this.pool.length;
@@ -1571,11 +1573,13 @@ const Home = {
   prev(){
     if(this.skipSolvedIds && this.skipSolvedIds.size){
       let n = this.idx;
+      let found = false;
       for(let k=0;k<this.pool.length;k++){
         n = (n-1+this.pool.length) % this.pool.length;
         const q = this.pool[n];
-        if(!q || !this.skipSolvedIds.has(q.id)) break;
+        if(!q || !this.skipSolvedIds.has(q.id)){ found = true; break; }
       }
+      if(!found){ alert('이 저장 학습의 모든 문제를 다 풀었어요! \ud83c\udf89'); return; }
       this.idx = n;
     } else {
       this.idx = (this.idx-1+this.pool.length) % this.pool.length;
