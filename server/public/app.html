@@ -1556,15 +1556,13 @@ const Home = {
   // 그렇지 않은 일반 학습에서는 기존처럼 모든 문제를 순서대로 넘긴다.
   next(){
     if(this.skipSolvedIds && this.skipSolvedIds.size){
-      let n = this.idx;
-      let found = false;
-      for(let k=0;k<this.pool.length;k++){
-        n = (n+1) % this.pool.length;
-        const q = this.pool[n];
-        if(!q || !this.skipSolvedIds.has(q.id)){ found = true; break; }
+      let found = -1;
+      for(let i=this.idx+1;i<this.pool.length;i++){
+        const q = this.pool[i];
+        if(!q || !this.skipSolvedIds.has(q.id)){ found = i; break; }
       }
-      if(!found){ alert('이 저장 학습의 모든 문제를 다 풀었어요! \ud83c\udf89'); return; }
-      this.idx = n;
+      if(found===-1){ alert('\ud83c\udf89 여기가 이 저장 학습의 마지막이에요! 안 푼 문제를 다 풀었어요.'); return; }
+      this.idx = found;
     } else {
       this.idx = (this.idx+1) % this.pool.length;
     }
@@ -1572,15 +1570,13 @@ const Home = {
   },
   prev(){
     if(this.skipSolvedIds && this.skipSolvedIds.size){
-      let n = this.idx;
-      let found = false;
-      for(let k=0;k<this.pool.length;k++){
-        n = (n-1+this.pool.length) % this.pool.length;
-        const q = this.pool[n];
-        if(!q || !this.skipSolvedIds.has(q.id)){ found = true; break; }
+      let found = -1;
+      for(let i=this.idx-1;i>=0;i--){
+        const q = this.pool[i];
+        if(!q || !this.skipSolvedIds.has(q.id)){ found = i; break; }
       }
-      if(!found){ alert('이 저장 학습의 모든 문제를 다 풀었어요! \ud83c\udf89'); return; }
-      this.idx = n;
+      if(found===-1){ alert('\ud83d\udccc 여기가 이 저장 학습의 시작 지점이에요. 더 이전 문제는 없어요.'); return; }
+      this.idx = found;
     } else {
       this.idx = (this.idx-1+this.pool.length) % this.pool.length;
     }
