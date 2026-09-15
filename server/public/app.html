@@ -520,6 +520,9 @@ button{font-family:inherit;}
             <button class="btn ghost" onclick="Home.saveSession()">💾 저장하기</button>
             <button class="btn ghost" id="fcLoadBtn" onclick="Home.toggleSavedPanel()">📂 저장 불러오기</button>
           </div>
+          <div class="flip-nav-row">
+            <button class="btn ghost" onclick="Home.resetToStart()">🔄 초기화</button>
+          </div>
         </div>
         <div class="saved-sessions-panel" id="savedSessionsPanel" style="display:none;"></div>
       </div>
@@ -1581,6 +1584,12 @@ const Home = {
       this.idx = (this.idx-1+this.pool.length) % this.pool.length;
     }
     this._save(); this.render();
+  },
+  resetToStart(){
+    if(!confirm('초기화 버튼 누르시겠습니까?')) return;
+    this.idx = 0;
+    this._save();
+    this.render();
   },
   _save(){
     LS_set('eh_home_idx_'+App.profile.subject, this.idx);
