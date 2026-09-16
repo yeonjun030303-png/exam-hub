@@ -207,6 +207,13 @@ button{font-family:inherit;}
 .flip-card .ans{background:var(--bg2);border-left:3px solid var(--cyan);border-radius:0 12px 12px 0;
   padding:12px 13px;font-size:13px;line-height:1.6;display:none;margin-top:10px;margin-bottom:14px;}
 .flip-card .ans.show{display:block;}
+.wrong-explain-box{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+.wrong-explain-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.3px;}
+.wrong-explain-item{background:var(--surface2);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.wrong-explain-item:last-child{margin-bottom:0;}
+.wrong-explain-num{color:#fff;font-weight:700;font-size:12.5px;margin-bottom:5px;}
+.wrong-explain-what{color:#fff;font-size:12.5px;line-height:1.55;margin-bottom:5px;}
+.wrong-explain-why{color:var(--muted);font-size:12.5px;line-height:1.55;padding-left:10px;border-left:2px solid var(--red);}
 .flip-nav-stack{display:flex;flex-direction:column-reverse;gap:8px;margin-top:20px;position:sticky;bottom:calc(var(--navh) + 10px);z-index:160;background:var(--bg);padding:10px 0 6px;border-top:1px solid var(--line);transition:transform .25s ease,opacity .25s ease;}
 .flip-nav-stack.nav-collapsed{transform:translateY(140%);opacity:0;pointer-events:none;}
 .flip-nav{display:flex;flex-direction:column;gap:8px;}
@@ -1546,7 +1553,26 @@ const Home = {
     });
     const ansBox = document.getElementById('fcAns');
     const timeUp = (i===-1);
-    ansBox.innerHTML = (timeUp ? `<b style="color:var(--red)">⏰ 시간 초과!</b><br>` : '') + `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}` + (q.r ? `<div class="qd-ref">[${q.r}]</div>` : '');
+    let html = (timeUp ? `<b style="color:var(--red)">⏰ 시간 초과!</b><br>` : '') + `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}` + (q.r ? `<div class="qd-ref">[${q.r}]</div>` : '');
+    // 오답 선택지별 해설(정답 해설과 시각적으로 구분해서 표시): 각 선택지가 무엇에 대한 설명인지(w) +
+    // 왜 이 문제의 정답이 될 수 없는지(r)를 항목별로 나눠 보여준다.
+    if(q.we){
+      let wrongHtml = '';
+      order.forEach((oi,j)=>{
+        if(oi===q.a) return;
+        const we = q.we[oi];
+        if(!we) return;
+        const what = (typeof we==='object') ? we.w : we;
+        const why = (typeof we==='object') ? we.r : '';
+        wrongHtml += `<div class="wrong-explain-item">
+          <div class="wrong-explain-num">${j+1}번: ${q.o[oi]}</div>
+          ${what ? `<div class="wrong-explain-what">${what}</div>` : ''}
+          ${why ? `<div class="wrong-explain-why">${why}</div>` : ''}
+        </div>`;
+      });
+      if(wrongHtml) html += `<div class="wrong-explain-box"><div class="wrong-explain-title">❌ 오답 선택지 해설</div>${wrongHtml}</div>`;
+    }
+    ansBox.innerHTML = html;
     ansBox.classList.add('show');
     this._recordStat(q, i===q.a);
     if(i!==q.a) this._recordWrong(q, i);
