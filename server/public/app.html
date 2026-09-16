@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <!-- v32: 신규 기능 4종(합격선 시뮬레이터/D-day 학습플랜/학습 히트맵/자가진단 확신도) -->
 <html lang="ko">
 <head>
@@ -1617,7 +1617,8 @@ const Home = {
     LS_set(key, list);
     // 지금 이 학습을 "활성 저장 세션"으로 표시 → 새로고침/재접속해도 이어서 복원됨
     LS_set('eh_active_session_'+App.profile.subject, this.sessionKey);
-    this.skipSolvedIds = new Set(solvedIds);
+    // 저장 버튼은 진행 상황만 기록한다. 스킵모드는 나중에 "불러오기"로 이 세션을
+    // 다시 열 때만 _applySavedSession()을 통해 켜진다(저장 직후 즉시 켜지지 않게 함).
     // 서버(계정) 동기화: 연결이 아직 안 돼있거나(재접속 중 등) 실패하면 잠깐씩 텀을 두고 재시도함
     // (콘솔에 성공/실패 로그를 남겨 다른 기기에서 안 보일 때 원인 확인 가능)
     const subjectForSync = App.profile.subject;
@@ -1684,8 +1685,12 @@ const Home = {
   _applySavedSession(s, silent){
     const byId = new Map(this.fullPool.map(q=>[q.id, q]));
     const solvedSet = new Set(s.solvedIds||[]);
-    const ordered = (s.poolIds||[]).map(id=>byId.get(id)).filter(Boolean);
+    const rawPoolIds = s.poolIds||[];
+    const ordered = rawPoolIds.map(id=>byId.get(id)).filter(Boolean);
     if(!ordered.length) return 'empty';
+    // 저장된 문항 id 중 상당수가 지금 문제은행에 없으면(데이터 갱신으로 id 체계가 바뀐 경우)
+    // 낡은 세션으로 보고 복원하지 않는다(진행률 분모/이전-다음 점프 오작동의 원인이었음).
+    if(ordered.length < rawPoolIds.length * 0.8) return 'stale';
     const firstUnsolvedIdx = ordered.findIndex(q=>!solvedSet.has(q.id));
     if(firstUnsolvedIdx===-1) return 'done';
     if(!silent){
@@ -1700,7 +1705,8 @@ const Home = {
     this.pool = ordered;
     this.idx = firstUnsolvedIdx;
     this.sessionKey = s.sessionKey;
-    this.sessionTotalIds = (s.poolIds||[]).slice();
+    // 원본 poolIds가 아니라 실제로 복원된(ordered) 문항 id 기준으로 분모를 맞춘다.
+    this.sessionTotalIds = ordered.map(q=>q.id);
     this.answeredInRun = new Set(s.solvedIds||[]);
     this.skipSolvedIds = solvedSet;
     LS_set('eh_active_session_'+App.profile.subject, s.sessionKey);
@@ -1716,7 +1722,10 @@ const Home = {
     const s = list.find(x=>x.sessionKey===activeKey);
     if(!s){ LS_set('eh_active_session_'+App.profile.subject, null); return; }
     const result = this._applySavedSession(s, true);
-    if(result!=='ok') LS_set('eh_active_session_'+App.profile.subject, null);
+    if(result!=='ok'){
+      if(result==='stale') console.warn('[저장 세션] 낡은 활성 세션(id 불일치) 감지, 자동 복원 건너뜀:', s.sessionKey);
+      LS_set('eh_active_session_'+App.profile.subject, null);
+    }
   },
   loadSession(i){
     const key = 'eh_saved_sessions_'+App.profile.subject;
@@ -1726,6 +1735,11 @@ const Home = {
     const result = this._applySavedSession(s, false);
     if(result==='empty' || result==='done'){
       alert('이 저장 학습은 이미 다 풀었어요! 저장 목록에서 지울게요.');
+      this.deleteSession(i);
+      return;
+    }
+    if(result==='stale'){
+      alert('이 저장 학습은 문제 데이터가 바뀌어서 더 이상 정확히 불러올 수 없어요. 저장 목록에서 지울게요.');
       this.deleteSession(i);
       return;
     }
