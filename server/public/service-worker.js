@@ -1,10 +1,12 @@
-const CACHE_NAME = 'exam-hub-v1';
+const CACHE_NAME = 'exam-hub-v2';
 const PRECACHE_URLS = [
   '/app.html',
   '/storage-shim.js',
   '/emt2-data.js',
   '/comp2-data.js',
   '/hsk4-data.js',
+  '/emt2-practical-data.js',
+  '/emt2-practical.js',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',

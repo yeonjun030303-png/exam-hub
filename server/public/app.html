@@ -553,6 +553,9 @@ button{font-family:inherit;}
     </div>
   </div>
 
+  <!-- 실기 -->
+  <div class="view" id="view-practical"><div id="prRoot"></div></div>
+
   <!-- 커뮤니티 -->
   <div class="view" id="view-community">
     <div class="pagehead">커뮤니티</div>
@@ -786,6 +789,7 @@ button{font-family:inherit;}
 <!-- 하단 네비 -->
 <div id="bottomnav">
   <button class="navbtn" data-v="home" onclick="Nav.go('home')"><span class="ic">🏠</span>홈</button>
+  <button class="navbtn" id="navPractical" data-v="practical" onclick="Nav.go('practical')" style="display:none"><span class="ic">🩺</span>실기</button>
   <button class="navbtn" data-v="community" onclick="Nav.go('community')"><span class="ic">💬</span>커뮤니티</button>
   <button class="navbtn" data-v="settings" onclick="Nav.go('settings')"><span class="ic">⚙️</span>설정</button>
 </div>
@@ -836,6 +840,8 @@ button{font-family:inherit;}
 <script src="emt2-data.js"></script>
 <script src="comp2-data.js"></script>
 <script src="hsk4-data.js"></script>
+<script src="emt2-practical-data.js"></script>
+<script src="emt2-practical.js"></script>
 <script>
 function syncNavHeight(){
   const nav = document.getElementById('bottomnav');
