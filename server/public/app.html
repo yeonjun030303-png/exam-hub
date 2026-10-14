@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!-- v32: 신규 기능 4종(합격선 시뮬레이터/D-day 학습플랜/학습 히트맵/자가진단 확신도) -->
 <html lang="ko">
 <head>
@@ -3218,7 +3218,13 @@ Auth.init();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
+    var hadCtl = !!navigator.serviceWorker.controller;
+    var reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){ if (!hadCtl || reloaded) return; reloaded = true; location.reload(); });
+    navigator.serviceWorker.register('/service-worker.js', {updateViaCache:'none'}).then(function(reg){
+      reg.update().catch(function(){});
+      document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') reg.update().catch(function(){}); });
+    }).catch(function(){});
   });
 }
 </script>
