@@ -1431,6 +1431,7 @@ const Home = {
       (this.filterDiff==='all' ? true :
         this.filterDiff==='past' ? (q.r && q.r.indexOf('기출문제')>=0) :
         this.filterDiff==='sum' ? (q.r && q.r.indexOf('요약문제')>=0) :
+        (typeof this.filterDiff==='string' && this.filterDiff.indexOf('sum:')===0) ? (!!window.COMP2_SC && window.COMP2_SC[q.id]===this.filterDiff.slice(4)) :
         this.filterDiff==='srs' ? (srsMap[q.id] && srsMap[q.id].nextReview<=now) :
         String(q.d)===this.filterDiff)
     );
@@ -1562,7 +1563,7 @@ const Home = {
     });
     const ansBox = document.getElementById('fcAns');
     const timeUp = (i===-1);
-    let html = (timeUp ? `<b style="color:var(--red)">⏰ 시간 초과!</b><br>` : '') + `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}` + (q.r ? `<div class="qd-ref">[${q.r}]</div>` : '');
+    let html = (timeUp ? `<b style="color:var(--red)">⏰ 시간 초과!</b><br>` : '') + `<b style="color:var(--green)">정답: ${q.o[q.a]}</b><br><br>${q.e}` + (window.compExHtml ? window.compExHtml(q) : '') + (q.r ? `<div class="qd-ref">[${q.r}]</div>` : '');
     // 오답 선택지별 해설(정답 해설과 시각적으로 구분해서 표시): 각 선택지가 무엇에 대한 설명인지(w) +
     // 왜 이 문제의 정답이 될 수 없는지(r)를 항목별로 나눠 보여준다.
     if(q.we){
@@ -3214,6 +3215,92 @@ const ConnMode = {
     window.addEventListener('offline', function(){ self.setStatus('offline'); });
   }
 };
+
+/* ===== 컴활 요약문제 소카테고리 + 엑셀 예시 표 ===== */
+window.COMP2_SC = {"comp2_s001": "시트 삽입·삭제·선택", "comp2_s002": "시트 삽입·삭제·선택", "comp2_s003": "시트 삽입·삭제·선택", "comp2_s004": "시트 삽입·삭제·선택", "comp2_s005": "시트 삽입·삭제·선택", "comp2_s006": "시트 삽입·삭제·선택", "comp2_s007": "시트·통합문서 보호·파일 형식", "comp2_s008": "시트·통합문서 보호·파일 형식", "comp2_s009": "시트·통합문서 보호·파일 형식", "comp2_s010": "시트·통합문서 보호·파일 형식", "comp2_s011": "시트·통합문서 보호·파일 형식", "comp2_s012": "사용자 지정 표시 형식", "comp2_s013": "사용자 지정 표시 형식", "comp2_s014": "사용자 지정 표시 형식", "comp2_s015": "사용자 지정 표시 형식", "comp2_s016": "셀 이름 정의", "comp2_s017": "셀 이름 정의", "comp2_s018": "셀 이름 정의", "comp2_s019": "셀 참조(절대·혼합)", "comp2_s020": "셀 참조(절대·혼합)", "comp2_s021": "셀 참조(절대·혼합)", "comp2_s022": "데이터 입력·날짜/시간", "comp2_s023": "데이터 입력·날짜/시간", "comp2_s024": "데이터 입력·날짜/시간", "comp2_s025": "데이터 입력·날짜/시간", "comp2_s026": "데이터 입력·날짜/시간", "comp2_s027": "데이터 유효성 검사", "comp2_s028": "데이터 유효성 검사", "comp2_s029": "데이터 유효성 검사", "comp2_s030": "데이터 유효성 검사", "comp2_s031": "메모·윗주", "comp2_s032": "메모·윗주", "comp2_s033": "메모·윗주", "comp2_s034": "메모·윗주", "comp2_s035": "조건부 서식", "comp2_s036": "조건부 서식", "comp2_s037": "조건부 서식", "comp2_s038": "조건부 서식", "comp2_s039": "조건부 서식", "comp2_s040": "정렬", "comp2_s041": "정렬", "comp2_s042": "틀 고정·창 나누기", "comp2_s043": "틀 고정·창 나누기", "comp2_s044": "수식 기초·연산자", "comp2_s045": "수식 기초·연산자", "comp2_s046": "수식 기초·연산자", "comp2_s047": "수식 기초·연산자", "comp2_s048": "함수 · 논리(IF·AND)", "comp2_s049": "함수 · 논리(IF·AND)", "comp2_s050": "함수 · 개수·조건 합계", "comp2_s051": "함수 · 개수·조건 합계", "comp2_s052": "함수 · 개수·조건 합계", "comp2_s053": "함수 · 개수·조건 합계", "comp2_s054": "함수 · 찾기(VLOOKUP·HLOOKUP)", "comp2_s055": "함수 · 찾기(VLOOKUP·HLOOKUP)", "comp2_s056": "함수 · 찾기(VLOOKUP·HLOOKUP)", "comp2_s057": "함수 · 텍스트(FIND·MID)", "comp2_s058": "함수 · 텍스트(FIND·MID)", "comp2_s059": "함수 · 수학(ROUND·MOD)", "comp2_s060": "함수 · 수학(ROUND·MOD)", "comp2_s061": "함수 · 순위·날짜(LARGE·RANK·NOW)", "comp2_s062": "함수 · 순위·날짜(LARGE·RANK·NOW)", "comp2_s063": "함수 · 순위·날짜(LARGE·RANK·NOW)", "comp2_s064": "차트", "comp2_s065": "차트", "comp2_s066": "차트", "comp2_s067": "차트", "comp2_s068": "차트", "comp2_s069": "인쇄", "comp2_s070": "인쇄", "comp2_s071": "매크로", "comp2_s072": "매크로", "comp2_s073": "최종 체크리스트", "comp2_s074": "최종 체크리스트"};
+window.COMP2_SC_ORDER = ["시트 삽입·삭제·선택", "시트·통합문서 보호·파일 형식", "사용자 지정 표시 형식", "셀 이름 정의", "셀 참조(절대·혼합)", "데이터 입력·날짜/시간", "데이터 유효성 검사", "메모·윗주", "조건부 서식", "정렬", "틀 고정·창 나누기", "수식 기초·연산자", "함수 · 논리(IF·AND)", "함수 · 개수·조건 합계", "함수 · 찾기(VLOOKUP·HLOOKUP)", "함수 · 텍스트(FIND·MID)", "함수 · 수학(ROUND·MOD)", "함수 · 순위·날짜(LARGE·RANK·NOW)", "차트", "인쇄", "매크로", "최종 체크리스트"];
+window.COMP2_EX = {"comp2_s012": [{"t": "양수;음수;0;텍스트 — 4구역 서식", "rows": [["입력", "화면 표시"], ["1500", "1,500"], ["-1500", "-1,500 (빨간색)"], ["0", "영"], ["컴활", "컴활"]], "rc": [[1, 1], [2, 1], [3, 1], [4, 1]], "f": "#,##0;[빨강]-#,##0;\"영\";@", "n": ["구역은 세미콜론(;)으로 나누고, 순서는 양수 → 음수 → 0 → 텍스트예요."]}], "comp2_s013": [{"t": "0은 빈 자리를 0으로 채워요", "rows": [["입력", "서식", "화면 표시"], ["25", "0000", "0025"], ["25", "####", "25"], ["1234567", "#,###", "1,234,567"]], "hl": [[1, 1]], "rc": [[1, 2]], "n": ["0000 서식에 25를 입력하면 자릿수가 모자란 앞자리를 0으로 채워 0025로 보여요."]}], "comp2_s014": [{"t": "#은 의미 없는 0을 표시하지 않아요", "rows": [["입력", "서식", "화면 표시"], ["25", "0000", "0025"], ["25", "####", "25"], ["1234567", "#,###", "1,234,567"]], "hl": [[2, 1], [3, 1]], "rc": [[2, 2], [3, 2]], "n": ["#### 서식에 25를 입력하면 빈 자리를 채우지 않고 25 그대로 보여요.", "#,###는 천 단위마다 쉼표를 넣어요."]}], "comp2_s015": [{"t": "@는 입력한 텍스트가 들어갈 자리", "rows": [["입력", "화면 표시"], ["홍길동", "홍길동님"]], "hl": [[1, 0]], "rc": [[1, 1]], "f": "서식: @\"님\"", "n": ["텍스트 앞뒤에 글자를 붙이고 싶을 때 @를 써요."]}], "comp2_s019": [{"t": "절대 참조 $A$1 — 어디로 복사해도 A1 고정", "rows": [["1000", "", ""], ["", "3", "=$A$1*B2"], ["", "5", "=$A$1*B3"]], "hl": [[0, 0]], "rc": [[1, 2], [2, 2]], "f": "C2의 =$A$1*B2 를 아래로 채우기 → C3은 =$A$1*B3", "n": ["$A$1은 열과 행을 모두 고정해서 아래·오른쪽 어디로 복사해도 A1을 가리켜요.", "B2는 상대 참조라 복사하면 B3, B4처럼 바뀌어요."]}], "comp2_s020": [{"t": "혼합 참조 $A1 — 열 고정, 행 변함", "rows": [["5", "=$A1", "=$A1"], ["8", "=$A2", ""]], "hl": [[0, 0], [1, 0]], "rc": [[0, 1], [0, 2], [1, 1]], "f": "B1에 =$A1 입력 후 오른쪽(C1)·아래(B2)로 복사", "n": ["오른쪽으로 복사하면 열(A)이 고정이라 =$A1 그대로예요.", "아래로 복사하면 행이 바뀌어 =$A2가 돼요."]}], "comp2_s021": [{"t": "혼합 참조 A$1 — 행 고정, 열 변함", "rows": [["5", "7"], ["=A$1", "=B$1"], ["=A$1", ""]], "hl": [[0, 0], [0, 1]], "rc": [[1, 0], [1, 1], [2, 0]], "f": "A2에 =A$1 입력 후 오른쪽(B2)·아래(A3)로 복사", "n": ["아래로 복사하면 행(1)이 고정이라 =A$1 그대로예요.", "오른쪽으로 복사하면 열이 바뀌어 =B$1이 돼요."]}], "comp2_s023": [{"t": "숫자를 문자로 입력하기", "rows": [["입력", "화면 표시"], ["'0123", "0123 (문자, 왼쪽 정렬)"], ["0123", "123 (숫자, 오른쪽 정렬)"]], "rc": [[1, 1], [2, 1]], "n": ["숫자 앞에 작은따옴표(')를 붙이면 문자 데이터로 인식돼서 앞자리 0이 유지돼요."]}], "comp2_s026": [{"t": "날짜·시간은 일련번호로 저장돼요", "rows": [["날짜/시간", "일련번호"], ["1900-01-01", "1"], ["1900-01-02", "2"], ["12:00", "0.5"]], "rc": [[1, 1], [2, 1], [3, 1]], "n": ["날짜는 1900-01-01을 1로 하는 일련번호, 시간은 하루(1)를 나눈 소수로 저장돼요.", "그래서 날짜끼리 빼면 일수가 나와요."]}], "comp2_s036": [{"t": "조건부 서식 수식: 한 행 전체 칠하기", "rows": [["이름", "반", "점수"], ["김", "1", "95"], ["이", "2", "80"], ["박", "1", "92"]], "hl": [[1, 0], [1, 1], [1, 2], [3, 0], [3, 1], [3, 2]], "f": "=$C2>=90", "n": ["조건부 서식에 수식을 쓸 때는 맨 앞에 =를 입력해요.", "$C처럼 열 앞에 $를 붙이면 열은 C로 고정되고 행만 바뀌어서, 점수가 90 이상인 행 전체(노란 칸)가 칠해져요."]}], "comp2_s037": [{"t": "조건부 서식 수식: 한 행 전체 칠하기", "rows": [["이름", "반", "점수"], ["김", "1", "95"], ["이", "2", "80"], ["박", "1", "92"]], "hl": [[1, 0], [1, 1], [1, 2], [3, 0], [3, 1], [3, 2]], "f": "=$C2>=90", "n": ["조건부 서식에 수식을 쓸 때는 맨 앞에 =를 입력해요.", "$C처럼 열 앞에 $를 붙이면 열은 C로 고정되고 행만 바뀌어서, 점수가 90 이상인 행 전체(노란 칸)가 칠해져요."]}], "comp2_s044": [{"t": "수식은 =로 시작, 텍스트는 큰따옴표", "rows": [["85", "85점"]], "hl": [[0, 0]], "rc": [[0, 1]], "f": "=A1&\"점\"", "res": "85점", "n": ["텍스트를 수식에 직접 쓸 때는 \"점\"처럼 큰따옴표(\")로 묶어요.", "&는 문자를 이어 붙이는 연산자예요."]}], "comp2_s045": [{"t": "연산자 우선순위", "f": "=2+3*4^2", "res": "50", "n": ["① 거듭제곱 4^2=16 → ② 곱셈 3*16=48 → ③ 덧셈 2+48=50", "괄호를 쓰면 먼저 계산해요: =(2+3)*4^2 → 80", "높은 순서: 참조 연산자(: , 공백) > 부호(-) > % > ^ > * / > + - > & > 비교 연산자"]}], "comp2_s046": [{"t": "Ctrl+` (숫자 1 왼쪽 키): 수식 전체 보기", "rows": [["3", "5", "8"]], "hl": [[0, 0], [0, 1]], "rc": [[0, 2]], "f": "=A1+B1", "res": "8", "n": ["평소에는 결과(8)가 보이고, Ctrl+`를 누르면 셀에 수식(=A1+B1) 자체가 보여요.", "다시 누르면 결과로 돌아와요."]}], "comp2_s047": [{"t": "같지 않다는 <>", "rows": [["5", "TRUE", "FALSE"]], "hl": [[0, 0]], "rc": [[0, 1], [0, 2]], "f": "B1: =A1<>3    C1: =A1<>5", "n": ["A1(5)은 3과 같지 않아서 TRUE, 5와는 같아서 FALSE예요.", "다른 비교 기호: = 같다, > 크다, >= 크거나 같다, <= 작거나 같다"]}], "comp2_s048": [{"t": "IF 중첩", "rows": [["85", "B"]], "hl": [[0, 0]], "rc": [[0, 1]], "f": "=IF(A1>=90,\"A\",IF(A1>=80,\"B\",\"C\"))", "res": "B", "n": ["① A1>=90 → 85는 90 미만이라 FALSE → 다음 IF로 넘어가요.", "② A1>=80 → TRUE → \"B\"를 반환해요."]}], "comp2_s049": [{"t": "AND는 모두 참이어야 TRUE", "rows": [["70", "80", "TRUE"], ["70", "50", "FALSE"]], "hl": [[0, 0], [0, 1], [1, 0], [1, 1]], "rc": [[0, 2], [1, 2]], "f": "C1: =AND(A1>=60,B1>=60)    (C2도 같은 수식)", "n": ["1행은 70, 80 모두 60 이상이라 TRUE예요.", "2행은 B2=50이 60 미만이라 FALSE예요.", "OR는 하나만 참이어도 TRUE예요."]}], "comp2_s050": [{"t": "데이터가 이런 모양일 때 (A3은 빈 셀)", "rows": [["10"], ["서울"], [""], ["30"], ["5"]], "hl": [[0, 0], [1, 0], [3, 0], [4, 0]]}, {"f": "=COUNT(A1:A5)", "res": "3", "n": ["숫자만 세요: 10, 30, 5"]}, {"f": "=COUNTA(A1:A5)", "res": "4", "n": ["비어 있지 않은 셀을 세요: 10, 서울, 30, 5"]}, {"f": "=COUNTBLANK(A1:A5)", "res": "1", "n": ["빈 셀을 세요: A3"]}], "comp2_s051": [{"t": "데이터가 이런 모양일 때 (A3은 빈 셀)", "rows": [["10"], ["서울"], [""], ["30"], ["5"]], "hl": [[0, 0], [1, 0], [3, 0], [4, 0]]}, {"f": "=COUNT(A1:A5)", "res": "3", "n": ["숫자만 세요: 10, 30, 5"]}, {"f": "=COUNTA(A1:A5)", "res": "4", "n": ["비어 있지 않은 셀을 세요: 10, 서울, 30, 5"]}, {"f": "=COUNTBLANK(A1:A5)", "res": "1", "n": ["빈 셀을 세요: A3"]}], "comp2_s052": [{"t": "60 이상인 셀 세기", "rows": [["50"], ["60"], ["75"], ["40"], ["90"], ["65"], ["30"], ["80"], ["55"], ["100"]], "hl": [[1, 0], [2, 0], [4, 0], [5, 0], [7, 0], [9, 0]], "f": "=COUNTIF(A1:A10,\">=60\")", "res": "6", "n": ["60 이상인 값(노란 칸): 60, 75, 90, 65, 80, 100 → 6개", "조건은 큰따옴표로 묶어요: \">=60\""]}], "comp2_s053": [{"t": "조건에 맞는 행만 더하기", "rows": [["이름", "지역", "금액"], ["김", "서울", "100"], ["이", "부산", "200"], ["박", "서울", "300"], ["최", "대구", "150"], ["정", "서울", "50"]], "hl": [[1, 1], [3, 1], [5, 1], [1, 2], [3, 2], [5, 2]], "f": "=SUMIF(B2:B6,\"서울\",C2:C6)", "res": "450", "n": ["SUMIF(조건 범위, 조건, 합계 범위)", "B열이 서울인 행의 C열만 더해요: 100+300+50 = 450"]}], "comp2_s054": [{"t": "VLOOKUP: 세로로 찾기", "rows": [["코드", "이름", "가격"], ["101", "사과", "1000"], ["102", "배", "2000"], ["103", "감", "1500"]], "hl": [[2, 0]], "rc": [[2, 2]], "f": "=VLOOKUP(102,A2:C4,3,FALSE)", "res": "2000", "n": ["① 범위 A2:C4의 첫 번째 열(A)에서 102를 찾아요.", "② 찾은 행에서 3번째 열(C열)의 값을 가져와요 → 2000", "찾는 값은 범위의 맨 왼쪽 열에 있어야 해요."]}], "comp2_s055": [{"t": "마지막 인수에 따라 결과가 달라져요", "rows": [["코드", "이름", "가격"], ["101", "사과", "1000"], ["102", "배", "2000"], ["103", "감", "1500"]], "hl": [[1, 0], [2, 0], [3, 0]]}, {"f": "=VLOOKUP(105,A2:C4,3,FALSE)", "res": "#N/A", "n": ["FALSE(또는 0): 정확히 일치하는 값만 찾아요. 105는 없어서 #N/A 오류예요."]}, {"f": "=VLOOKUP(105,A2:C4,3,TRUE)", "res": "1500", "n": ["TRUE(또는 생략): 비슷한 값을 찾아요. 105 이하에서 가장 큰 값(103)의 행을 가져와요.", "근삿값 찾기는 첫 열이 오름차순 정렬되어 있어야 해요."]}], "comp2_s056": [{"t": "HLOOKUP: 가로로 찾기", "rows": [["월", "화", "수"], ["10", "20", "30"]], "hl": [[0, 1]], "rc": [[1, 1]], "f": "=HLOOKUP(\"화\",A1:C2,2,FALSE)", "res": "20", "n": ["H는 Horizontal(가로)이에요. 첫 행에서 \"화\"를 찾고 2번째 행의 값을 가져와요."]}], "comp2_s057": [{"t": "FIND와 SEARCH", "rows": [["Excel"]], "hl": [[0, 0]]}, {"f": "=FIND(\"e\",A1)", "res": "4", "n": ["FIND는 대소문자를 구분해요. 소문자 e는 4번째 글자예요."]}, {"f": "=SEARCH(\"e\",A1)", "res": "1", "n": ["SEARCH는 대소문자를 구분하지 않아요. E가 1번째라 1이에요.", "SEARCH는 와일드카드(?, *)를 쓸 수 있고, FIND는 쓸 수 없어요."]}], "comp2_s058": [{"t": "MID: 가운데 글자 꺼내기", "rows": [["컴", "퓨", "터", "활", "용"]], "hl": [[0, 1], [0, 2], [0, 3]], "f": "=MID(\"컴퓨터활용\",2,3)", "res": "퓨터활", "n": ["MID(텍스트, 시작 위치, 개수): 2번째 글자부터 3글자 → 퓨터활"]}], "comp2_s059": [{"t": "ROUND의 음수 자릿수", "f": "=ROUND(1234.567,-2)", "res": "1200", "n": ["자릿수가 음수이면 소수점 왼쪽 자리에서 반올림해요.", "-1 → 1230, -2 → 1200, -3 → 1000", "참고: =ROUND(1234.567,1) → 1234.6"]}], "comp2_s060": [{"t": "MOD: 나머지", "f": "=MOD(10,3)", "res": "1", "n": ["MOD(나누어지는 수, 나누는 수): 10 ÷ 3 = 3 … 나머지 1", "몫은 QUOTIENT 함수예요: =QUOTIENT(10,3) → 3"]}], "comp2_s061": [{"t": "LARGE: k번째로 큰 값", "rows": [["70"], ["95"], ["85"], ["60"], ["90"]], "hl": [[1, 0]], "rc": [[4, 0]], "f": "=LARGE(A1:A5,2)", "res": "90", "n": ["큰 순서: 95(1번째) → 90(2번째) → 85 …", "작은 값은 SMALL: =SMALL(A1:A5,2) → 70"]}], "comp2_s062": [{"t": "RANK: 순위 구하기", "rows": [["70"], ["95"], ["85"], ["60"], ["90"]], "hl": [[0, 0]]}, {"f": "=RANK(70,A1:A5)", "res": "4", "n": ["내림차순(생략 또는 0): 95, 90, 85, 70 → 4등"]}, {"f": "=RANK(70,A1:A5,1)", "res": "2", "n": ["오름차순(0이 아닌 값): 60, 70 → 2등", "RANK(순위를 구할 값, 범위, 정렬 방법)"]}], "comp2_s063": [{"t": "NOW와 TODAY (아래는 예시 값)", "f": "=NOW()", "res": "2026-10-15 15:30", "n": ["현재 날짜와 시간이에요. 열 때마다 다시 계산돼요."]}, {"f": "=TODAY()", "res": "2026-10-15", "n": ["오늘 날짜만 나와요."]}]};
+(function(){
+  try{
+    var st = document.createElement('style');
+    st.textContent =
+      '.xlx{margin:14px 0 6px;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(127,127,127,.08)}' +
+      '.xlh2{font-weight:800;font-size:13px;margin-bottom:8px;color:var(--cyan)}' +
+      '.xlb{margin-bottom:12px}.xlb:last-child{margin-bottom:0}' +
+      '.xlt{font-size:12.5px;font-weight:700;margin-bottom:5px}' +
+      '.xlf{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#f6f8fa;color:#1f2328;border:1px solid #d0d7de;border-radius:6px;padding:5px 8px;margin-bottom:5px;font-size:13px}' +
+      '.xlfx{font-weight:800;color:#1a7f37;font-style:italic}' +
+      '.xlfv{font-family:Consolas,monospace;word-break:break-all}' +
+      '.xlres{margin-left:auto;font-weight:800;color:#1a7f37}' +
+      '.xlw{overflow-x:auto}' +
+      '.xltb{border-collapse:collapse;background:#fff;color:#1f2328;font-size:13px}' +
+      '.xltb th{background:#e9edf1;color:#57606a;font-weight:600;border:1px solid #d0d7de;padding:3px 8px;min-width:24px}' +
+      '.xltb td{border:1px solid #d0d7de;padding:4px 10px;text-align:left;white-space:nowrap}' +
+      '.xltb td.xlh{background:#fff3b0}' +
+      '.xltb td.xlr{background:#c9f2d3;font-weight:800}' +
+      '.xln{font-size:12.5px;line-height:1.7;margin-top:5px}';
+    document.head.appendChild(st);
+  }catch(e){}
+  var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var colName = function(i){ return String.fromCharCode(65+i); };
+  function block(b){
+    var rows = b.rows || [], nc = 0, hl = {}, rc = {};
+    rows.forEach(function(r){ if(r.length>nc) nc = r.length; });
+    (b.hl||[]).forEach(function(p){ hl[p[0]+','+p[1]] = 1; });
+    (b.rc||[]).forEach(function(p){ rc[p[0]+','+p[1]] = 1; });
+    var h = '<div class="xlb">';
+    if(b.t) h += '<div class="xlt">'+esc(b.t)+'</div>';
+    if(b.f) h += '<div class="xlf"><span class="xlfx">fx</span><span class="xlfv">'+esc(b.f)+'</span>'+(b.res!==undefined ? '<span class="xlres">→ '+esc(b.res)+'</span>' : '')+'</div>';
+    if(rows.length){
+      h += '<div class="xlw"><table class="xltb"><tr><th></th>';
+      for(var c=0;c<nc;c++) h += '<th>'+colName(c)+'</th>';
+      h += '</tr>';
+      rows.forEach(function(r,i){
+        h += '<tr><th>'+(i+1)+'</th>';
+        for(var c=0;c<nc;c++){
+          var k = i+','+c, cls = rc[k] ? 'xlr' : (hl[k] ? 'xlh' : '');
+          h += '<td class="'+cls+'">'+esc(r[c]===undefined ? '' : r[c])+'</td>';
+        }
+        h += '</tr>';
+      });
+      h += '</table></div>';
+    }
+    if(b.n) h += '<div class="xln">'+b.n.map(esc).join('<br>')+'</div>';
+    return h + '</div>';
+  }
+  window.compExHtml = function(q){
+    try{
+      var ex = window.COMP2_EX[q && q.id];
+      if(!ex) return '';
+      return '<div class="xlx"><div class="xlh2">📊 엑셀 예시로 이해하기</div>' + ex.map(block).join('') + '</div>';
+    }catch(e){ return ''; }
+  };
+  if(typeof Home !== 'undefined' && Home.buildFilterOptions){
+    var orig = Home.buildFilterOptions;
+    Home.buildFilterOptions = function(){
+      orig.apply(this, arguments);
+      try{
+        var sel = document.getElementById('fcFilterDiff');
+        if(!sel) return;
+        var cnt = {};
+        (this.fullPool || []).forEach(function(q){
+          var sc = window.COMP2_SC[q.id];
+          if(sc) cnt[sc] = (cnt[sc] || 0) + 1;
+        });
+        var g = document.createElement('optgroup');
+        g.label = '📝 요약문제 소카테고리';
+        window.COMP2_SC_ORDER.forEach(function(sc){
+          if(!cnt[sc]) return;
+          var o = document.createElement('option');
+          o.value = 'sum:' + sc;
+          o.textContent = sc + ' (' + cnt[sc] + ')';
+          g.appendChild(o);
+        });
+        if(g.children.length) sel.appendChild(g);
+      }catch(e){}
+    };
+  }
+})();
 
 ConnMode.init();
 Auth.init();
