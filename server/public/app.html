@@ -3302,6 +3302,125 @@ window.COMP2_EX = {"comp2_s012": [{"t": "양수;음수;0;텍스트 — 4구역 �
   }
 })();
 
+/* ===== EH_UPDATER: 배포 자동 감지 + 당겨서 새로고침 ===== */
+window.EH_UPDATER = true;
+(function(){
+  var FILES = ['/app.html','/comp2-data.js','/emt2-data.js','/hsk4-data.js','/emt2-practical-data.js','/emt2-practical.js','/service-worker.js'];
+  var KEY = 'eh_build_sig', TKEY = 'eh_build_reload_at';
+  var busy = false, pending = null;
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  function inExam(){ var e = document.getElementById('examTaking'); return !!(e && e.classList.contains('show')); }
+  var BASE = 'position:fixed;left:50%;transform:translateX(-50%);z-index:99999;background:rgba(20,24,32,.94);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:9px 16px;font-size:13px;font-weight:700;display:none;max-width:88%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.4)';
+  function mk(id, css){
+    var d = document.getElementById(id);
+    if(!d){ d = document.createElement('div'); d.id = id; d.style.cssText = css; document.body.appendChild(d); }
+    return d;
+  }
+  function toast(msg, ms){
+    var d = mk('ehToast', BASE + ';bottom:calc(76px + env(safe-area-inset-bottom,0px));pointer-events:none');
+    d.textContent = msg; d.style.display = 'block';
+    clearTimeout(d._t); d._t = setTimeout(function(){ d.style.display = 'none'; }, ms || 2600);
+  }
+  function sig(){
+    return Promise.all(FILES.map(function(u){
+      return fetch(u, {method:'HEAD', cache:'no-store'}).then(function(r){
+        if(!r.ok) return '';
+        return u + '=' + (r.headers.get('etag') || r.headers.get('last-modified') || r.headers.get('content-length') || '');
+      }).catch(function(){ return ''; });
+    })).then(function(arr){
+      for(var i = 0; i < arr.length; i++){ if(!arr[i]) return null; }
+      return arr.join('|');
+    });
+  }
+  function wipe(){
+    var p = [];
+    try{ if(window.caches) p.push(caches.keys().then(function(ks){ return Promise.all(ks.map(function(k){ return caches.delete(k); })); })); }catch(e){}
+    try{ if(navigator.serviceWorker) p.push(navigator.serviceWorker.getRegistrations().then(function(rs){ return Promise.all(rs.map(function(r){ return r.unregister(); })); })); }catch(e){}
+    return Promise.all(p).catch(function(){});
+  }
+  function go(s){
+    if(busy) return;
+    busy = true;
+    if(s) lsSet(KEY, s);
+    lsSet(TKEY, String(Date.now()));
+    try{ sessionStorage.setItem('eh_updated', '1'); }catch(e){}
+    toast('업데이트 중…', 4000);
+    wipe().then(function(){ location.replace(location.pathname + '?v=' + Date.now()); });
+  }
+  function banner(s){
+    pending = s;
+    var d = mk('ehBanner', BASE + ';bottom:calc(76px + env(safe-area-inset-bottom,0px));cursor:pointer');
+    d.textContent = '🔄 새 버전이 있어요 · 눌러서 업데이트';
+    d.style.display = 'block';
+    d.onclick = function(){ d.style.display = 'none'; go(pending); };
+  }
+  function check(auto){
+    if(busy || navigator.onLine === false) return;
+    sig().then(function(s){
+      if(!s) return;
+      var old = lsGet(KEY);
+      if(!old){ lsSet(KEY, s); return; }
+      if(old === s) return;
+      if(Date.now() - parseInt(lsGet(TKEY) || '0', 10) < 20000) return;
+      if(auto && inExam()){ banner(s); return; }
+      go(s);
+    });
+  }
+  window.EH_forceRefresh = function(){
+    if(navigator.onLine === false){ toast('오프라인이라 새로고침할 수 없어요'); return; }
+    sig().then(function(s){
+      if(!s){ toast('인터넷 연결을 확인해 주세요'); return; }
+      go(s);
+    });
+  };
+  try{
+    if(sessionStorage.getItem('eh_updated')){
+      sessionStorage.removeItem('eh_updated');
+      setTimeout(function(){ toast('✅ 새 버전으로 업데이트했어요'); }, 600);
+    }
+  }catch(e){}
+  setTimeout(function(){ check(false); }, 1500);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') check(true); });
+  window.addEventListener('pageshow', function(e){ if(e.persisted) check(true); });
+  setInterval(function(){ if(document.visibilityState === 'visible') check(true); }, 300000);
+
+  /* 당겨서 새로고침 */
+  var sy = 0, sx = 0, dy = 0, pulling = false;
+  function ptrOk(t){
+    if(inExam()) return false;
+    var se = document.scrollingElement || document.documentElement;
+    if(se.scrollTop > 0) return false;
+    for(var n = t; n && n !== document.body && n.nodeType === 1; n = n.parentElement){
+      var tg = n.tagName;
+      if(tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT') return false;
+      if(n.scrollTop > 0) return false;
+    }
+    return true;
+  }
+  function ind(msg){
+    var d = mk('ehPtr', BASE + ';top:calc(10px + env(safe-area-inset-top,0px));pointer-events:none');
+    if(msg){ d.textContent = msg; d.style.display = 'block'; } else { d.style.display = 'none'; }
+  }
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length === 1 && ptrOk(e.target)){ sy = e.touches[0].clientY; sx = e.touches[0].clientX; dy = 0; pulling = true; }
+    else { pulling = false; }
+  }, {passive:true});
+  document.addEventListener('touchmove', function(e){
+    if(!pulling) return;
+    dy = e.touches[0].clientY - sy;
+    var dx = e.touches[0].clientX - sx;
+    if(dy < 0 || Math.abs(dx) > Math.abs(dy)){ pulling = false; ind(''); return; }
+    if(dy > 30) ind(dy > 110 ? '⬇ 놓으면 새로고침' : '⬇ 아래로 당겨 새로고침');
+  }, {passive:true});
+  document.addEventListener('touchend', function(){
+    if(!pulling) return;
+    pulling = false; ind('');
+    if(dy > 110) window.EH_forceRefresh();
+  }, {passive:true});
+  document.addEventListener('touchcancel', function(){ pulling = false; ind(''); }, {passive:true});
+})();
+
 ConnMode.init();
 Auth.init();
 window.syncPracticalNav = function(){
