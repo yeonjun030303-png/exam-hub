@@ -1,5 +1,5 @@
-const CACHE_NAME = 'exam-hub-v2';
-const PRECACHE = ['/app.html', '/manifest.json', '/emt2-data.js', '/comp2-data.js', '/hsk4-data.js'];
+const CACHE_NAME = 'exam-hub-v3';
+const PRECACHE = ['/app.html', '/manifest.json', '/emt2-data.js', '/comp2-data.js', '/hsk4-data.js', '/emt2-practical-data.js', '/emt2-practical.js'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

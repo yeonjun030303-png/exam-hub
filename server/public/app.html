@@ -919,7 +919,7 @@ setTimeout(syncNavHeight, 300);
 ========================================================= */
 
 const SUBJECTS_META = {
-  emt2:  {label:'응급구조사 2급', data:()=>window.EMT2_DATA, subjectCounts:{총론:20,환자관리:20,법령:20,각론:60,장비:20}, timeLimitMin:150},
+  emt2:  {label:'응급구조사 2급 필기', data:()=>window.EMT2_DATA, subjectCounts:{총론:20,환자관리:20,법령:20,각론:60,장비:20}, timeLimitMin:150},
   comp2: {label:'컴활 2급 필기', data:()=>window.COMP2_DATA, subjectCounts:{'1과목':20,'2과목':20}, timeLimitMin:40},
   hsk4:  {label:'HSK 4급', data:()=>window.HSK4_DATA, subjectCounts:{'가족·호칭':2,'위치·방향':2,'시간표현':2,'형용사(반의어)':6,'동사(반의어)':4,'HSK3.0 핵심표현':3,'고빈출 일반어휘':59,'기초한자·기본어휘':22}, timeLimitMin:100}
 };
@@ -1079,6 +1079,8 @@ const Nav = {
     document.getElementById('examTaking').classList.remove('show');
     document.getElementById('examResult').classList.remove('show');
     document.getElementById('view-'+v).classList.add('show');
+    if(window.syncPracticalNav) window.syncPracticalNav();
+    if(v==='practical' && window.PR && window.PR.home) window.PR.home();
     document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
     if(v==='settings') SettingsOB.init();
     if(v==='home') this.checkResumeBanner();
@@ -3215,6 +3217,15 @@ const ConnMode = {
 
 ConnMode.init();
 Auth.init();
+window.syncPracticalNav = function(){
+  try{
+    var b = document.getElementById('navPractical'); if(!b) return;
+    var s = (typeof App !== 'undefined' && App.profile) ? App.profile.subject : null;
+    b.style.display = (s === 'emt2') ? '' : 'none';
+  }catch(e){}
+};
+window.syncPracticalNav();
+setInterval(window.syncPracticalNav, 1500);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
