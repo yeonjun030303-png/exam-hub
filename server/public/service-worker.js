@@ -1,49 +1,34 @@
-const CACHE_NAME = 'exam-hub-v3';
-const PRECACHE = ['/app.html', '/manifest.json', '/emt2-data.js', '/comp2-data.js', '/hsk4-data.js', '/emt2-practical-data.js', '/emt2-practical.js'];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      Promise.all(PRECACHE.map((u) => cache.add(new Request(u, { cache: 'reload' })).catch(() => {})))
-    )
-  );
-  self.skipWaiting();
+/* EH service worker: network-first, 옛 캐시 정리 */
+var C = 'eh-net-first';
+self.addEventListener('install', function(e){ self.skipWaiting(); });
+self.addEventListener('activate', function(e){
+  e.waitUntil((async function(){
+    var ks = await caches.keys();
+    await Promise.all(ks.filter(function(k){ return k !== C; }).map(function(k){ return caches.delete(k); }));
+    await self.clients.claim();
+    var cs = await self.clients.matchAll({type:'window'});
+    cs.forEach(function(c){ try{ c.navigate(c.url); }catch(err){} });
+  })());
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
-    )
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/socket.io/')) return;
-
-  event.respondWith(
-    Promise.race([
-      fetch(url.href, { cache: 'no-cache' }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000))
-    ])
-      .then((res) => {
-        if (res && res.status === 200) {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(req, copy));
-        }
-        return res;
-      })
-      .catch(() =>
-        caches.match(req, { ignoreSearch: true }).then((hit) => {
-          if (hit) return hit;
-          if (req.mode === 'navigate') return caches.match('/app.html');
-          return Response.error();
-        })
-      )
-  );
+self.addEventListener('fetch', function(e){
+  var r = e.request;
+  if(r.method !== 'GET') return;
+  var u = new URL(r.url);
+  if(u.origin !== location.origin) return;
+  if(u.pathname.indexOf('/api') === 0 || u.pathname.indexOf('/socket.io') === 0) return;
+  e.respondWith((async function(){
+    try{
+      var res = await fetch(r, {cache:'no-store'});
+      if(res && res.ok){ var c = await caches.open(C); c.put(r, res.clone()); }
+      return res;
+    }catch(err){
+      var m = await caches.match(r, {ignoreSearch:true});
+      if(m) return m;
+      if(r.mode === 'navigate'){
+        var a = await caches.match('/app.html', {ignoreSearch:true});
+        if(a) return a;
+      }
+      throw err;
+    }
+  })());
 });

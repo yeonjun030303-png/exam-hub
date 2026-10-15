@@ -3325,7 +3325,7 @@ window.EH_UPDATER = true;
   function sig(){
     return Promise.all(FILES.map(function(u){
       return fetch(u, {method:'HEAD', cache:'no-store'}).then(function(r){
-        if(!r.ok) return '';
+        if(!r.ok) return u + '=x' + r.status;
         return u + '=' + (r.headers.get('etag') || r.headers.get('last-modified') || r.headers.get('content-length') || '');
       }).catch(function(){ return ''; });
     })).then(function(arr){
