@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>최종모의고사 · 2급 응급구조사</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#1d2433;--sub:#6b7488;--line:#e2e6ef;--pri:#3b6cf6;--pri2:#e8eefe;--ok:#1f9d55;--okbg:#e6f6ec;--no:#d64545;--nobg:#fdeaea;--warn:#c58a00;--warnbg:#fff6dc}
+@media(prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1c212c;--tx:#e8ecf5;--sub:#9aa3b8;--line:#2c3342;--pri:#6c93ff;--pri2:#232c47;--ok:#4cc77f;--okbg:#17301f;--no:#ff7676;--nobg:#3a1f1f;--warn:#e8b730;--warnbg:#3a3218}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:16px;line-height:1.55}
+.top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+.top h1{font-size:17px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .tm{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:10px;padding:9px 14px;font-size:15px;cursor:pointer}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:600}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn:disabled{opacity:.4}
+.wrap{max-width:760px;margin:0 auto;padding:14px 14px 110px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ex{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px 4px;text-align:center;cursor:pointer;color:var(--tx);font-size:15px}
+.ex b{display:block;font-size:18px}
+.ex small{display:block;color:var(--sub);font-size:11px;min-height:15px}
+.ex.done{border-color:var(--ok)}
+.hint{color:var(--sub);font-size:13px}
+.seg{display:flex;gap:8px;margin:8px 0 14px;flex-wrap:wrap}
+.seg .btn{flex:1;min-width:90px;text-align:center}
+.seg .btn.on{background:var(--pri2);border-color:var(--pri);color:var(--pri);font-weight:700}
+.stem{font-size:17px;font-weight:600;margin:4px 0 10px;white-space:pre-wrap}
+.subj{display:inline-block;font-size:12px;color:var(--pri);background:var(--pri2);padding:2px 8px;border-radius:99px;margin-bottom:6px}
+.items{background:var(--bg);border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:15px}
+.items div{margin:2px 0}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--tx);border-radius:12px;padding:12px;margin-bottom:8px;font-size:16px;cursor:pointer}
+.opt .no{flex:0 0 26px;height:26px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px}
+.opt.sel{border-color:var(--pri);background:var(--pri2)}
+.opt.right{border-color:var(--ok);background:var(--okbg)}
+.opt.wrong{border-color:var(--no);background:var(--nobg)}
+.opt.lock{cursor:default}
+.exp{border-left:4px solid var(--line);padding:6px 10px;margin:6px 0;font-size:14.5px;background:var(--bg);border-radius:0 8px 8px 0}
+.exp.c{border-left-color:var(--ok)}
+.exp.w{border-left-color:var(--no)}
+.kp{font-size:14.5px}
+.kp .t{font-weight:700;margin:10px 0 4px;color:var(--pri)}
+.kp .o{margin:4px 0 4px 4px}
+.kp .x{margin:4px 0 4px 4px;color:var(--no)}
+details{margin-top:8px}summary{cursor:pointer;font-weight:600;padding:6px 0}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-top:1px solid var(--line);display:flex;gap:8px;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .btn{flex:1}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);display:flex;align-items:flex-end}
+.sheet>div{background:var(--card);width:100%;max-height:78vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.pal{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:6px 0 14px}
+.pal button{height:38px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--tx);font-size:14px;cursor:pointer}
+.pal button.a{background:var(--pri2);border-color:var(--pri)}
+.pal button.r{background:var(--okbg);border-color:var(--ok)}
+.pal button.w{background:var(--nobg);border-color:var(--no)}
+.pal button.cur{outline:2px solid var(--pri)}
+.score{text-align:center;padding:18px 8px}
+.score .big{font-size:54px;font-weight:800;line-height:1.1}
+.pass{color:var(--ok)}.fail{color:var(--no)}.edge{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+td:first-child,th:first-child{text-align:left}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px}
+.tag.f{background:var(--nobg);color:var(--no)}.tag.p{background:var(--okbg);color:var(--ok)}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1}
+</style>
+</head>
+<body>
+<div class="top"><button class="btn sm" id="back">←</button><h1 id="ttl">🏁 최종모의고사</h1><span class="tm" id="tm"></span></div>
+<div class="wrap" id="app"></div>
+<div id="bar"></div>
+<div id="sheet"></div>
+<script>
+(function(){
+'use strict';
+var CIR='①②③④⑤';
+var LS='mock_final_v1';
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function load(){try{return JSON.parse(localStorage.getItem(LS))||{}}catch(e){return{}}}
+function save(d){try{localStorage.setItem(LS,JSON.stringify(d))}catch(e){}}
+var DB=load(); DB.prog=DB.prog||{}; DB.best=DB.best||{};
+var S={view:'home',exam:0,sess:1,mode:'real',list:[],idx:0,ans:{},done:false,t0:0,pk:'',retry:false};
+var timer=null;
+
+function loadExam(n,cb){
+  if(window.MOCK&&window.MOCK[n])return cb();
+  var s=document.createElement('script');
+  s.src='mock/mock-'+(n<10?'0':'')+n+'.js';
+  s.onload=cb;
+  s.onerror=function(){$('app').innerHTML='<div class="card">데이터 파일을 불러오지 못했습니다. (mock/mock-'+n+'.js) 인터넷 연결을 확인하고 다시 시도하세요.</div>'};
+  document.head.appendChild(s);
+}
+function buildList(){
+  var D=window.MOCK[S.exam].sessions,out=[];
+  D.forEach(function(se){
+    if(S.sess!==0&&se.id!==S.sess)return;
+    se.qs.forEach(function(q){out.push({k:se.id+'-'+q.n,sid:se.id,q:q,sub:se.subs[q.s][0]})});
+  });
+  return out;
+}
+function pkey(){return S.exam+'|'+S.sess+'|'+S.mode}
+function persist(){
+  DB.prog[S.pk]={ans:S.ans,idx:S.idx,done:S.done,keys:S.retry?S.list.map(function(x){return x.k}):null,t:Date.now(),el:Math.floor((Date.now()-S.t0)/1000)};
+  save(DB);
+}
+function setTitle(t){$('ttl').textContent=t}
+function fmt(s){var m=Math.floor(s/60),x=s%60;return m+':'+(x<10?'0':'')+x}
+function tick(){
+  if(timer)clearInterval(timer);
+  $('tm').textContent='';
+  if(S.view==='quiz'&&S.mode==='real'&&!S.done){
+    timer=setInterval(function(){$('tm').textContent=fmt(Math.floor((Date.now()-S.t0)/1000))},1000);
+  }
+}
+function sessName(s){return s===0?'1·2교시 전체':s+'교시'}
+
+/* ---------- 홈 ---------- */
+function home(){
+  S.view='home';setTitle('🏁 최종모의고사');tick();$('bar').innerHTML='';
+  var h='<div class="card"><b>2급 응급구조사 최종모의고사 1~20회</b><div class="hint">회차마다 1교시 60문항 + 2교시 80문항, 문항별 보기 해설과 핵심 정리 포함. 합격 기준: 과목별 40% 미만이면 과락, 전체 60% 이상이면 합격.</div></div><div class="grid">';
+  for(var n=1;n<=20;n++){
+    var b=DB.best[n+'|0']||null, lab='';
+    var any=['1','2','0'].some(function(s){return ['real','practice'].some(function(m){return DB.prog[n+'|'+s+'|'+m]})});
+    if(b)lab='최고 '+b.pct+'점';else if(any)lab='진행중';
+    h+='<button class="ex'+(b?' done':'')+'" data-n="'+n+'"><b>'+n+'회</b><small>'+lab+'</small></button>';
+  }
+  h+='</div>';
+  $('app').innerHTML=h;
+  [].forEach.call(document.querySelectorAll('.ex'),function(el){el.onclick=function(){setup(+el.getAttribute('data-n'))}});
+  $('back').onclick=function(){location.href='app.html'};
+}
+
+/* ---------- 설정 ---------- */
+function setup(n){
+  S.view='setup';S.exam=n;setTitle(n+'회 최종모의고사');tick();$('bar').innerHTML='';
+  function draw(){
+    var pk=n+'|'+S.sess+'|'+S.mode, p=DB.prog[pk];
+    var h='<div class="card"><b>범위</b><div class="seg">';
+    [1,2,0].forEach(function(s){h+='<button class="btn'+(S.sess===s?' on':'')+'" data-s="'+s+'">'+sessName(s)+'</button>'});
+    h+='</div><b>방식</b><div class="seg"><button class="btn'+(S.mode==='real'?' on':'')+'" data-m="real">실전 (끝에 채점)</button><button class="btn'+(S.mode==='practice'?' on':'')+'" data-m="practice">연습 (바로 해설)</button></div>';
+    h+='<div class="hint">'+(S.mode==='real'?'실전: 답을 바꿀 수 있고 제출하면 한 번에 채점됩니다. 시간이 표시됩니다.':'연습: 보기를 고르면 바로 정답과 해설이 나옵니다.')+'</div></div>';
+    if(p&&!p.keys){
+      var cnt=Object.keys(p.ans).length;
+      h+='<div class="card"><b>'+(p.done?'이전 결과가 있어요':'풀던 기록이 있어요')+'</b><div class="hint">'+cnt+'문항 응답</div><div class="row" style="margin-top:8px">'+
+        (p.done?'<button class="btn pri" id="seeRes">결과 보기</button>':'<button class="btn pri" id="resume">이어서 풀기</button>')+
+        '<button class="btn" id="fresh">처음부터</button></div></div>';
+    }else{
+      h+='<button class="btn pri" id="go" style="width:100%;padding:14px;font-size:17px">시작하기</button>';
+    }
+    $('app').innerHTML=h;
+    [].forEach.call(document.querySelectorAll('[data-s]'),function(el){el.onclick=function(){S.sess=+el.getAttribute('data-s');draw()}});
+    [].forEach.call(document.querySelectorAll('[data-m]'),function(el){el.onclick=function(){S.mode=el.getAttribute('data-m');draw()}});
+    var g=$('go');if(g)g.onclick=function(){start(false)};
+    var f=$('fresh');if(f)f.onclick=function(){if(confirm('이전 기록을 지우고 처음부터 시작할까요?'))start(false)};
+    var r=$('resume');if(r)r.onclick=function(){start(true)};
+    var sr=$('seeRes');if(sr)sr.onclick=function(){start(true)};
+  }
+  draw();
+  $('back').onclick=home;
+}
+
+function start(resume){
+  loadExam(S.exam,function(){
+    S.pk=pkey();S.retry=false;S.list=buildList();
+    var p=DB.prog[S.pk];
+    if(resume&&p&&!p.keys){S.ans=p.ans||{};S.idx=Math.min(p.idx||0,S.list.length-1);S.done=!!p.done;S.t0=Date.now()-(p.el||0)*1000}
+    else{S.ans={};S.idx=0;S.done=false;S.t0=Date.now()}
+    persist();
+    if(S.done)result();else quiz();
+  });
+}
+
+/* ---------- 문제 ---------- */
+function isLocked(){return S.done||(S.mode==='practice'&&S.ans[S.list[S.idx].k]!=null)}
+function qHTML(it,opt){
+  var q=it.q,a=S.ans[it.k],lock=opt.lock,show=opt.show;
+  var h='<div class="card"><span class="subj">'+esc(it.sub)+'</span> <span class="hint">'+it.sid+'교시 '+q.n+'번</span><div class="stem">'+(opt.num!=null?opt.num+'. ':'')+esc(q.q)+'</div>';
+  if(q.i.length){h+='<div class="items">'+q.i.map(function(x){return'<div>'+esc(x)+'</div>'}).join('')+'</div>'}
+  q.o.forEach(function(o,i){
+    var c='opt';
+    if(show){if(i+1===q.a)c+=' right';else if(a===i+1)c+=' wrong'}
+    else if(a===i+1)c+=' sel';
+    if(lock)c+=' lock';
+    h+='<button class="'+c+'" data-o="'+(i+1)+'"><span class="no">'+CIR[i]+'</span><span>'+esc(o)+'</span></button>';
+  });
+  if(show){
+    var ok=a===q.a;
+    h+='<div style="margin:8px 0;font-weight:700" class="'+(ok?'pass':'fail')+'">'+(a==null?'⚪ 무응답 · 정답 '+CIR[q.a-1]:ok?'⭕ 정답 '+CIR[q.a-1]:'❌ 오답 · 내 답 '+CIR[a-1]+' → 정답 '+CIR[q.a-1])+'</div>';
+    q.e.forEach(function(e,i){h+='<div class="exp '+(i+1===q.a?'c':'w')+'">'+esc(e)+'</div>'});
+    if(q.k&&q.k.length){
+      h+='<details><summary>📌 핵심 정리</summary><div class="kp">'+q.k.map(function(x){
+        var c=x[0]==='×'?'x':(x[0]==='○'||/^[ㄱ-ㅁ] /.test(x))?'o':'t';
+        return'<div class="'+c+'">'+esc(x)+'</div>'}).join('')+'</div></details>';
+    }
+  }
+  return h+'</div>';
+}
+function quiz(){
+  S.view='quiz';tick();
+  var it=S.list[S.idx];
+  setTitle(S.exam+'회 · '+(S.idx+1)+' / '+S.list.length);
+  var lock=isLocked(),show=S.done||(S.mode==='practice'&&S.ans[it.k]!=null);
+  $('app').innerHTML=qHTML(it,{lock:lock,show:show,num:S.idx+1});
+  [].forEach.call(document.querySelectorAll('.opt'),function(b){b.onclick=function(){
+    if(isLocked())return;
+    var v=+b.getAttribute('data-o');
+    if(S.mode==='real'&&S.ans[it.k]===v)delete S.ans[it.k];else S.ans[it.k]=v;
+    persist();quiz();
+    if(S.mode==='practice')window.scrollTo({top:0});
+  }});
+  var last=S.idx===S.list.length-1;
+  $('bar').innerHTML='<div class="bar"><button class="btn" id="pv"'+(S.idx===0?' disabled':'')+'>◀ 이전</button><button class="btn" id="pl">번호</button>'+
+    (last?'<button class="btn pri" id="nx">'+(S.done?'결과':'제출')+'</button>':'<button class="btn" id="nx">다음 ▶</button>')+'</div>';
+  $('pv').onclick=function(){S.idx--;persist();quiz();window.scrollTo({top:0})};
+  $('nx').onclick=function(){
+    if(last){if(S.done)result();else submit()}
+    else{S.idx++;persist();quiz();window.scrollTo({top:0})}
+  };
+  $('pl').onclick=palette;
+  $('back').onclick=function(){persist();setup(S.exam)};
+}
+function palette(){
+  var h='<div><div style="display:flex;justify-content:space-between;align-items:center"><b>문항 이동</b><button class="btn sm" id="sx">닫기</button></div>';
+  var curSub=null,open=false;
+  S.list.forEach(function(it,i){
+    var key=it.sid+'|'+it.sub;
+    if(key!==curSub){if(open)h+='</div>';h+='<div class="hint" style="margin-top:8px">'+it.sid+'교시 · '+esc(it.sub)+'</div><div class="pal">';curSub=key;open=true}
+    var a=S.ans[it.k],c='';
+    if(S.done||(S.mode==='practice'&&a!=null))c=a===it.q.a?'r':(a==null?'':'w');else if(a!=null)c='a';
+    if(i===S.idx)c+=' cur';
+    h+='<button class="'+c+'" data-i="'+i+'">'+(i+1)+'</button>';
+  });
+  h+='</div>';
+  if(!S.done){var n=Object.keys(S.ans).length;h+='<div class="hint">응답 '+n+' / '+S.list.length+'</div><button class="btn pri" id="sb" style="width:100%;margin-top:8px">제출하고 채점</button>'}
+  h+='</div>';
+  $('sheet').innerHTML='<div class="sheet" id="sh">'+h+'</div>';
+  $('sx').onclick=function(){$('sheet').innerHTML=''};
+  $('sh').onclick=function(e){if(e.target.id==='sh')$('sheet').innerHTML=''};
+  [].forEach.call(document.querySelectorAll('.pal button'),function(b){b.onclick=function(){S.idx=+b.getAttribute('data-i');$('sheet').innerHTML='';persist();quiz();window.scrollTo({top:0})}});
+  var sb=$('sb');if(sb)sb.onclick=function(){$('sheet').innerHTML='';submit()};
+}
+function submit(){
+  var un=S.list.length-Object.keys(S.ans).length;
+  if(!confirm(un>0?'아직 '+un+'문항을 안 풀었어요. 그래도 제출할까요?':'제출하고 채점할까요?'))return;
+  S.done=true;persist();result();
+}
+
+/* ---------- 결과 ---------- */
+function calc(){
+  var D=window.MOCK[S.exam].sessions,res=[],tot=0,right=0;
+  var map={};
+  S.list.forEach(function(it){
+    var m=map[it.sid+'|'+it.sub]=map[it.sid+'|'+it.sub]||{sid:it.sid,sub:it.sub,n:0,r:0,u:0};
+    m.n++;tot++;
+    var a=S.ans[it.k];
+    if(a==null)m.u++;
+    if(a===it.q.a){m.r++;right++}
+  });
+  Object.keys(map).forEach(function(k){res.push(map[k])});
+  res.forEach(function(m){m.cut=m.r/m.n<0.4});
+  var pct=tot?Math.round(right*1000/tot)/10:0;
+  var cut=res.some(function(m){return m.cut});
+  var verdict=cut?'fail':(pct>=60?'pass':'fail');
+  if(!cut&&pct>=60&&pct<65)verdict='edge';
+  return{res:res,tot:tot,right:right,pct:pct,cut:cut,verdict:verdict};
+}
+function result(){
+  S.view='result';tick();$('bar').innerHTML='';setTitle(S.exam+'회 결과');
+  var c=calc();
+  if(!S.retry&&S.sess===0){
+    var b=DB.best[S.exam+'|0'];
+    if(!b||c.pct>b.pct){DB.best[S.exam+'|0']={pct:c.pct,t:Date.now()};save(DB)}
+  }
+  var label=c.verdict==='pass'?'합격권':c.verdict==='edge'?'간당간당 (합격선 근처)':(c.cut?'과락 있음':'불합격권');
+  var h='<div class="card score"><div class="hint">'+sessName(S.sess)+(S.retry?' · 틀린 문제 다시 풀기':'')+' · '+(S.mode==='real'?'실전':'연습')+'</div><div class="big '+(c.verdict==='pass'?'pass':c.verdict==='edge'?'edge':'fail')+'">'+c.pct+'점</div>'+
+    '<div>'+c.right+' / '+c.tot+' 정답 · <b class="'+(c.verdict==='pass'?'pass':c.verdict==='edge'?'edge':'fail')+'">'+label+'</b></div></div>';
+  h+='<div class="card"><table><tr><th>과목</th><th>점수</th><th>비율</th><th></th></tr>';
+  c.res.forEach(function(m){
+    var p=Math.round(m.r*100/m.n);
+    h+='<tr><td>'+esc(m.sub)+'</td><td>'+m.r+'/'+m.n+'</td><td>'+p+'%</td><td><span class="tag '+(m.cut?'f':'p')+'">'+(m.cut?'과락':'통과')+'</span></td></tr>';
+  });
+  h+='</table><div class="hint" style="margin-top:6px">기준: 과목별 40% 미만 과락, 전체 60% 이상 합격. 무응답은 오답 처리.</div></div>';
+  var wrong=S.list.filter(function(it){return S.ans[it.k]!==it.q.a});
+  h+='<div class="row"><button class="btn pri" id="rw"'+(wrong.length?'':' disabled')+'>틀린 문제 다시 풀기 ('+wrong.length+')</button><button class="btn" id="rv">전체 해설 보기</button></div>';
+  h+='<div class="row" style="margin-top:8px"><button class="btn" id="rs">이 시험 다시 보기</button><button class="btn" id="hm">회차 목록</button></div>';
+  $('app').innerHTML=h;
+  $('rw').onclick=function(){
+    S.retry=true;S.mode='practice';S.pk=S.exam+'|'+S.sess+'|retry';
+    S.list=wrong;S.ans={};S.idx=0;S.done=false;S.t0=Date.now();
+    DB.prog[S.pk]={ans:{},idx:0,done:false,keys:wrong.map(function(x){return x.k}),t:Date.now(),el:0};save(DB);quiz();
+  };
+  $('rv').onclick=function(){review(false)};
+  $('rs').onclick=function(){setup(S.exam)};
+  $('hm').onclick=home;
+  $('back').onclick=function(){setup(S.exam)};
+  window.scrollTo({top:0});
+}
+function review(onlyWrong){
+  S.view='review';setTitle(S.exam+'회 해설');
+  var h='<div class="seg"><button class="btn'+(onlyWrong?'':' on')+'" id="fa">전체</button><button class="btn'+(onlyWrong?' on':'')+'" id="fw">틀린 문제만</button></div>';
+  S.list.forEach(function(it,i){
+    if(onlyWrong&&S.ans[it.k]===it.q.a)return;
+    h+=qHTML(it,{lock:true,show:true,num:i+1});
+  });
+  $('app').innerHTML=h;
+  $('fa').onclick=function(){review(false)};$('fw').onclick=function(){review(true)};
+  $('back').onclick=result;
+  window.scrollTo({top:0});
+}
+home();
+})();
+</script>
+</body>
+</html>
